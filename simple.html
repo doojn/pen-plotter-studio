@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استوديو الرسم الآلي · Pen Plotter Studio (Simple)</title>
+  <link rel="stylesheet" href="simple.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖋️</text></svg>">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="simple-header">
+    <div class="brand">
+      <div class="brand-icon">🖋️</div>
+      <div>
+        <h1 class="brand-title" id="brandTitle">استوديو الرسم الآلي</h1>
+        <p class="brand-sub" id="brandSub">ورشة الفن الخوارزمي بالقلم</p>
+      </div>
+    </div>
+
+    <div class="header-tools">
+      <button class="lang-switch-btn" id="btnLangSwitch" title="Switch Language / تغيير اللغة">
+        <span>🌐</span>
+        <span id="langLabel">English</span>
+      </button>
+
+      <a href="index.html" class="pro-mode-link" id="proLink" title="Switch to Advanced Studio">
+        ⚙️ الوضع المتقدم
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="simple-main">
+
+    <!-- Sidebar Controls -->
+    <aside class="simple-sidebar">
+
+      <!-- STEP 1: PICK A STYLE -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-badge">١</div>
+          <h2 class="step-title" id="step1Title">١. اختر نمط الرسم</h2>
+        </div>
+        <div class="style-grid" id="styleGrid">
+          <!-- Populated by simple.js -->
+        </div>
+      </section>
+
+      <!-- STEP 2: CUSTOMIZE -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-badge">٢</div>
+          <h2 class="step-title" id="step2Title">٢. غيّر وبدّل بالتصميم</h2>
+        </div>
+
+        <!-- Big Random Shuffle Button -->
+        <button class="btn-big-shuffle" id="btnShuffle">
+          <span>🎲 شكلاً جديداً (تغيير)</span>
+        </button>
+
+        <!-- Density Slider -->
+        <div class="simple-slider-row">
+          <div class="slider-label-row">
+            <span id="labelDensity">كثافة الخطوط</span>
+          </div>
+          <input type="range" id="sliderDensity" min="1" max="5" step="1" value="3">
+          <div class="slider-icons-row">
+            <span id="txtFew">قليل</span>
+            <span id="txtMany">كثيف</span>
+          </div>
+        </div>
+
+        <!-- Wiggle Slider -->
+        <div class="simple-slider-row">
+          <div class="slider-label-row">
+            <span id="labelWiggle">تموج وانحناء الخطوط</span>
+          </div>
+          <input type="range" id="sliderWiggle" min="1" max="5" step="1" value="3">
+          <div class="slider-icons-row">
+            <span id="txtSmooth">هادئ</span>
+            <span id="txtWild">عاصف</span>
+          </div>
+        </div>
+
+        <!-- Paper Size -->
+        <div class="simple-slider-row">
+          <div class="slider-label-row">
+            <span id="labelPaper">حجم الورقة</span>
+          </div>
+          <div class="paper-pills">
+            <button type="button" class="paper-pill active" data-paper="a5">A5 (١٤٨ × ٢١٠ مم)</button>
+            <button type="button" class="paper-pill" data-paper="a4">A4 (٢١٠ × ٢٩٧ مم)</button>
+          </div>
+        </div>
+
+        <!-- Color Palette Preview -->
+        <div class="simple-slider-row">
+          <div class="slider-label-row">
+            <span id="labelColors">ألوان الورق والحبر</span>
+          </div>
+          <div class="palette-row">
+            <button type="button" class="palette-btn active" data-palette="white_black">
+              <div class="palette-circle" style="background: #fafaf9; border-color: #cbd5e1;">
+                <div class="inner-dot" style="background: #111827;"></div>
+              </div>
+              <span class="palette-label" id="colorWhiteBlack">أبيض + أسود</span>
+            </button>
+
+            <button type="button" class="palette-btn" data-palette="black_white">
+              <div class="palette-circle" style="background: #18181b; border-color: #52525b;">
+                <div class="inner-dot" style="background: #f8fafc;"></div>
+              </div>
+              <span class="palette-label" id="colorBlackWhite">أسود + أبيض</span>
+            </button>
+
+            <button type="button" class="palette-btn" data-palette="navy_gold">
+              <div class="palette-circle" style="background: #0f172a; border-color: #334155;">
+                <div class="inner-dot" style="background: #f59e0b;"></div>
+              </div>
+              <span class="palette-label" id="colorNavyGold">كحلي + ذهبي</span>
+            </button>
+
+            <button type="button" class="palette-btn" data-palette="kraft_black">
+              <div class="palette-circle" style="background: #d4b896; border-color: #a88863;">
+                <div class="inner-dot" style="background: #1c1917;"></div>
+              </div>
+              <span class="palette-label" id="colorKraftBlack">كرتون + أسود</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: ACTION & EXPORT -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-badge">٣</div>
+          <h2 class="step-title" id="step3Title">٣. جاهز للرسم بالآلة!</h2>
+        </div>
+
+        <button class="btn-action-secondary" id="btnSimulate">
+          <span>▶️ شاهد القلم يرسم</span>
+        </button>
+
+        <button class="btn-action-primary" id="btnDownload">
+          <span>📥 تحميل ملف الرسم (SVG)</span>
+        </button>
+      </section>
+
+    </aside>
+
+    <!-- Canvas Viewport -->
+    <section class="simple-viewport">
+      <div class="paper-container" id="paperContainer">
+        <canvas id="artCanvas"></canvas>
+      </div>
+
+      <!-- Quick Zoom Controls -->
+      <div class="viewport-zoom-bar">
+        <button class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+        <button class="zoom-btn" id="zoomReset" title="Reset Zoom">⛶</button>
+        <button class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="simple-toast" id="simpleToast"></div>
+
+  <!-- Scripts -->
+  <script src="js/noise.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/plotter.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/simple.js"></script>
+</body>
+</html>

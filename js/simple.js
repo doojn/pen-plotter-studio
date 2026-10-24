@@ -1,0 +1,510 @@
+/**
+ * Simplified Bilingual Controller for Pen Plotter Studio
+ * Designed for absolute beginners, minimal reading, visual icons, and Arabic/English support.
+ */
+
+const TRANSLATIONS = {
+  ar: {
+    brandTitle: "استوديو الرسم الآلي",
+    brandSub: "ورشة الفن الخوارزمي بالقلم",
+    proLink: "⚙️ الوضع المتقدم",
+    step1Title: "١. اختر نمط الرسم",
+    step2Title: "٢. غيّر وبدّل بالتصميم",
+    step3Title: "٣. جاهز للرسم بالآلة!",
+    btnShuffle: "🎲 شكلاً جديداً (تغيير)",
+    labelDensity: "كثافة الخطوط",
+    few: "قليل",
+    many: "كثيف",
+    labelWiggle: "تموج وانحناء الخطوط",
+    smooth: "هادئ",
+    wild: "عاصف",
+    labelPaper: "حجم الورقة",
+    labelColors: "ألوان الورق والحبر",
+    colorWhiteBlack: "أبيض + أسود",
+    colorBlackWhite: "أسود + أبيض",
+    colorNavyGold: "كحلي + ذهبي",
+    colorKraftBlack: "كرتون + أسود",
+    btnSimulate: "▶️ شاهد القلم يرسم",
+    btnStopSim: "⏹ إيقاف العرض",
+    btnDownload: "📥 تحميل ملف الرسم (SVG)",
+    toastShuffle: "تم توليد شكل جديد بنجاح! 🎲",
+    toastDownload: "تم تحميل الملف! جاهز للإرسال للآلة 🖋️",
+    toastSimFinished: "انتهى القلم من الرسم! ✨",
+    styles: {
+      waves: { name: "أمواج رشيقة", sub: "خطوط نهرية ناعمة" },
+      mountains: { name: "جبال ثلاثية الأبعاد", sub: "تضاريس كلاسيكية" },
+      loops: { name: "حلقات البندول", sub: "دوائر هندسية ساحرة" },
+      maze: { name: "متاهة إسلامية", sub: "أقواس متصلة متشابكة" },
+      ripples: { name: "تموجات الماء", sub: "دوائر متداخلة بصرية" },
+      tree: { name: "أغصان الشجرة", sub: "تفرعات طبيعية ذكية" },
+      oneline: { name: "خط متصل واحد", sub: "بدون أي رفع للقلم!" }
+    }
+  },
+  en: {
+    brandTitle: "Pen Plotter Studio",
+    brandSub: "Algorithmic Art Workshop",
+    proLink: "⚙️ Pro Studio",
+    step1Title: "1. Pick a Style",
+    step2Title: "2. Tweak Your Design",
+    step3Title: "3. Ready to Plot!",
+    btnShuffle: "🎲 Roll New Shape",
+    labelDensity: "Line Density",
+    few: "Few",
+    many: "Dense",
+    labelWiggle: "Wave & Turbulence",
+    smooth: "Gentle",
+    wild: "Wild",
+    labelPaper: "Paper Size",
+    labelColors: "Paper & Ink Colors",
+    colorWhiteBlack: "White + Black",
+    colorBlackWhite: "Black + White",
+    colorNavyGold: "Navy + Gold",
+    colorKraftBlack: "Kraft + Black",
+    btnSimulate: "▶️ Watch It Draw",
+    btnStopSim: "⏹ Stop Simulation",
+    btnDownload: "📥 Download Vector (SVG)",
+    toastShuffle: "New shape variation generated! 🎲",
+    toastDownload: "Downloaded SVG! Ready to plot 🖋️",
+    toastSimFinished: "Plot simulation completed! ✨",
+    styles: {
+      waves: { name: "Ocean Waves", sub: "Flowing organic streams" },
+      mountains: { name: "Mountain Ridges", sub: "3D Joy Division peaks" },
+      loops: { name: "Pendulum Loops", sub: "Hypnotic geometric orbits" },
+      maze: { name: "Curved Maze", sub: "Interlocking ribbon tiles" },
+      ripples: { name: "Water Ripples", sub: "Optical interference rings" },
+      tree: { name: "Fractal Tree", sub: "Natural branching growth" },
+      oneline: { name: "One Continuous Line", sub: "Zero pen lifts!" }
+    }
+  }
+};
+
+const SIMPLE_STYLES = [
+  { id: "waves", algoId: "flowField", icon: "🌊", defaultPreset: "Ocean Currents" },
+  { id: "mountains", algoId: "waveRidges", icon: "🏔️", defaultPreset: "Joy Division Classic" },
+  { id: "loops", algoId: "harmonograph", icon: "♾️", defaultPreset: "Pendulum Waltz" },
+  { id: "maze", algoId: "truchetTiles", icon: "🧩", defaultPreset: "Woven Ribbon Labyrinth" },
+  { id: "ripples", algoId: "concentricMoire", icon: "🎯", defaultPreset: "Dual Moiré Interference" },
+  { id: "tree", algoId: "fractalTree", icon: "🌳", defaultPreset: "Ancient Bonsai" },
+  { id: "oneline", algoId: "continuousMeander", icon: "➰", defaultPreset: "Continuous Hilbert Labyrinth" }
+];
+
+const COLOR_PALETTES = {
+  white_black: { paper: "#fafaf9", pen: "#111827", strokeWidth: 0.35, paperId: "white", penId: "micron_black" },
+  black_white: { paper: "#18181b", pen: "#f8fafc", strokeWidth: 0.45, paperId: "black", penId: "gelly_white" },
+  navy_gold: { paper: "#0f172a", pen: "#f59e0b", strokeWidth: 0.40, paperId: "indigo", penId: "metallic_gold" },
+  kraft_black: { paper: "#d4b896", pen: "#1c1917", strokeWidth: 0.35, paperId: "kraft", penId: "micron_black" }
+};
+
+class SimpleApp {
+  constructor() {
+    this.plotter = new PlotterEngine();
+    this.rng = new RandomGenerator(4242);
+    this.noise = new SimplexNoise(this.rng);
+
+    this.state = {
+      lang: "ar", // 'ar' or 'en'
+      activeStyleId: "waves",
+      seed: 4242,
+      densityLevel: 3, // 1 (sparse) to 5 (dense)
+      wiggleLevel: 3,  // 1 (gentle) to 5 (wild)
+      paperKey: "a5",
+      paletteKey: "white_black",
+      zoom: 1.0,
+      
+      pathsLayer1: [],
+      pathsLayer2: [],
+      bounds: null
+    };
+
+    this.initDOM();
+    this.initEvents();
+    this.setLanguage("ar");
+    this.render();
+  }
+
+  initDOM() {
+    this.canvas = document.getElementById("artCanvas");
+    this.ctx = this.canvas.getContext("2d");
+    this.paperContainer = document.getElementById("paperContainer");
+
+    // Plotter simulator
+    this.simulator = new PlotterSimulator(this.canvas, (simState) => {
+      this.drawCanvas(simState);
+      if (simState.completed) {
+        const btn = document.getElementById("btnSimulate");
+        const t = TRANSLATIONS[this.state.lang];
+        if (btn) btn.innerHTML = t.btnSimulate;
+        this.showToast(t.toastSimFinished);
+      }
+    });
+
+    this.renderStyleCards();
+  }
+
+  renderStyleCards() {
+    const grid = document.getElementById("styleGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const t = TRANSLATIONS[this.state.lang];
+
+    SIMPLE_STYLES.forEach(style => {
+      const card = document.createElement("div");
+      card.className = `style-card ${style.id === this.state.activeStyleId ? "active" : ""}`;
+      card.dataset.styleId = style.id;
+      const trans = t.styles[style.id] || { name: style.id, sub: "" };
+
+      card.innerHTML = `
+        <span class="style-icon">${style.icon}</span>
+        <span class="style-name">${trans.name}</span>
+        <span class="style-sub">${trans.sub}</span>
+      `;
+
+      card.addEventListener("click", () => {
+        this.state.activeStyleId = style.id;
+        document.querySelectorAll(".style-card").forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+        this.render();
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  initEvents() {
+    // Language Toggle Button
+    document.getElementById("btnLangSwitch")?.addEventListener("click", () => {
+      const nextLang = this.state.lang === "ar" ? "en" : "ar";
+      this.setLanguage(nextLang);
+    });
+
+    // Big Shuffle Button
+    document.getElementById("btnShuffle")?.addEventListener("click", () => {
+      this.state.seed = Math.floor(Math.random() * 900000) + 10000;
+      this.render();
+      this.showToast(TRANSLATIONS[this.state.lang].toastShuffle);
+    });
+
+    // Density Slider
+    document.getElementById("sliderDensity")?.addEventListener("input", (e) => {
+      this.state.densityLevel = parseInt(e.target.value);
+      this.render();
+    });
+
+    // Wiggle Slider
+    document.getElementById("sliderWiggle")?.addEventListener("input", (e) => {
+      this.state.wiggleLevel = parseInt(e.target.value);
+      this.render();
+    });
+
+    // Paper Size Pills
+    document.querySelectorAll(".paper-pill").forEach(pill => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".paper-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        this.state.paperKey = pill.dataset.paper;
+        this.render();
+      });
+    });
+
+    // Palette Buttons
+    document.querySelectorAll(".palette-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".palette-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        this.state.paletteKey = btn.dataset.palette;
+        this.drawCanvas();
+      });
+    });
+
+    // Simulate Button
+    document.getElementById("btnSimulate")?.addEventListener("click", () => {
+      const t = TRANSLATIONS[this.state.lang];
+      const btn = document.getElementById("btnSimulate");
+      if (this.simulator.isPlaying) {
+        this.simulator.stop();
+        btn.innerHTML = t.btnSimulate;
+        this.drawCanvas();
+      } else {
+        this.simulator.loadPaths(this.state.pathsLayer1, this.state.pathsLayer2, this.state.bounds);
+        this.simulator.play();
+        btn.innerHTML = t.btnStopSim;
+      }
+    });
+
+    // Download Button
+    document.getElementById("btnDownload")?.addEventListener("click", () => {
+      this.downloadSVG();
+    });
+
+    // Zoom Buttons
+    document.getElementById("zoomIn")?.addEventListener("click", () => this.zoom(1.15));
+    document.getElementById("zoomOut")?.addEventListener("click", () => this.zoom(0.85));
+    document.getElementById("zoomReset")?.addEventListener("click", () => this.zoomReset());
+  }
+
+  setLanguage(lang) {
+    this.state.lang = lang;
+    const isAr = lang === "ar";
+    document.body.setAttribute("dir", isAr ? "rtl" : "ltr");
+    document.documentElement.setAttribute("lang", lang);
+
+    const t = TRANSLATIONS[lang];
+
+    // Update Header
+    document.getElementById("brandTitle").textContent = t.brandTitle;
+    document.getElementById("brandSub").textContent = t.brandSub;
+    document.getElementById("proLink").textContent = t.proLink;
+    document.getElementById("langLabel").textContent = isAr ? "English" : "العربية";
+
+    // Update Step Titles
+    document.getElementById("step1Title").textContent = t.step1Title;
+    document.getElementById("step2Title").textContent = t.step2Title;
+    document.getElementById("step3Title").textContent = t.step3Title;
+
+    // Update Controls Text
+    document.getElementById("btnShuffle").innerHTML = t.btnShuffle;
+    document.getElementById("labelDensity").textContent = t.labelDensity;
+    document.getElementById("txtFew").textContent = t.few;
+    document.getElementById("txtMany").textContent = t.many;
+
+    document.getElementById("labelWiggle").textContent = t.labelWiggle;
+    document.getElementById("txtSmooth").textContent = t.smooth;
+    document.getElementById("txtWild").textContent = t.wild;
+
+    document.getElementById("labelPaper").textContent = t.labelPaper;
+    document.getElementById("labelColors").textContent = t.labelColors;
+
+    document.getElementById("colorWhiteBlack").textContent = t.colorWhiteBlack;
+    document.getElementById("colorBlackWhite").textContent = t.colorBlackWhite;
+    document.getElementById("colorNavyGold").textContent = t.colorNavyGold;
+    document.getElementById("colorKraftBlack").textContent = t.colorKraftBlack;
+
+    // Action buttons
+    const simBtn = document.getElementById("btnSimulate");
+    if (simBtn) simBtn.innerHTML = this.simulator.isPlaying ? t.btnStopSim : t.btnSimulate;
+    document.getElementById("btnDownload").innerHTML = t.btnDownload;
+
+    this.renderStyleCards();
+  }
+
+  render() {
+    this.rng.setSeed(this.state.seed);
+    this.noise.reseed(this.rng);
+
+    this.state.bounds = this.plotter.getBounds(this.state.paperKey, "portrait", 12);
+    const styleObj = SIMPLE_STYLES.find(s => s.id === this.state.activeStyleId) || SIMPLE_STYLES[0];
+    const algoDef = ALGORITHM_DEFINITIONS[styleObj.algoId];
+
+    // Compute tailored parameters based on simple 1..5 density & wiggle sliders
+    const params = this.computeParams(styleObj.algoId, algoDef);
+
+    const result = algoDef.generate(this.state.bounds, params, this.rng, this.noise);
+    let layer1 = result.layer1 || [];
+    let layer2 = result.layer2 || [];
+
+    // Always apply TSP path optimizer for beginner safety
+    layer1 = this.plotter.optimizePaths(layer1);
+    layer2 = this.plotter.optimizePaths(layer2);
+
+    this.state.pathsLayer1 = layer1;
+    this.state.pathsLayer2 = layer2;
+
+    this.drawCanvas();
+  }
+
+  computeParams(algoId, algoDef) {
+    const d = this.state.densityLevel; // 1 to 5
+    const w = this.state.wiggleLevel;   // 1 to 5
+    const params = {};
+    algoDef.parameters.forEach(p => params[p.id] = p.default);
+
+    if (algoId === "flowField") {
+      params.streamCount = Math.round(MathUtils.map(d, 1, 5, 200, 750));
+      params.stepCount = Math.round(MathUtils.map(w, 1, 5, 60, 140));
+      params.noiseScale = MathUtils.map(w, 1, 5, 0.002, 0.012);
+      params.curlMultiplier = MathUtils.map(w, 1, 5, 1.0, 3.5);
+      params.streamAvoidance = 1.0;
+    } else if (algoId === "waveRidges") {
+      params.lineCount = Math.round(MathUtils.map(d, 1, 5, 25, 70));
+      params.peakHeight = MathUtils.map(w, 1, 5, 12, 34);
+      params.noiseScale = MathUtils.map(w, 1, 5, 0.01, 0.035);
+      params.occlusion = true;
+    } else if (algoId === "harmonograph") {
+      params.geometryMode = "harmonograph";
+      params.loopCount = Math.round(MathUtils.map(d, 1, 5, 3000, 9000));
+      params.damping = MathUtils.map(w, 1, 5, 0.0025, 0.0008);
+      params.freqX = 2.0 + (w * 0.005);
+      params.freqY = 3.0;
+    } else if (algoId === "truchetTiles") {
+      params.gridCols = Math.round(MathUtils.map(d, 1, 5, 8, 20));
+      params.arcsPerTile = Math.round(MathUtils.map(w, 1, 5, 1, 3));
+      params.tileStyle = "arcs";
+    } else if (algoId === "concentricMoire") {
+      params.ringCount = Math.round(MathUtils.map(d, 1, 5, 25, 65));
+      params.noiseWobble = MathUtils.map(w, 1, 5, 0, 8);
+      params.centerCount = 2;
+    } else if (algoId === "fractalTree") {
+      params.recursionDepth = Math.round(MathUtils.map(d, 1, 5, 5, 8));
+      params.branchAngle = MathUtils.map(w, 1, 5, 20, 45);
+      params.windSway = MathUtils.map(w, 1, 5, 0, 12);
+    } else if (algoId === "continuousMeander") {
+      params.curveOrder = Math.round(MathUtils.map(d, 1, 5, 3, 5));
+      params.wobble = MathUtils.map(w, 1, 5, 0, 1.8);
+      params.cornerRoundness = 0.25;
+    }
+
+    return params;
+  }
+
+  drawCanvas(simState = null) {
+    const bounds = this.state.bounds;
+    if (!bounds) return;
+
+    const pw = bounds.paperWidth;
+    const ph = bounds.paperHeight;
+    const pxPerMm = 4.0;
+    const canvasW = Math.round(pw * pxPerMm);
+    const canvasH = Math.round(ph * pxPerMm);
+
+    if (this.canvas.width !== canvasW || this.canvas.height !== canvasH) {
+      this.canvas.width = canvasW;
+      this.canvas.height = canvasH;
+      this.canvas.style.width = `${pw * 2.8}px`;
+      this.canvas.style.height = `${ph * 2.8}px`;
+    }
+
+    const palette = COLOR_PALETTES[this.state.paletteKey] || COLOR_PALETTES.white_black;
+    const ctx = this.ctx;
+
+    ctx.save();
+    ctx.scale(pxPerMm, pxPerMm);
+
+    // Fill Paper
+    ctx.fillStyle = palette.paper;
+    ctx.fillRect(0, 0, pw, ph);
+
+    // Subtle texture lines
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.02)";
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < pw; i += 8) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, ph);
+      ctx.stroke();
+    }
+
+    if (!simState || simState.progress === 0) {
+      // Normal Draw
+      ctx.strokeStyle = palette.pen;
+      ctx.lineWidth = palette.strokeWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      const allPaths = [...this.state.pathsLayer1, ...this.state.pathsLayer2];
+      allPaths.forEach(p => {
+        if (p.length < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(p[0].x, p[0].y);
+        for (let i = 1; i < p.length; i++) {
+          ctx.lineTo(p[i].x, p[i].y);
+        }
+        ctx.stroke();
+      });
+    } else {
+      // Simulator Animated Draw
+      const segments = this.simulator.segments;
+      const curStep = simState.currentStep;
+
+      for (let i = 0; i <= curStep && i < segments.length; i++) {
+        const seg = segments[i];
+        if (seg.type === "down") {
+          ctx.strokeStyle = palette.pen;
+          ctx.lineWidth = palette.strokeWidth;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(seg.x1, seg.y1);
+          ctx.lineTo(seg.x2, seg.y2);
+          ctx.stroke();
+        } else if (seg.type === "up") {
+          ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
+          ctx.lineWidth = 0.25;
+          ctx.setLineDash([1, 1]);
+          ctx.beginPath();
+          ctx.moveTo(seg.x1, seg.y1);
+          ctx.lineTo(seg.x2, seg.y2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // Virtual Pen Carriage
+      const pos = simState.currentPos;
+      if (pos) {
+        ctx.save();
+        ctx.strokeStyle = simState.isPenDown ? "#10b981" : "#f59e0b";
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 2.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = palette.pen;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 1.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  downloadSVG() {
+    const palette = COLOR_PALETTES[this.state.paletteKey] || COLOR_PALETTES.white_black;
+    const svg = this.plotter.generateSVG(
+      this.state.bounds,
+      this.state.pathsLayer1,
+      this.state.pathsLayer2,
+      {
+        color1: palette.pen,
+        color2: palette.pen,
+        strokeWidth: palette.strokeWidth
+      }
+    );
+
+    const filename = `plotter_${this.state.activeStyleId}_seed${this.state.seed}.svg`;
+    this.plotter.downloadSVG(filename, svg);
+    this.showToast(TRANSLATIONS[this.state.lang].toastDownload);
+  }
+
+  zoom(factor) {
+    this.state.zoom = Math.max(0.4, Math.min(3.0, this.state.zoom * factor));
+    if (this.paperContainer) {
+      this.paperContainer.style.transform = `scale(${this.state.zoom})`;
+    }
+  }
+
+  zoomReset() {
+    this.state.zoom = 1.0;
+    if (this.paperContainer) {
+      this.paperContainer.style.transform = `scale(1.0)`;
+    }
+  }
+
+  showToast(msg) {
+    let toast = document.getElementById("simpleToast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "simpleToast";
+      toast.className = "simple-toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  window.simpleApp = new SimpleApp();
+});
