@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pen Plotter Single/Dual Path Vector Generator (A5)</title>
+  <style>
+    :root {
+      --bg-dark: #0f1117;
+      --bg-card: #181b24;
+      --bg-card-hover: #212634;
+      --bg-input: #11131a;
+      --border-color: #2b3245;
+      --border-focus: #3b82f6;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-orange: #f97316;
+      --accent-pink: #ec4899;
+      --danger: #ef4444;
+      --sidebar-width: 420px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: 360px;
+      max-width: 480px;
+      height: 100vh;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(24, 27, 36, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-a5 {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: #2b3245;
+      border-radius: 3px;
+    }
+
+    /* Section Cards */
+    .control-section {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.02);
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.06);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .drop-zone-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .drop-zone-text {
+      font-size: 13px;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    .drop-zone-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Sample Selector */
+    .sample-btn-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .btn-sample {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 11px;
+      padding: 6px 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .btn-sample:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-cyan);
+    }
+    .btn-sample.active {
+      border-color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.15);
+      font-weight: 600;
+    }
+
+    /* Form Controls */
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .form-value-badge {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 5px;
+      background: var(--border-color);
+      border-radius: 3px;
+      outline: none;
+      margin: 6px 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(6, 182, 212, 0.6);
+      transition: transform 0.1s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Path Pill Toggle (1 vs 2 Paths) */
+    .path-mode-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .path-mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.15s ease;
+    }
+    .path-mode-btn small {
+      font-size: 9px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+    .path-mode-btn.active {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--accent-cyan);
+    }
+
+    /* Toggles / Checkboxes */
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    /* Bottom Action Bar */
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+    }
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .export-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-secondary {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Main Viewport */
+    .main-viewport {
+      flex: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #090a0f;
+    }
+
+    /* Viewport Top Bar */
+    .viewport-header {
+      height: 52px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(15, 17, 23, 0.9);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 5;
+    }
+
+    .stats-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .stat-badge {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 700;
+      color: #fff;
+      background: #1f2536;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid #333d56;
+    }
+    .stat-badge.highlight-green {
+      color: var(--accent-emerald);
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .viewport-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tool-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .tool-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-cyan);
+    }
+    .tool-btn.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* Paper Canvas Area */
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      /* Plotter Cutting Mat Grid effect */
+      background-color: #0b0d13;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.3) 0%, transparent 80%),
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+    }
+    .canvas-container:active {
+      cursor: grabbing;
+    }
+
+    /* Physical Paper Simulation Container */
+    #paper-stage {
+      position: absolute;
+      transform-origin: center center;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .paper-sheet {
+      background: #fdfdfc;
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.6),
+        0 3px 10px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* A5 Ruler / Boundary Guides */
+    .paper-sheet::before {
+      content: "ISO A5 (148 × 210 mm)";
+      position: absolute;
+      bottom: 4px;
+      right: 8px;
+      font-size: 9px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #94a3b8;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #svg-element {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Pen Simulation Head */
+    #plotter-pen-head {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-pink) 20%, rgba(236, 72, 153, 0.2) 60%, transparent 100%);
+      border: 1.5px solid #fff;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 20;
+      display: none;
+      box-shadow: 0 0 10px var(--accent-pink);
+    }
+
+    /* Split View Container */
+    .split-image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      border-right: 2px solid var(--accent-cyan);
+      box-shadow: 2px 0 12px rgba(6, 182, 212, 0.5);
+      display: none;
+    }
+    .split-image-overlay img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* Notification Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Controls -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <span>🖋️ Pen Plotter Studio</span>
+        <span class="badge-a5">A5 Format</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="index.html" style="font-size: 11px; color: var(--accent-cyan); text-decoration: none; font-weight: 700; background: rgba(6,182,212,0.12); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.3);">
+          ← Generative Workshop
+        </a>
+      </div>
+    </div>
+
+    <div class="sidebar-content">
+      
+      <!-- Image Upload & Presets -->
+      <div class="control-section">
+        <div class="section-header">
+          <span>1. Source Image</span>
+          <span style="font-size: 10px; color: var(--text-muted);">Paste Ctrl+V supported</span>
+        </div>
+        
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*">
+          <span class="drop-zone-icon">🖼️</span>
+          <div class="drop-zone-text">Drop photo here or browse</div>
+          <div class="drop-zone-sub">JPG, PNG, WebP (auto-scales to A5)</div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Or load a built-in test image:</div>
+        <div class="sample-btn-group">
+          <button type="button" class="btn-sample active" data-sample="portrait">Portrait</button>
+          <button type="button" class="btn-sample" data-sample="sculpture">Sculpture</button>
+          <button type="button" class="btn-sample" data-sample="landscape">Landscape</button>
+          <button type="button" class="btn-sample" data-sample="geometry">Sphere</button>
+        </div>
+      </div>
+
+      <!-- Path Constraint & Algorithm -->
+      <div class="control-section">
+        <div class="section-header">
+          <span>2. Plotter Path Constraint</span>
+          <span style="color: var(--accent-cyan); font-weight: 700;">Zero Pen Lifts</span>
+        </div>
+
+        <div class="path-mode-toggle">
+          <button type="button" class="path-mode-btn active" id="btn-path-1" data-paths="1">
+            <span>1 Path Mode</span>
+            <small>Single continuous stroke</small>
+          </button>
+          <button type="button" class="path-mode-btn" id="btn-path-2" data-paths="2">
+            <span>2 Paths Mode</span>
+            <small>Dual cross-hatch / layers</small>
+          </button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Plotting Algorithm</span>
+          </div>
+          <select id="select-algo">
+            <option value="serpentine-h">Serpentine Scanline (Horizontal)</option>
+            <option value="serpentine-v">Serpentine Scanline (Vertical)</option>
+            <option value="cross-hatch" selected>Dual Cross-Hatch (Horizontal + Vertical)</option>
+            <option value="diagonal-cross">Dual Diagonal Meander (±45°)</option>
+            <option value="spiral">Archimedean Spiral (Center-Out)</option>
+            <option value="dual-spiral">Dual Intertwined Spiral</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Wave Modulation</span>
+          </div>
+          <select id="select-modulation">
+            <option value="both" selected>Amplitude + Frequency (SquiggleCam)</option>
+            <option value="amplitude">Amplitude Only (Fixed spacing)</option>
+            <option value="frequency">Frequency Only (Constant height)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Wave Profile</span>
+          </div>
+          <select id="select-wave-shape">
+            <option value="sine" selected>Smooth Sine Wave</option>
+            <option value="triangle">Sharp Triangle (Angular)</option>
+            <option value="jitter">Organic Hand-Drawn Jitter</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Line Density & Dimensions -->
+      <div class="control-section">
+        <div class="section-header">
+          <span>3. Line Density & Squiggle Effects</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Line Count / Spacing</span>
+            <span class="form-value-badge" id="val-line-count">110 lines</span>
+          </div>
+          <input type="range" id="param-lines" min="30" max="240" step="2" value="110">
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Max Wave Amplitude</span>
+            <span class="form-value-badge" id="val-amplitude">1.8 mm</span>
+          </div>
+          <input type="range" id="param-amplitude" min="0.3" max="5.0" step="0.1" value="1.8">
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Wave Frequency Multiplier</span>
+            <span class="form-value-badge" id="val-frequency">1.4x</span>
+          </div>
+          <input type="range" id="param-frequency" min="0.5" max="3.5" step="0.1" value="1.4">
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Sampling Step (Resolution)</span>
+            <span class="form-value-badge" id="val-step">0.30 mm</span>
+          </div>
+          <input type="range" id="param-step" min="0.15" max="0.8" step="0.05" value="0.30">
+        </div>
+      </div>
+
+      <!-- Image Processing & Tone Curve -->
+      <div class="control-section">
+        <div class="section-header">
+          <span>4. Tone & Shading Controls</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Contrast</span>
+            <span class="form-value-badge" id="val-contrast">1.35x</span>
+          </div>
+          <input type="range" id="param-contrast" min="0.5" max="3.0" step="0.05" value="1.35">
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Brightness</span>
+            <span class="form-value-badge" id="val-brightness">0%</span>
+          </div>
+          <input type="range" id="param-brightness" min="-100" max="100" step="2" value="0">
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Gamma / Midtones</span>
+            <span class="form-value-badge" id="val-gamma">1.10</span>
+          </div>
+          <input type="range" id="param-gamma" min="0.3" max="2.5" step="0.05" value="1.10">
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>White Highlight Cutoff</span>
+            <span class="form-value-badge" id="val-cutoff">15%</span>
+          </div>
+          <input type="range" id="param-cutoff" min="0" max="50" step="1" value="15">
+        </div>
+
+        <div class="form-grid-2">
+          <label class="checkbox-label">
+            <input type="checkbox" id="param-invert">
+            <span>Invert (White Pen)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="param-straight-white" checked>
+            <span>Flat in Highlights</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- A5 Paper & Hardware Setup -->
+      <div class="control-section">
+        <div class="section-header">
+          <span>5. A5 Paper & Margins</span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <div class="form-row-header">
+              <span>Orientation</span>
+            </div>
+            <select id="select-orientation">
+              <option value="portrait" selected>Portrait (148×210)</option>
+              <option value="landscape">Landscape (210×148)</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-row-header">
+              <span>Margin</span>
+              <span class="form-value-badge" id="val-margin">10 mm</span>
+            </div>
+            <input type="range" id="param-margin" min="4" max="25" step="1" value="10">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-row-header">
+            <span>Pen Tip Width (SVG Stroke)</span>
+            <span class="form-value-badge" id="val-stroke">0.30 mm</span>
+          </div>
+          <input type="range" id="param-stroke" min="0.1" max="1.0" step="0.05" value="0.30">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar Footer / Export Actions -->
+    <div class="sidebar-footer">
+      <button type="button" class="btn-primary" id="btn-export-svg">
+        <span>📥</span>
+        <span>Export A5 SVG (Pen Plotter)</span>
+      </button>
+
+      <div class="export-options-grid">
+        <button type="button" class="btn-secondary" id="btn-export-p1">Export Path 1</button>
+        <button type="button" class="btn-secondary" id="btn-export-p2">Export Path 2</button>
+      </div>
+
+      <div class="export-options-grid">
+        <button type="button" class="btn-secondary" id="btn-copy-svg">📋 Copy SVG</button>
+        <button type="button" class="btn-secondary" id="btn-reset-params">↺ Reset All</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Viewport -->
+  <main class="main-viewport">
+    
+    <!-- Top Stats and View Bar -->
+    <div class="viewport-header">
+      <div class="stats-container">
+        <div class="stat-item">
+          <span>Active Paths:</span>
+          <span class="stat-badge highlight-green" id="stat-paths">1 Path</span>
+        </div>
+        <div class="stat-item">
+          <span>Pen Lifts:</span>
+          <span class="stat-badge highlight-green" id="stat-lifts">0 (Continuous)</span>
+        </div>
+        <div class="stat-item">
+          <span>Pen Distance:</span>
+          <span class="stat-badge" id="stat-distance">0.0 m</span>
+        </div>
+        <div class="stat-item">
+          <span>Est. Plot Time:</span>
+          <span class="stat-badge" id="stat-time">0m 0s</span>
+        </div>
+        <div class="stat-item" style="display: none;" id="stat-dimensions-item">
+          <span>Sheet:</span>
+          <span class="stat-badge" id="stat-dimensions">148 × 210 mm</span>
+        </div>
+      </div>
+
+      <div class="viewport-controls">
+        <button type="button" class="tool-btn" id="btn-toggle-color" title="Colorize individual paths to differentiate Path 1 and Path 2">
+          <span>🎨 Path Colors</span>
+        </button>
+        <button type="button" class="tool-btn" id="btn-toggle-split" title="Toggle overlay preview with original image">
+          <span>👁️ Compare</span>
+        </button>
+        <button type="button" class="tool-btn" id="btn-simulate" title="Animate pen drawing the paths in real-time">
+          <span>▶ Simulate Plot</span>
+        </button>
+        <button type="button" class="tool-btn" id="btn-zoom-reset" title="Fit to screen">
+          <span>⤢ Fit</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Paper Canvas Area -->
+    <div class="canvas-container" id="canvas-container">
+      <div id="paper-stage">
+        <div class="paper-sheet" id="paper-sheet">
+          <svg id="svg-element" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="plotter-paper-shadow" x="-5%" y="-5%" width="110%" height="110%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.1"/>
+              </filter>
+            </defs>
+            <!-- SVG paths will be injected here -->
+          </svg>
+          <div class="split-image-overlay" id="split-overlay">
+            <img id="split-img" alt="Original Reference">
+          </div>
+          <div id="plotter-pen-head"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast">SVG Exported Successfully!</div>
+
+  <!-- Hidden off-screen canvas for image sampling -->
+  <canvas id="sampling-canvas" style="display:none;"></canvas>
+
+  <script>
+    /**
+     * Pen Plotter A5 Vector Generator
+     * High-performance client-side image to continuous 1 or 2 path SVG converter.
+     */
+    (function() {
+      // Configuration & State
+      const A5_PORTRAIT = { width: 148, height: 210 };
+      const A5_LANDSCAPE = { width: 210, height: 148 };
+
+      const state = {
+        image: null,
+        numPaths: 2, // 1 or 2
+        algo: 'cross-hatch', // serpentine-h, serpentine-v, cross-hatch, diagonal-cross, spiral, dual-spiral
+        modulation: 'both', // both, amplitude, frequency
+        waveShape: 'sine', // sine, triangle, jitter
+        lines: 110,
+        maxAmplitude: 1.8, // mm
+        frequency: 1.4,
+        stepMm: 0.30, // sampling distance along path
+        contrast: 1.35,
+        brightness: 0,
+        gamma: 1.10,
+        whiteCutoff: 0.15,
+        invert: false,
+        straightWhite: true,
+        orientation: 'portrait',
+        marginMm: 10,
+        strokeMm: 0.30,
+        colorize: false,
+        showSplit: false,
+        // Paths data
+        path1Data: '',
+        path2Data: '',
+        path1Length: 0,
+        path2Length: 0,
+        totalPoints: 0,
+        // Simulation
+        isSimulating: false,
+        simAnimId: null,
+        // Pan & Zoom
+        zoom: 1,
+        panX: 0,
+        panY: 0,
+        isPanning: false,
+        startX: 0,
+        startY: 0
+      };
+
+      // DOM Elements
+      const samplingCanvas = document.getElementById('sampling-canvas');
+      const samplingCtx = samplingCanvas.getContext('2d', { willReadFrequently: true });
+      const svgElement = document.getElementById('svg-element');
+      const paperSheet = document.getElementById('paper-sheet');
+      const paperStage = document.getElementById('paper-stage');
+      const canvasContainer = document.getElementById('canvas-container');
+      const penHead = document.getElementById('plotter-pen-head');
+      const splitOverlay = document.getElementById('split-overlay');
+      const splitImg = document.getElementById('split-img');
+      const toast = document.getElementById('toast');
+
+      // Stats
+      const statPaths = document.getElementById('stat-paths');
+      const statLifts = document.getElementById('stat-lifts');
+      const statDistance = document.getElementById('stat-distance');
+      const statTime = document.getElementById('stat-time');
+
+      // Helper: Show toast notification
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2600);
+      }
+
+      // Generate Procedural Test Images
+      function generateSampleImage(type) {
+        const c = document.createElement('canvas');
+        c.width = 600;
+        c.height = 850;
+        const ctx = c.getContext('2d');
+
+        if (type === 'portrait') {
+          // Dark background with Rembrandt-style dramatic portrait lighting
+          ctx.fillStyle = '#111';
+          ctx.fillRect(0, 0, 600, 850);
+          
+          // Head silhouette
+          const grad = ctx.createRadialGradient(280, 360, 50, 300, 400, 260);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.3, '#dddddd');
+          grad.addColorStop(0.65, '#555555');
+          grad.addColorStop(1, '#111111');
+          
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.ellipse(300, 380, 150, 200, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Facial shadows / features
+          ctx.fillStyle = '#111';
+          // Eye sockets
+          ctx.beginPath();
+          ctx.ellipse(250, 350, 25, 14, -0.1, 0, Math.PI * 2);
+          ctx.ellipse(350, 350, 25, 14, 0.1, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Nose shadow
+          ctx.beginPath();
+          ctx.moveTo(300, 350);
+          ctx.lineTo(290, 420);
+          ctx.lineTo(315, 420);
+          ctx.closePath();
+          ctx.fill();
+
+          // Lips
+          ctx.beginPath();
+          ctx.ellipse(300, 470, 35, 10, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Dramatic side shadow
+          const sideGrad = ctx.createLinearGradient(120, 0, 480, 0);
+          sideGrad.addColorStop(0, 'rgba(0,0,0,0.85)');
+          sideGrad.addColorStop(0.4, 'transparent');
+          sideGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+          ctx.fillStyle = sideGrad;
+          ctx.fillRect(0, 0, 600, 850);
+
+        } else if (type === 'sculpture') {
+          // Classical marble bust aesthetic
+          ctx.fillStyle = '#222';
+          ctx.fillRect(0, 0, 600, 850);
+          
+          const g = ctx.createLinearGradient(100, 100, 500, 750);
+          g.addColorStop(0, '#ffffff');
+          g.addColorStop(0.5, '#777777');
+          g.addColorStop(1, '#050505');
+          ctx.fillStyle = g;
+          
+          // Greek torso silhouette
+          ctx.beginPath();
+          ctx.moveTo(300, 180);
+          ctx.bezierCurveTo(420, 200, 450, 350, 400, 550);
+          ctx.bezierCurveTo(380, 650, 420, 750, 420, 800);
+          ctx.lineTo(180, 800);
+          ctx.bezierCurveTo(180, 750, 220, 650, 200, 550);
+          ctx.bezierCurveTo(150, 350, 180, 200, 300, 180);
+          ctx.fill();
+
+          // Shading rings
+          ctx.lineWidth = 14;
+          ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+          ctx.beginPath();
+          ctx.arc(300, 380, 70, 0, Math.PI);
+          ctx.stroke();
+
+        } else if (type === 'landscape') {
+          // Mountain landscape with moon
+          const skyGrad = ctx.createLinearGradient(0, 0, 0, 600);
+          skyGrad.addColorStop(0, '#151525');
+          skyGrad.addColorStop(1, '#e0e0e0');
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(0, 0, 600, 850);
+
+          // Full Moon
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(420, 220, 60, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Background mountain
+          ctx.fillStyle = '#777777';
+          ctx.beginPath();
+          ctx.moveTo(50, 600);
+          ctx.lineTo(260, 320);
+          ctx.lineTo(460, 600);
+          ctx.closePath();
+          ctx.fill();
+
+          // Foreground mountain
+          ctx.fillStyle = '#222222';
+          ctx.beginPath();
+          ctx.moveTo(180, 700);
+          ctx.lineTo(390, 420);
+          ctx.lineTo(580, 700);
+          ctx.closePath();
+          ctx.fill();
+
+          // Lake reflection
+          ctx.fillStyle = '#111111';
+          ctx.fillRect(0, 680, 600, 170);
+
+        } else if (type === 'geometry') {
+          // Perfectly shaded sphere with shadow
+          ctx.fillStyle = '#f5f5f5';
+          ctx.fillRect(0, 0, 600, 850);
+
+          // Cast shadow
+          ctx.fillStyle = '#333333';
+          ctx.beginPath();
+          ctx.ellipse(320, 580, 170, 45, -0.1, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Shaded sphere
+          const sphereGrad = ctx.createRadialGradient(230, 340, 30, 300, 400, 180);
+          sphereGrad.addColorStop(0, '#ffffff');
+          sphereGrad.addColorStop(0.5, '#888888');
+          sphereGrad.addColorStop(0.85, '#222222');
+          sphereGrad.addColorStop(1, '#050505');
+          ctx.fillStyle = sphereGrad;
+          ctx.beginPath();
+          ctx.arc(300, 400, 180, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const img = new Image();
+        img.src = c.toDataURL('image/png');
+        img.onload = () => {
+          state.image = img;
+          splitImg.src = img.src;
+          generatePlotterPaths();
+        };
+      }
+
+      // Compute A5 Dimensions
+      function getDimensions() {
+        const isPortrait = state.orientation === 'portrait';
+        const pageSize = isPortrait ? A5_PORTRAIT : A5_LANDSCAPE;
+        const widthMm = pageSize.width;
+        const heightMm = pageSize.height;
+        const margin = state.marginMm;
+        const drawWidth = widthMm - (margin * 2);
+        const drawHeight = heightMm - (margin * 2);
+
+        return { widthMm, heightMm, margin, drawWidth, drawHeight, isPortrait };
+      }
+
+      // Update Paper Sheet styling to match A5 aspect ratio
+      function updatePaperDisplay() {
+        const { widthMm, heightMm } = getDimensions();
+        // Base viewport scaling: 1mm = 3.6 CSS px for comfortable desktop view
+        const scalePx = 3.6;
+        paperSheet.style.width = (widthMm * scalePx) + 'px';
+        paperSheet.style.height = (heightMm * scalePx) + 'px';
+
+        document.getElementById('stat-dimensions').textContent = `${widthMm} × ${heightMm} mm (A5)`;
+      }
+
+      // Sample luminance from loaded image at normalized coordinates (u, v) in [0, 1]
+      // Returns darkness D in [0, 1] where 0 = white/light, 1 = deep black/ink
+      function sampleDarkness(u, v, imgData, w, h) {
+        if (u < 0 || u > 1 || v < 0 || v > 1) return 0;
+
+        const x = Math.min(w - 1, Math.max(0, u * (w - 1)));
+        const y = Math.min(h - 1, Math.max(0, v * (h - 1)));
+
+        // Bilinear interpolation
+        const x1 = Math.floor(x);
+        const y1 = Math.floor(y);
+        const x2 = Math.min(w - 1, x1 + 1);
+        const y2 = Math.min(h - 1, y1 + 1);
+        const fx = x - x1;
+        const fy = y - y1;
+
+        function getLum(px, py) {
+          const idx = (py * w + px) * 4;
+          const r = imgData[idx];
+          const g = imgData[idx + 1];
+          const b = imgData[idx + 2];
+          return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        }
+
+        const l11 = getLum(x1, y1);
+        const l21 = getLum(x2, y1);
+        const l12 = getLum(x1, y2);
+        const l22 = getLum(x2, y2);
+
+        let lum = (1 - fx) * (1 - fy) * l11 + fx * (1 - fy) * l21 + (1 - fx) * fy * l12 + fx * fy * l22;
+
+        // Apply Brightness
+        lum += (state.brightness / 100);
+
+        // Apply Contrast
+        lum = (lum - 0.5) * state.contrast + 0.5;
+
+        // Clamp
+        lum = Math.max(0, Math.min(1, lum));
+
+        // Apply Gamma
+        lum = Math.pow(lum, state.gamma);
+
+        // Darkness value
+        let darkness = 1 - lum;
+        if (state.invert) {
+          darkness = lum;
+        }
+
+        // Highlight cutoff threshold (pure highlights stay flat or minimal)
+        if (darkness < state.whiteCutoff) {
+          darkness = 0;
+        } else {
+          // Smooth remap from cutoff to 1
+          darkness = (darkness - state.whiteCutoff) / (1 - state.whiteCutoff);
+        }
+
+        return Math.max(0, Math.min(1, darkness));
+      }
+
+      // Wave form evaluator
+      function getWaveValue(phase, shape) {
+        const normPhase = ((phase % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
+        if (shape === 'triangle') {
+          return (2 / Math.PI) * Math.asin(Math.sin(phase));
+        } else if (shape === 'jitter') {
+          // Harmonic jitter
+          return 0.65 * Math.sin(phase) + 0.35 * Math.sin(phase * 2.8 + 0.5);
+        }
+        // Default Sine
+        return Math.sin(phase);
+      }
+
+      /**
+       * Core Generator: Produces strictly 1 or 2 unbroken SVG paths.
+       * Uses continuous loopbacks at ends to ensure zero pen lifts.
+       */
+      function generatePlotterPaths() {
+        if (!state.image) return;
+
+        const { widthMm, heightMm, margin, drawWidth, drawHeight } = getDimensions();
+
+        // Prepare sampling canvas matching aspect ratio of drawable area
+        const sampleW = 500;
+        const sampleH = Math.round(sampleW * (drawHeight / drawWidth));
+        samplingCanvas.width = sampleW;
+        samplingCanvas.height = sampleH;
+
+        samplingCtx.fillStyle = '#ffffff';
+        samplingCtx.fillRect(0, 0, sampleW, sampleH);
+
+        // Fit image nicely into drawable area (contain mode)
+        const imgRatio = state.image.width / state.image.height;
+        const targetRatio = sampleW / sampleH;
+        let dw, dh, dx, dy;
+
+        if (imgRatio > targetRatio) {
+          dw = sampleW;
+          dh = sampleW / imgRatio;
+          dx = 0;
+          dy = (sampleH - dh) / 2;
+        } else {
+          dh = sampleH;
+          dw = sampleH * imgRatio;
+          dy = 0;
+          dx = (sampleW - dw) / 2;
+        }
+
+        samplingCtx.drawImage(state.image, dx, dy, dw, dh);
+        const imgDataObj = samplingCtx.getImageData(0, 0, sampleW, sampleH);
+        const imgData = imgDataObj.data;
+
+        // Path generation buffers
+        let path1Points = [];
+        let path2Points = [];
+
+        const algo = state.algo;
+        const numPaths = state.numPaths;
+        const lines = state.lines;
+        const maxAmp = state.maxAmplitude;
+        const freqMult = state.frequency;
+        const stepMm = Math.max(0.15, state.stepMm);
+        const waveShape = state.waveShape;
+        const modulation = state.modulation;
+        const straightWhite = state.straightWhite;
+
+        // --- PATH GENERATORS ---
+
+        // 1. Horizontal Serpentine Line (Unbroken Meander)
+        function generateHorizontalSerpentine(offsetY = 0, scaleFactor = 1.0) {
+          const pts = [];
+          const numLines = Math.round(lines * scaleFactor);
+          const dy = drawHeight / numLines;
+          let phase = 0;
+
+          for (let i = 0; i < numLines; i++) {
+            const baseY = margin + (i + 0.5) * dy + offsetY;
+            const goingRight = (i % 2 === 0);
+            const xStart = goingRight ? margin : (margin + drawWidth);
+            const xEnd = goingRight ? (margin + drawWidth) : margin;
+            const numSteps = Math.ceil(drawWidth / stepMm);
+            const stepX = (xEnd - xStart) / numSteps;
+
+            for (let s = 0; s <= numSteps; s++) {
+              const x = xStart + s * stepX;
+              const u = (x - margin) / drawWidth;
+              const v = (baseY - margin) / drawHeight;
+              const darkness = sampleDarkness(u, v, imgData, sampleW, sampleH);
+
+              let amp = 0;
+              let stepFreq = 1.0;
+
+              if (modulation === 'both') {
+                amp = darkness * maxAmp;
+                stepFreq = freqMult * (0.4 + 1.6 * darkness);
+              } else if (modulation === 'amplitude') {
+                amp = darkness * maxAmp;
+                stepFreq = freqMult * 1.0;
+              } else if (modulation === 'frequency') {
+                amp = (darkness > 0.05 ? maxAmp * 0.7 : 0);
+                stepFreq = freqMult * (0.2 + 2.5 * darkness);
+              }
+
+              if (straightWhite && darkness <= 0.02) {
+                amp = 0;
+              }
+
+              phase += (2 * Math.PI * stepFreq * stepMm) / 3.0;
+              const waveY = amp * getWaveValue(phase, waveShape);
+              const finalY = Math.max(margin, Math.min(heightMm - margin, baseY + waveY));
+
+              pts.push({ x: Number(x.toFixed(2)), y: Number(finalY.toFixed(2)) });
+            }
+
+            // Continuous connector to next line: adds smooth turnaround point at boundary
+            if (i < numLines - 1) {
+              const nextBaseY = margin + (i + 1.5) * dy + offsetY;
+              const edgeX = xEnd;
+              pts.push({ x: Number(edgeX.toFixed(2)), y: Number(((baseY + nextBaseY) / 2).toFixed(2)) });
+            }
+          }
+          return pts;
+        }
+
+        // 2. Vertical Serpentine Line (Unbroken Meander)
+        function generateVerticalSerpentine(offsetX = 0, scaleFactor = 1.0) {
+          const pts = [];
+          const numCols = Math.round((lines * (drawWidth / drawHeight)) * scaleFactor);
+          const dx = drawWidth / numCols;
+          let phase = 0;
+
+          for (let i = 0; i < numCols; i++) {
+            const baseX = margin + (i + 0.5) * dx + offsetX;
+            const goingDown = (i % 2 === 0);
+            const yStart = goingDown ? margin : (margin + drawHeight);
+            const yEnd = goingDown ? (margin + drawHeight) : margin;
+            const numSteps = Math.ceil(drawHeight / stepMm);
+            const stepY = (yEnd - yStart) / numSteps;
+
+            for (let s = 0; s <= numSteps; s++) {
+              const y = yStart + s * stepY;
+              const u = (baseX - margin) / drawWidth;
+              const v = (y - margin) / drawHeight;
+              const darkness = sampleDarkness(u, v, imgData, sampleW, sampleH);
+
+              let amp = 0;
+              let stepFreq = 1.0;
+
+              if (modulation === 'both') {
+                amp = darkness * maxAmp;
+                stepFreq = freqMult * (0.4 + 1.6 * darkness);
+              } else if (modulation === 'amplitude') {
+                amp = darkness * maxAmp;
+                stepFreq = freqMult * 1.0;
+              } else if (modulation === 'frequency') {
+                amp = (darkness > 0.05 ? maxAmp * 0.7 : 0);
+                stepFreq = freqMult * (0.2 + 2.5 * darkness);
+              }
+
+              if (straightWhite && darkness <= 0.02) {
+                amp = 0;
+              }
+
+              phase += (2 * Math.PI * stepFreq * stepMm) / 3.0;
+              const waveX = amp * getWaveValue(phase, waveShape);
+              const finalX = Math.max(margin, Math.min(widthMm - margin, baseX + waveX));
+
+              pts.push({ x: Number(finalX.toFixed(2)), y: Number(y.toFixed(2)) });
+            }
+
+            if (i < numCols - 1) {
+              const nextBaseX = margin + (i + 1.5) * dx + offsetX;
+              const edgeY = yEnd;
+              pts.push({ x: Number(((baseX + nextBaseX) / 2).toFixed(2)), y: Number(edgeY.toFixed(2)) });
+            }
+          }
+          return pts;
+        }
+
+        // 3. Diagonal Meander (+45° or -45° single continuous path)
+        function generateDiagonalMeander(angleDeg = 45) {
+          const pts = [];
+          const is45 = (angleDeg === 45);
+          const rad = (angleDeg * Math.PI) / 180;
+          const cosA = Math.cos(rad);
+          const sinA = Math.sin(rad);
+
+          // Project bounding box along diagonal
+          const numDiag = Math.round(lines * 1.2);
+          const diagSpan = (drawWidth + drawHeight) * 0.707;
+          const deltaD = diagSpan / numDiag;
+          let phase = 0;
+
+          // Serpentine along diagonal bands
+          for (let i = 0; i < numDiag; i++) {
+            const d = -diagSpan * 0.5 + (i + 0.5) * deltaD;
+            const goingFwd = (i % 2 === 0);
+
+            // Find intersections of line (x*cos - y*sin = d) with bounding box
+            const cx = margin + drawWidth / 2;
+            const cy = margin + drawHeight / 2;
+
+            const tSpan = Math.max(drawWidth, drawHeight) * 1.4;
+            const tStart = goingFwd ? -tSpan / 2 : tSpan / 2;
+            const tEnd = goingFwd ? tSpan / 2 : -tSpan / 2;
+            const steps = Math.ceil(tSpan / stepMm);
+
+            for (let s = 0; s <= steps; s++) {
+              const t = tStart + (s / steps) * (tEnd - tStart);
+              let x, y;
+              if (is45) {
+                x = cx + (d * cosA - t * sinA);
+                y = cy + (d * sinA + t * cosA);
+              } else {
+                x = cx + (d * cosA + t * sinA);
+                y = cy + (-d * sinA + t * cosA);
+              }
+
+              if (x >= margin && x <= margin + drawWidth && y >= margin && y <= margin + drawHeight) {
+                const u = (x - margin) / drawWidth;
+                const v = (y - margin) / drawHeight;
+                const darkness = sampleDarkness(u, v, imgData, sampleW, sampleH);
+
+                let amp = darkness * maxAmp;
+                if (straightWhite && darkness <= 0.02) amp = 0;
+
+                phase += (2 * Math.PI * freqMult * (0.5 + darkness) * stepMm) / 3.0;
+                const disp = amp * getWaveValue(phase, waveShape);
+
+                const finalX = x + disp * -sinA;
+                const finalY = y + disp * cosA;
+
+                pts.push({
+                  x: Number(Math.max(margin, Math.min(widthMm - margin, finalX)).toFixed(2)),
+                  y: Number(Math.max(margin, Math.min(heightMm - margin, finalY)).toFixed(2))
+                });
+              }
+            }
+          }
+          return pts;
+        }
+
+        // 4. Archimedean Spiral (Center-Out continuous path)
+        function generateSpiral(startAngleOffset = 0) {
+          const pts = [];
+          const cx = margin + drawWidth / 2;
+          const cy = margin + drawHeight / 2;
+          const maxRadius = Math.sqrt(Math.pow(drawWidth / 2, 2) + Math.pow(drawHeight / 2, 2));
+
+          const turns = lines * 0.5;
+          const maxTheta = turns * 2 * Math.PI;
+          const thetaStep = (stepMm / maxRadius) * 2.5;
+          let phase = 0;
+
+          for (let theta = 0.5; theta <= maxTheta; theta += thetaStep) {
+            const r = (theta / maxTheta) * maxRadius;
+            const currentAngle = theta + startAngleOffset;
+            const x = cx + r * Math.cos(currentAngle);
+            const y = cy + r * Math.sin(currentAngle);
+
+            if (x >= margin && x <= margin + drawWidth && y >= margin && y <= margin + drawHeight) {
+              const u = (x - margin) / drawWidth;
+              const v = (y - margin) / drawHeight;
+              const darkness = sampleDarkness(u, v, imgData, sampleW, sampleH);
+
+              let amp = darkness * maxAmp;
+              if (straightWhite && darkness <= 0.02) amp = 0;
+
+              phase += (2 * Math.PI * freqMult * (0.6 + 1.4 * darkness) * stepMm) / 3.0;
+              const disp = amp * getWaveValue(phase, waveShape);
+
+              const rMod = r + disp;
+              const finalX = cx + rMod * Math.cos(currentAngle);
+              const finalY = cy + rMod * Math.sin(currentAngle);
+
+              pts.push({
+                x: Number(Math.max(margin, Math.min(widthMm - margin, finalX)).toFixed(2)),
+                y: Number(Math.max(margin, Math.min(heightMm - margin, finalY)).toFixed(2))
+              });
+            }
+          }
+          return pts;
+        }
+
+        // Branching based on Algorithm choice & Path Count
+        if (numPaths === 1) {
+          if (algo === 'serpentine-h') {
+            path1Points = generateHorizontalSerpentine();
+          } else if (algo === 'serpentine-v') {
+            path1Points = generateVerticalSerpentine();
+          } else if (algo === 'cross-hatch') {
+            path1Points = generateHorizontalSerpentine();
+          } else if (algo === 'diagonal-cross') {
+            path1Points = generateDiagonalMeander(45);
+          } else if (algo === 'spiral' || algo === 'dual-spiral') {
+            path1Points = generateSpiral(0);
+          }
+          path2Points = [];
+        } else {
+          // 2 Paths Mode
+          if (algo === 'serpentine-h') {
+            // Path 1 = base horizontal, Path 2 = fine detail horizontal offset
+            path1Points = generateHorizontalSerpentine(0, 0.7);
+            path2Points = generateHorizontalSerpentine(drawHeight / (lines * 1.4), 0.7);
+          } else if (algo === 'serpentine-v') {
+            path1Points = generateVerticalSerpentine(0, 0.7);
+            path2Points = generateVerticalSerpentine(drawWidth / (lines * 1.4), 0.7);
+          } else if (algo === 'cross-hatch') {
+            // Path 1 = Horizontal Meander, Path 2 = Vertical Meander
+            path1Points = generateHorizontalSerpentine(0, 0.9);
+            path2Points = generateVerticalSerpentine(0, 0.9);
+          } else if (algo === 'diagonal-cross') {
+            // Path 1 = +45°, Path 2 = -45° (135°)
+            path1Points = generateDiagonalMeander(45);
+            path2Points = generateDiagonalMeander(135);
+          } else if (algo === 'spiral' || algo === 'dual-spiral') {
+            // Path 1 = Primary Spiral, Path 2 = 180° Intertwined Spiral
+            path1Points = generateSpiral(0);
+            path2Points = generateSpiral(Math.PI);
+          }
+        }
+
+        // Convert Point Arrays to continuous SVG Path Data 'd' string
+        function pointsToSvgPath(points) {
+          if (!points || points.length === 0) return '';
+          let d = `M ${points[0].x} ${points[0].y}`;
+          for (let i = 1; i < points.length; i++) {
+            d += ` L ${points[i].x} ${points[i].y}`;
+          }
+          return d;
+        }
+
+        // Calculate travel length in mm
+        function calculateLength(points) {
+          let dist = 0;
+          for (let i = 1; i < points.length; i++) {
+            const dx = points[i].x - points[i - 1].x;
+            const dy = points[i].y - points[i - 1].y;
+            dist += Math.sqrt(dx * dx + dy * dy);
+          }
+          return dist;
+        }
+
+        state.path1Data = pointsToSvgPath(path1Points);
+        state.path2Data = pointsToSvgPath(path2Points);
+        state.path1Length = calculateLength(path1Points);
+        state.path2Length = calculateLength(path2Points);
+        state.totalPoints = path1Points.length + path2Points.length;
+
+        renderSvgToViewport(widthMm, heightMm);
+        updateStats();
+      }
+
+      // Render SVG onto interactive paper
+      function renderSvgToViewport(widthMm, heightMm) {
+        updatePaperDisplay();
+
+        const strokeMm = state.strokeMm;
+        const color1 = state.colorize ? '#2563eb' : '#111111'; // Blue or Black
+        const color2 = state.colorize ? '#dc2626' : '#111111'; // Red or Black
+
+        svgElement.setAttribute('viewBox', `0 0 ${widthMm} ${heightMm}`);
+        svgElement.setAttribute('width', '100%');
+        svgElement.setAttribute('height', '100%');
+
+        let svgHtml = `
+          <!-- Margin Guide Boundary (Non-printing reference) -->
+          <rect x="${state.marginMm}" y="${state.marginMm}" 
+                width="${widthMm - state.marginMm * 2}" height="${heightMm - state.marginMm * 2}" 
+                fill="none" stroke="#e2e8f0" stroke-width="0.15" stroke-dasharray="2,2"/>
+        `;
+
+        if (state.path1Data) {
+          svgHtml += `
+            <g id="layer-path-1">
+              <path id="svg-path-1" d="${state.path1Data}" 
+                    fill="none" 
+                    stroke="${color1}" 
+                    stroke-width="${strokeMm}" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round"/>
+            </g>
+          `;
+        }
+
+        if (state.numPaths === 2 && state.path2Data) {
+          svgHtml += `
+            <g id="layer-path-2">
+              <path id="svg-path-2" d="${state.path2Data}" 
+                    fill="none" 
+                    stroke="${color2}" 
+                    stroke-width="${strokeMm}" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round"/>
+            </g>
+          `;
+        }
+
+        svgElement.innerHTML = svgHtml;
+      }
+
+      // Update Header Stats
+      function updateStats() {
+        const activePaths = state.numPaths === 1 || !state.path2Data ? 1 : 2;
+        statPaths.textContent = `${activePaths} Path${activePaths > 1 ? 's' : ''}`;
+        statLifts.textContent = `${activePaths} (Continuous)`;
+
+        const totalDistMm = state.path1Length + state.path2Length;
+        const totalDistMeters = (totalDistMm / 1000).toFixed(2);
+        statDistance.textContent = `${totalDistMeters} m (${(totalDistMeters * 3.28084).toFixed(1)} ft)`;
+
+        // Estimated Plot Time (Assuming standard plotter draw speed 40 mm/s + acceleration)
+        const plotSpeedMmS = 40;
+        const totalSeconds = Math.round(totalDistMm / plotSpeedMmS);
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        statTime.textContent = `${mins}m ${secs}s`;
+      }
+
+      /**
+       * Generate Full Compliant A5 SVG String
+       * Ready for Inkscape, AxiDraw, VPype, or any CNC plotter!
+       */
+      function buildExportSvgString(mode = 'both') {
+        const { widthMm, heightMm } = getDimensions();
+        const strokeMm = state.strokeMm;
+
+        let content = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`;
+        content += `<!-- Created with Pen Plotter A5 Studio: 100% Continuous Paths - Zero Pen Lifts -->\n`;
+        content += `<svg xmlns="http://www.w3.org/2000/svg" \n`;
+        content += `     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"\n`;
+        content += `     width="${widthMm}mm" height="${heightMm}mm" \n`;
+        content += `     viewBox="0 0 ${widthMm} ${heightMm}">\n`;
+        content += `  <style>\n`;
+        content += `    path { fill: none; stroke: #000000; stroke-width: ${strokeMm}mm; stroke-linecap: round; stroke-linejoin: round; }\n`;
+        content += `  </style>\n`;
+
+        if ((mode === 'both' || mode === 'p1') && state.path1Data) {
+          content += `  <g inkscape:groupmode="layer" id="layer1" inkscape:label="Path 1 (Pen 1)">\n`;
+          content += `    <path id="plotter-path-1" d="${state.path1Data}"/>\n`;
+          content += `  </g>\n`;
+        }
+
+        if ((mode === 'both' || mode === 'p2') && state.numPaths === 2 && state.path2Data) {
+          content += `  <g inkscape:groupmode="layer" id="layer2" inkscape:label="Path 2 (Pen 2)">\n`;
+          content += `    <path id="plotter-path-2" d="${state.path2Data}"/>\n`;
+          content += `  </g>\n`;
+        }
+
+        content += `</svg>\n`;
+        return content;
+      }
+
+      // Download helper
+      function downloadFile(content, fileName, mimeType = 'image/svg+xml') {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // Export Buttons
+      document.getElementById('btn-export-svg').addEventListener('click', () => {
+        const svgStr = buildExportSvgString('both');
+        const filename = `plotter_a5_${state.orientation}_${state.numPaths}path.svg`;
+        downloadFile(svgStr, filename);
+        showToast(`Exported ${filename} (${state.numPaths} Path A5)`);
+      });
+
+      document.getElementById('btn-export-p1').addEventListener('click', () => {
+        const svgStr = buildExportSvgString('p1');
+        const filename = `plotter_a5_path1.svg`;
+        downloadFile(svgStr, filename);
+        showToast('Exported Path 1 SVG');
+      });
+
+      document.getElementById('btn-export-p2').addEventListener('click', () => {
+        if (state.numPaths !== 2 || !state.path2Data) {
+          showToast('Enable 2 Paths Mode to export Path 2');
+          return;
+        }
+        const svgStr = buildExportSvgString('p2');
+        const filename = `plotter_a5_path2.svg`;
+        downloadFile(svgStr, filename);
+        showToast('Exported Path 2 SVG');
+      });
+
+      document.getElementById('btn-copy-svg').addEventListener('click', async () => {
+        const svgStr = buildExportSvgString('both');
+        try {
+          await navigator.clipboard.writeText(svgStr);
+          showToast('SVG copied to clipboard!');
+        } catch (err) {
+          showToast('Failed to copy to clipboard');
+        }
+      });
+
+      // Simulation / Animate Pen
+      const btnSimulate = document.getElementById('btn-simulate');
+      btnSimulate.addEventListener('click', () => {
+        if (state.isSimulating) {
+          stopSimulation();
+        } else {
+          startSimulation();
+        }
+      });
+
+      function stopSimulation() {
+        state.isSimulating = false;
+        btnSimulate.innerHTML = `<span>▶ Simulate Plot</span>`;
+        btnSimulate.classList.remove('active');
+        penHead.style.display = 'none';
+        if (state.simAnimId) cancelAnimationFrame(state.simAnimId);
+        
+        // Restore paths visibility
+        const p1 = document.getElementById('svg-path-1');
+        const p2 = document.getElementById('svg-path-2');
+        if (p1) p1.style.strokeDashoffset = '0';
+        if (p2) p2.style.strokeDashoffset = '0';
+      }
+
+      function startSimulation() {
+        const p1 = document.getElementById('svg-path-1');
+        if (!p1) return;
+
+        state.isSimulating = true;
+        btnSimulate.innerHTML = `<span>⏹ Stop Simulation</span>`;
+        btnSimulate.classList.add('active');
+        penHead.style.display = 'block';
+
+        const p2 = document.getElementById('svg-path-2');
+        const len1 = p1.getTotalLength();
+        const len2 = p2 ? p2.getTotalLength() : 0;
+        const totalLen = len1 + len2;
+
+        p1.style.strokeDasharray = `${len1}`;
+        p1.style.strokeDashoffset = `${len1}`;
+        if (p2) {
+          p2.style.strokeDasharray = `${len2}`;
+          p2.style.strokeDashoffset = `${len2}`;
+        }
+
+        const duration = 12000; // 12 seconds preview animation
+        const startTime = performance.now();
+        const sheetRect = paperSheet.getBoundingClientRect();
+        const { widthMm, heightMm } = getDimensions();
+
+        function animate(now) {
+          if (!state.isSimulating) return;
+          const elapsed = now - startTime;
+          const progress = Math.min(1, elapsed / duration);
+          const currentDistance = progress * totalLen;
+
+          if (currentDistance <= len1) {
+            p1.style.strokeDashoffset = `${len1 - currentDistance}`;
+            const pt = p1.getPointAtLength(currentDistance);
+            // Convert mm to sheet CSS px
+            const px = (pt.x / widthMm) * paperSheet.offsetWidth;
+            const py = (pt.y / heightMm) * paperSheet.offsetHeight;
+            penHead.style.left = `${px}px`;
+            penHead.style.top = `${py}px`;
+          } else if (p2) {
+            p1.style.strokeDashoffset = '0';
+            const dist2 = currentDistance - len1;
+            p2.style.strokeDashoffset = `${len2 - dist2}`;
+            const pt = p2.getPointAtLength(dist2);
+            const px = (pt.x / widthMm) * paperSheet.offsetWidth;
+            const py = (pt.y / heightMm) * paperSheet.offsetHeight;
+            penHead.style.left = `${px}px`;
+            penHead.style.top = `${py}px`;
+          }
+
+          if (progress < 1) {
+            state.simAnimId = requestAnimationFrame(animate);
+          } else {
+            showToast('Plot simulation completed!');
+            stopSimulation();
+          }
+        }
+
+        state.simAnimId = requestAnimationFrame(animate);
+      }
+
+      // UI Control Bindings & Event Listeners
+      const btnPath1 = document.getElementById('btn-path-1');
+      const btnPath2 = document.getElementById('btn-path-2');
+
+      btnPath1.addEventListener('click', () => {
+        state.numPaths = 1;
+        btnPath1.classList.add('active');
+        btnPath2.classList.remove('active');
+        generatePlotterPaths();
+      });
+
+      btnPath2.addEventListener('click', () => {
+        state.numPaths = 2;
+        btnPath2.classList.add('active');
+        btnPath1.classList.remove('active');
+        generatePlotterPaths();
+      });
+
+      // Sample image buttons
+      document.querySelectorAll('.btn-sample').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.btn-sample').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          generateSampleImage(btn.dataset.sample);
+        });
+      });
+
+      // File Drag & Drop
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+
+      function handleFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            state.image = img;
+            splitImg.src = img.src;
+            document.querySelectorAll('.btn-sample').forEach(b => b.classList.remove('active'));
+            generatePlotterPaths();
+            showToast('Image loaded successfully');
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+      });
+
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+      });
+
+      // Clipboard Paste Listener
+      window.addEventListener('paste', (e) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            handleFile(blob);
+            break;
+          }
+        }
+      });
+
+      // Dynamic Param Slider Binding Helper
+      function bindSlider(id, badgeId, stateKey, unit = '', formatFn = null) {
+        const slider = document.getElementById(id);
+        const badge = document.getElementById(badgeId);
+
+        slider.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          state[stateKey] = val;
+          badge.textContent = formatFn ? formatFn(val) : `${val}${unit}`;
+          generatePlotterPaths();
+        });
+      }
+
+      bindSlider('param-lines', 'val-line-count', 'lines', ' lines');
+      bindSlider('param-amplitude', 'val-amplitude', 'maxAmplitude', ' mm', (v) => `${v.toFixed(1)} mm`);
+      bindSlider('param-frequency', 'val-frequency', 'frequency', 'x', (v) => `${v.toFixed(1)}x`);
+      bindSlider('param-step', 'val-step', 'stepMm', ' mm', (v) => `${v.toFixed(2)} mm`);
+      bindSlider('param-contrast', 'val-contrast', 'contrast', 'x', (v) => `${v.toFixed(2)}x`);
+      bindSlider('param-brightness', 'val-brightness', 'brightness', '%', (v) => `${v > 0 ? '+' : ''}${v}%`);
+      bindSlider('param-gamma', 'val-gamma', 'gamma', '', (v) => v.toFixed(2));
+      bindSlider('param-cutoff', 'val-cutoff', 'whiteCutoff', '%', (v) => `${Math.round(v)}%`);
+      bindSlider('param-margin', 'val-margin', 'marginMm', ' mm');
+      bindSlider('param-stroke', 'val-stroke', 'strokeMm', ' mm', (v) => `${v.toFixed(2)} mm`);
+
+      // Special handling for cutoff %
+      document.getElementById('param-cutoff').addEventListener('input', (e) => {
+        state.whiteCutoff = parseFloat(e.target.value) / 100;
+      });
+
+      // Select Dropdowns
+      document.getElementById('select-algo').addEventListener('change', (e) => {
+        state.algo = e.target.value;
+        generatePlotterPaths();
+      });
+
+      document.getElementById('select-modulation').addEventListener('change', (e) => {
+        state.modulation = e.target.value;
+        generatePlotterPaths();
+      });
+
+      document.getElementById('select-wave-shape').addEventListener('change', (e) => {
+        state.waveShape = e.target.value;
+        generatePlotterPaths();
+      });
+
+      document.getElementById('select-orientation').addEventListener('change', (e) => {
+        state.orientation = e.target.value;
+        generatePlotterPaths();
+      });
+
+      // Checkboxes
+      document.getElementById('param-invert').addEventListener('change', (e) => {
+        state.invert = e.target.checked;
+        generatePlotterPaths();
+      });
+
+      document.getElementById('param-straight-white').addEventListener('change', (e) => {
+        state.straightWhite = e.target.checked;
+        generatePlotterPaths();
+      });
+
+      // Colorize Paths toggle
+      const btnToggleColor = document.getElementById('btn-toggle-color');
+      btnToggleColor.addEventListener('click', () => {
+        state.colorize = !state.colorize;
+        btnToggleColor.classList.toggle('active', state.colorize);
+        const { widthMm, heightMm } = getDimensions();
+        renderSvgToViewport(widthMm, heightMm);
+      });
+
+      // Split View Compare
+      const btnToggleSplit = document.getElementById('btn-toggle-split');
+      btnToggleSplit.addEventListener('click', () => {
+        state.showSplit = !state.showSplit;
+        btnToggleSplit.classList.toggle('active', state.showSplit);
+        splitOverlay.style.display = state.showSplit ? 'block' : 'none';
+        splitOverlay.style.width = '50%';
+      });
+
+      // Zoom & Pan Engine
+      function updateTransform() {
+        paperStage.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+      }
+
+      canvasContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomDelta = e.deltaY < 0 ? 1.1 : 0.9;
+        state.zoom = Math.max(0.2, Math.min(6.0, state.zoom * zoomDelta));
+        updateTransform();
+      }, { passive: false });
+
+      canvasContainer.addEventListener('mousedown', (e) => {
+        if (e.target.closest('#paper-sheet') && state.showSplit) return;
+        state.isPanning = true;
+        state.startX = e.clientX - state.panX;
+        state.startY = e.clientY - state.panY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!state.isPanning) return;
+        state.panX = e.clientX - state.startX;
+        state.panY = e.clientY - state.startY;
+        updateTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        state.isPanning = false;
+      });
+
+      document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+        state.zoom = 1;
+        state.panX = 0;
+        state.panY = 0;
+        updateTransform();
+      });
+
+      // Reset Defaults
+      document.getElementById('btn-reset-params').addEventListener('click', () => {
+        state.lines = 110;
+        state.maxAmplitude = 1.8;
+        state.frequency = 1.4;
+        state.stepMm = 0.30;
+        state.contrast = 1.35;
+        state.brightness = 0;
+        state.gamma = 1.10;
+        state.whiteCutoff = 0.15;
+        state.marginMm = 10;
+        state.strokeMm = 0.30;
+        state.algo = 'cross-hatch';
+        state.numPaths = 2;
+
+        document.getElementById('param-lines').value = 110;
+        document.getElementById('val-line-count').textContent = '110 lines';
+        document.getElementById('param-amplitude').value = 1.8;
+        document.getElementById('val-amplitude').textContent = '1.8 mm';
+        document.getElementById('param-frequency').value = 1.4;
+        document.getElementById('val-frequency').textContent = '1.4x';
+        document.getElementById('param-step').value = 0.30;
+        document.getElementById('val-step').textContent = '0.30 mm';
+        document.getElementById('param-contrast').value = 1.35;
+        document.getElementById('val-contrast').textContent = '1.35x';
+        document.getElementById('param-brightness').value = 0;
+        document.getElementById('val-brightness').textContent = '0%';
+        document.getElementById('param-gamma').value = 1.10;
+        document.getElementById('val-gamma').textContent = '1.10';
+        document.getElementById('param-cutoff').value = 15;
+        document.getElementById('val-cutoff').textContent = '15%';
+        document.getElementById('select-algo').value = 'cross-hatch';
+
+        btnPath2.click();
+        showToast('Reset all parameters to default');
+      });
+
+      // Initial Bootstrap
+      generateSampleImage('portrait');
+
+    })();
+  </script>
+</body>
+</html>

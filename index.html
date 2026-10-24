@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pen Plotter Studio - Algorithmic Generative Art Workshop</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖋️</text></svg>">
+</head>
+<body>
+
+  <!-- =========================================================================
+       SIDEBAR CONTROLS
+       ========================================================================= -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <div class="logo-icon">🖋️</div>
+        <div class="logo-text">
+          <h1>Plotter Studio</h1>
+          <p>Algorithmic Art Workshop</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="image_to_path.html" class="btn-guide" style="text-decoration: none; color: var(--text-secondary); border-color: var(--border-color); background: var(--bg-card);" title="Switch to Photo / Raster Vectorizer">
+          <span>📷 Photo to Path</span>
+        </a>
+        <button class="btn-guide" id="btnOpenGuide" title="View Workshop Guide & Plotter Instructions">
+          <span>🎓 Guide</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab navigation -->
+    <nav class="sidebar-tabs">
+      <button class="tab-btn active" data-tab="tab-algorithms">
+        <span>🎨 Algorithms</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-setup">
+        <span>📐 Paper & Pen</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-code">
+        <span>💻 Math & Code</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-content">
+
+      <!-- =====================================================================
+           TAB 1: ALGORITHMS & PRESETS
+           ===================================================================== -->
+      <div class="tab-pane active" id="tab-algorithms">
+
+        <!-- Algorithm Grid Selection -->
+        <div class="control-section">
+          <div class="section-title">
+            <span>1. Choose an Algorithm</span>
+            <span class="badge">8 Core Models</span>
+          </div>
+          <div class="algo-grid" id="algoGrid">
+            <!-- Populated dynamically by app.js -->
+          </div>
+        </div>
+
+        <!-- Algorithm Info Box -->
+        <div class="algo-info-box" id="algoInfoBox">
+          <div class="algo-info-header">
+            <div class="algo-info-title" id="algoInfoTitle">🌊 Perlin Flow Field</div>
+          </div>
+          <p class="algo-info-desc" id="algoInfoDesc">
+            Trace hundreds of particles drifting through an invisible fluid river or wind current.
+          </p>
+          <div class="algo-tip" id="algoInfoTip">
+            💡 <b>Beginner Tip:</b> Try increasing 'Noise Zoom' for broad gentle curves!
+          </div>
+        </div>
+
+        <!-- Starter Presets / Recipes -->
+        <div class="control-section">
+          <div class="section-title">
+            <span>2. Starter Recipes</span>
+            <span class="badge">1-Click Looks</span>
+          </div>
+          <div class="preset-bar">
+            <div class="preset-pills" id="presetPills">
+              <!-- Populated dynamically by app.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Random Seed Bar -->
+        <div class="control-section">
+          <div class="section-title">
+            <span>3. Seed & Variations</span>
+            <span class="badge">Reproducible</span>
+          </div>
+          <div class="seed-bar">
+            <div class="seed-input-wrapper">
+              <input type="text" class="seed-input" id="seedInput" value="4242" title="Unique seed number">
+            </div>
+            <button class="btn-random" id="btnRandomSeed" title="Roll a new random variation (Shortcut: Spacebar)">
+              <span>🎲 Roll Seed</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Parameter Sliders -->
+        <div class="control-section">
+          <div class="section-title">
+            <span>4. Customize Parameters</span>
+            <span class="badge">Live Tweak</span>
+          </div>
+          <div class="param-group" id="paramContainer">
+            <!-- Populated dynamically by app.js -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =====================================================================
+           TAB 2: PAPER & PEN HARDWARE SETUP
+           ===================================================================== -->
+      <div class="tab-pane" id="tab-setup">
+
+        <div class="control-section">
+          <div class="section-title">
+            <span>Physical Paper Dimensions</span>
+            <span class="badge">Hardware Specs</span>
+          </div>
+          <div class="param-group">
+            <div class="param-item">
+              <label class="param-label">Paper Size Format</label>
+              <select class="param-select" id="paperSelect">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="param-item">
+              <label class="param-label">Paper Orientation</label>
+              <select class="param-select" id="orientationSelect">
+                <option value="portrait" selected>Portrait (Vertical)</option>
+                <option value="landscape">Landscape (Horizontal)</option>
+              </select>
+            </div>
+            <div class="param-item">
+              <div class="param-header">
+                <label class="param-label" title="Protects your plotter clips from being hit by the pen head">
+                  Safe Margin (Clips Clearance)
+                </label>
+                <span class="param-value" id="marginVal">12 mm</span>
+              </div>
+              <input type="range" id="marginSlider" min="4" max="30" step="1" value="12">
+            </div>
+            <div class="param-item">
+              <label class="param-label">Paper Color / Stock Preview</label>
+              <select class="param-select" id="paperColorSelect">
+                <option value="white" selected>Heavy White Bristol Paper</option>
+                <option value="cream">Warm Cream Moleskine</option>
+                <option value="black">Charcoal Black Heavy Cardstock</option>
+                <option value="kraft">Natural Kraft Cardboard</option>
+                <option value="indigo">Midnight Blueprint Indigo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">
+            <span>Pen Selection & Stroke Preview</span>
+            <span class="badge">Drawing Ink</span>
+          </div>
+          <div class="param-group">
+            <div class="param-item">
+              <label class="param-label">Pen 1 (Primary Pen)</label>
+              <select class="param-select" id="pen1Select">
+                <option value="micron_black" selected>Sakura Micron 0.3mm (Black)</option>
+                <option value="gelly_white">Gelly Roll 0.5mm (White Gel)</option>
+                <option value="metallic_gold">Metallic Gold Gel 0.4mm</option>
+                <option value="fountain_blue">Prussian Blue Fountain Pen</option>
+                <option value="crimson_red">Vivid Crimson Sharpie</option>
+                <option value="cyan_fine">Electric Cyan Fine 0.3mm</option>
+              </select>
+            </div>
+            <div class="param-item">
+              <label class="param-label">Pen 2 (Accent Pen / Dual-Layer)</label>
+              <select class="param-select" id="pen2Select">
+                <option value="crimson_red" selected>Vivid Crimson Sharpie</option>
+                <option value="metallic_gold">Metallic Gold Gel 0.4mm</option>
+                <option value="cyan_fine">Electric Cyan Fine 0.3mm</option>
+                <option value="gelly_white">Gelly Roll 0.5mm (White Gel)</option>
+                <option value="fountain_blue">Prussian Blue Fountain Pen</option>
+                <option value="micron_black">Sakura Micron 0.3mm (Black)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">
+            <span>Plotter Path Optimization</span>
+            <span class="badge">AxiDraw Speedup</span>
+          </div>
+          <div class="param-checkbox-row">
+            <label class="param-label" title="Greedy TSP nearest-neighbor sorting cuts pen-up travel time by up to 50%">
+              ⚡ TSP Path Optimization (Sort Nearest)
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="optimizePathsToggle" checked>
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+            When enabled, disconnected lines are reordered so the pen always moves to the closest line next, and paths are reversed when drawing from the tail is faster.
+          </p>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">
+            <span>Switch to Image Studio</span>
+          </div>
+          <p style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5;">
+            Want to vectorize a portrait or photo into continuous squiggles instead of purely generative math?
+          </p>
+          <a href="image_to_path.html" class="btn-secondary" style="text-decoration: none; justify-content: center;">
+            📷 Open Image-to-Path Studio
+          </a>
+        </div>
+
+      </div>
+
+      <!-- =====================================================================
+           TAB 3: MATH & CODE PEEK
+           ===================================================================== -->
+      <div class="tab-pane" id="tab-code">
+        <div class="control-section">
+          <div class="section-title">
+            <span>Algorithm Logic & Formula</span>
+            <span class="badge">JavaScript</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+            Every generative artwork is produced by mathematical rules executed repeatedly in loops. Here is the core logic running your selected algorithm:
+          </p>
+          <div class="code-preview-box" id="algoCodeSnippet">
+// Algorithm formula
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">
+            <span>The Generative Recipe</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+            <div><b>1. Deterministic Seeds:</b> Generative art uses pseudo-random numbers seeded by a specific number (like <code>4242</code>). Every time you use that seed, the math reproduces the exact same strokes.</div>
+            <div><b>2. Vector Polylines:</b> Instead of raster pixels, pen plotters only understand continuous coordinate points: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.</div>
+            <div><b>3. Physical Constraints:</b> Unlike screens, physical pens have friction, paper absorbs ink, and pen lifts take mechanical time. Algorithms with fewer lifts plot faster and cleaner!</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       MAIN VIEWPORT & CANVAS
+       ========================================================================= -->
+  <main class="main-viewport">
+
+    <!-- Top Viewport Toolbar -->
+    <header class="top-toolbar">
+      <div class="toolbar-group">
+        <button class="toolbar-btn" id="btnZoomOut" title="Zoom Out">🔍 -</button>
+        <button class="toolbar-btn" id="btnZoomIn" title="Zoom In">🔍 +</button>
+        <button class="toolbar-btn" id="btnZoomFit" title="Fit to Screen (Shortcut: F)">⛶ Fit View</button>
+      </div>
+
+      <div class="toolbar-group">
+        <button class="toolbar-btn" id="btnSimToggle" style="background: rgba(56, 189, 248, 0.15); border-color: var(--primary); color: var(--primary); font-weight: 700;">
+          <span>▶️ Simulate Draw</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Canvas Pan/Zoom Wrapper -->
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <div class="paper-sheet" id="paperSheet">
+        <canvas id="artCanvas"></canvas>
+        <div class="margin-overlay" id="marginOverlay"></div>
+      </div>
+    </div>
+
+    <!-- Floating Plotter Simulation Panel (Hidden by default) -->
+    <div class="simulator-panel" id="simulatorPanel" style="display: none;">
+      <div class="sim-header">
+        <div class="sim-title">
+          <span>🤖 Pen Plotter Simulator</span>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('simulatorPanel').style.display='none'">✕</button>
+      </div>
+
+      <div class="sim-controls">
+        <button class="sim-btn play-btn" id="simPlayBtn" title="Play / Pause">▶</button>
+        <button class="sim-btn" id="simStopBtn" title="Reset">⏹</button>
+        <select class="param-select" id="simSpeedSelect" style="width: auto; padding: 4px 8px;">
+          <option value="1">1x Speed</option>
+          <option value="2">2x Speed</option>
+          <option value="5" selected>5x Speed</option>
+          <option value="10">10x Speed</option>
+          <option value="25">25x Speed</option>
+        </select>
+      </div>
+
+      <input type="range" class="sim-scrubber" id="simScrubber" min="0" max="100" value="0">
+
+      <div class="sim-status">
+        <span id="simPenState" style="color: #10b981; font-weight: 600;">PEN READY</span>
+        <span id="simCoords" style="font-family: monospace;">X: 0.0mm Y: 0.0mm</span>
+      </div>
+    </div>
+
+    <!-- Bottom Floating Plotter Diagnostics & Actions Bar -->
+    <div class="bottom-dock">
+      <div class="plot-stats">
+        <div class="stat-item">
+          <span class="stat-label">Draw Distance</span>
+          <span class="stat-val" id="statDistance">0.0 m</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Pen Lifts</span>
+          <span class="stat-val" id="statLifts">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Est. Plot Time</span>
+          <span class="stat-val" id="statTime">0s</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Paths Count</span>
+          <span class="stat-val" id="statPaths">0</span>
+        </div>
+      </div>
+
+      <div class="plot-actions">
+        <button class="btn-primary" id="btnDownloadSVG" title="Download clean vector SVG with exact millimeter dimensions for AxiDraw / Inkscape">
+          <span>📥 Download SVG</span>
+        </button>
+        <button class="btn-secondary" id="btnCopySVG" title="Copy raw SVG markup to paste into Inkscape or Illustrator">
+          <span>📋 Copy SVG</span>
+        </button>
+        <button class="btn-secondary" id="btnDownloadPNG" title="Download snapshot image for workshop submission">
+          <span>📸 PNG</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- =========================================================================
+       WORKSHOP GUIDE & AXIDRAW CHEATSHEET MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="guideModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🎓 Workshop Guide & Pen Plotter Cheatsheet</span>
+        </div>
+        <button class="modal-close" id="btnCloseGuide">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <h3>🌟 What is Algorithmic Generative Art?</h3>
+        <p>
+          Generative art is art made by a collaboration between a human artist and an autonomous system (an algorithm). Instead of manually drawing individual lines, you design the <b>rules</b>, <b>mathematical formulas</b>, and <b>random variations</b>. The computer computes thousands of coordinate points, and a mechanical pen plotter physically draws the artwork with real ink on paper!
+        </p>
+
+        <h3>🖋️ The 4 Steps: From Screen to Physical Paper</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="guide-step-card">
+            <div class="guide-step-num">1</div>
+            <div>
+              <b>Choose & Tweak Your Algorithm:</b> Pick an algorithm on the left sidebar (Flow Fields, Mountain Ridges, Harmonographs, etc.). Tweak the sliders, test starter recipes, and hit <b>🎲 Roll Seed</b> until you love the composition.
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">2</div>
+            <div>
+              <b>Check Plotter Safety Margins:</b> Keep the <i>Safe Margin</i> at 12mm or higher. This ensures the pen head never bumps into the metal binder clips holding your paper to the board!
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">3</div>
+            <div>
+              <b>Simulate the Draw:</b> Click <b>▶️ Simulate Draw</b> to watch the virtual pen move across your page. Look out for pen lifts and total distance.
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">4</div>
+            <div>
+              <b>Download SVG & Plot:</b> Click <b>📥 Download SVG</b>. Open the SVG in <b>Inkscape</b>, connect your AxiDraw or plotter via USB, select <i>Extensions > AxiDraw > Plot</i>, and watch your code come to life in physical ink!
+            </div>
+          </div>
+        </div>
+
+        <h3>💡 3 Golden Rules for Pen Plotting Beginners</h3>
+        <ul>
+          <li><b>No Fills, Only Strokes:</b> A pen plotter cannot paint solid fills like a desktop printer. Shading is achieved by dense parallel lines, cross-hatching, or tight squiggles.</li>
+          <li><b>Mind the Pen Bleed:</b> If a line stops for too long or overlaps repeatedly, wet ink can bleed through paper. Our TSP Path Optimizer eliminates duplicate visits!</li>
+          <li><b>Test Your Pen Height First:</b> When clamping your pen (Sakura Micron, gel pen, or fountain pen), ensure the pen tip sits ~3mm above the paper when raised, and rests gently on paper when lowered.</li>
+        </ul>
+
+        <h3>🚀 Recommended Pens & Papers</h3>
+        <ul>
+          <li><b>Best Pens:</b> Sakura Pigma Micron (0.3mm or 0.5mm), Uni-ball Signo Broad (White or Metallic Gold), Pilot G2 Gel.</li>
+          <li><b>Best Paper:</b> Bristol Board (Smooth), Heavy Cardstock (250+ gsm), or Clairefontaine archival sketch paper.</li>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/noise.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/plotter.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
