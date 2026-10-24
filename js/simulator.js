@@ -117,24 +117,29 @@ class PlotterSimulator {
   animate() {
     if (!this.isPlaying) return;
 
-    // Steps to advance this frame based on speed multiplier
-    const stepsThisFrame = Math.max(1, Math.round(this.speedMultiplier * 4));
-    this.currentStep = Math.min(this.totalSteps, this.currentStep + stepsThisFrame);
-    this.progress = this.totalSteps > 0 ? this.currentStep / this.totalSteps : 0;
+    // Smooth fractional step accumulator for realistic, calm pen speed
+    this.stepAccumulator = (this.stepAccumulator || 0) + Math.max(0.08, this.speedMultiplier * 0.6);
+    const stepsThisFrame = Math.floor(this.stepAccumulator);
+    this.stepAccumulator -= stepsThisFrame;
 
-    if (this.currentStep < this.totalSteps) {
-      const seg = this.segments[this.currentStep];
-      this.currentPos = { x: seg.x2, y: seg.y2 };
-      this.isPenDown = seg.type === "down";
+    if (stepsThisFrame > 0) {
+      this.currentStep = Math.min(this.totalSteps, this.currentStep + stepsThisFrame);
+      this.progress = this.totalSteps > 0 ? this.currentStep / this.totalSteps : 0;
+
+      if (this.currentStep < this.totalSteps) {
+        const seg = this.segments[this.currentStep];
+        this.currentPos = { x: seg.x2, y: seg.y2 };
+        this.isPenDown = seg.type === "down";
+      }
+
+      this.onProgressUpdate({
+        progress: this.progress,
+        currentStep: this.currentStep,
+        totalSteps: this.totalSteps,
+        currentPos: this.currentPos,
+        isPenDown: this.isPenDown
+      });
     }
-
-    this.onProgressUpdate({
-      progress: this.progress,
-      currentStep: this.currentStep,
-      totalSteps: this.totalSteps,
-      currentPos: this.currentPos,
-      isPenDown: this.isPenDown
-    });
 
     if (this.currentStep >= this.totalSteps) {
       this.isPlaying = false;

@@ -30,8 +30,13 @@ const TRANSLATIONS = {
     toastShuffle: "تم توليد شكل جديد بنجاح! 🎲",
     toastDownload: "تم تحميل الملف! جاهز للإرسال للآلة 🖋️",
     toastSimFinished: "انتهى القلم من الرسم! ✨",
+    labelSpeed: "سرعة رسم القلم",
+    speedSlow: "🐢 بطيء وهادئ",
+    speedNormal: "🚶 عادي",
+    speedFast: "🐇 سريع",
     styles: {
       waves: { name: "أمواج رشيقة", sub: "خطوط نهرية ناعمة" },
+      spirals: { name: "حلزون متموج", sub: "دوامات قابلة للتشويه" },
       mountains: { name: "جبال ثلاثية الأبعاد", sub: "تضاريس كلاسيكية" },
       loops: { name: "حلقات البندول", sub: "دوائر هندسية ساحرة" },
       maze: { name: "متاهة إسلامية", sub: "أقواس متصلة متشابكة" },
@@ -66,8 +71,13 @@ const TRANSLATIONS = {
     toastShuffle: "New shape variation generated! 🎲",
     toastDownload: "Downloaded SVG! Ready to plot 🖋️",
     toastSimFinished: "Plot simulation completed! ✨",
+    labelSpeed: "Pen Drawing Speed",
+    speedSlow: "🐢 Relaxed",
+    speedNormal: "🚶 Normal",
+    speedFast: "🐇 Fast",
     styles: {
       waves: { name: "Ocean Waves", sub: "Flowing organic streams" },
+      spirals: { name: "Distorted Spiral", sub: "Coils with organic distortion" },
       mountains: { name: "Mountain Ridges", sub: "3D Joy Division peaks" },
       loops: { name: "Pendulum Loops", sub: "Hypnotic geometric orbits" },
       maze: { name: "Curved Maze", sub: "Interlocking ribbon tiles" },
@@ -80,6 +90,7 @@ const TRANSLATIONS = {
 
 const SIMPLE_STYLES = [
   { id: "waves", algoId: "flowField", icon: "🌊", defaultPreset: "Ocean Currents" },
+  { id: "spirals", algoId: "spirals", icon: "🌀", defaultPreset: "Organic Fingerprint Whorl" },
   { id: "mountains", algoId: "waveRidges", icon: "🏔️", defaultPreset: "Joy Division Classic" },
   { id: "loops", algoId: "harmonograph", icon: "♾️", defaultPreset: "Pendulum Waltz" },
   { id: "maze", algoId: "truchetTiles", icon: "🧩", defaultPreset: "Woven Ribbon Labyrinth" },
@@ -240,7 +251,18 @@ class SimpleApp {
     // Zoom Buttons
     document.getElementById("zoomIn")?.addEventListener("click", () => this.zoom(1.15));
     document.getElementById("zoomOut")?.addEventListener("click", () => this.zoom(0.85));
-    document.getElementById("zoomReset")?.addEventListener("click", () => this.zoomReset());
+    document.getElementById("zoomReset")?.addEventListener("click", () => this.centerView());
+    document.getElementById("btnCenter")?.addEventListener("click", () => this.centerView());
+
+    // Speed Selector Pills (Slow, Normal, Fast)
+    document.querySelectorAll(".speed-pill").forEach(pill => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".speed-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        const speed = parseFloat(pill.dataset.speed);
+        this.simulator.setSpeed(speed);
+      });
+    });
   }
 
   setLanguage(lang) {
@@ -280,12 +302,30 @@ class SimpleApp {
     document.getElementById("colorNavyGold").textContent = t.colorNavyGold;
     document.getElementById("colorKraftBlack").textContent = t.colorKraftBlack;
 
+    // Speed labels
+    const lblSpd = document.getElementById("labelSpeed");
+    if (lblSpd) lblSpd.textContent = t.labelSpeed;
+    const spdSlow = document.getElementById("speedSlow");
+    if (spdSlow) spdSlow.textContent = t.speedSlow;
+    const spdNorm = document.getElementById("speedNormal");
+    if (spdNorm) spdNorm.textContent = t.speedNormal;
+    const spdFast = document.getElementById("speedFast");
+    if (spdFast) spdFast.textContent = t.speedFast;
+
     // Action buttons
     const simBtn = document.getElementById("btnSimulate");
     if (simBtn) simBtn.innerHTML = this.simulator.isPlaying ? t.btnStopSim : t.btnSimulate;
     document.getElementById("btnDownload").innerHTML = t.btnDownload;
 
     this.renderStyleCards();
+  }
+
+  centerView() {
+    this.state.zoom = 1.0;
+    if (this.paperContainer) {
+      this.paperContainer.style.transform = `scale(1.0)`;
+    }
+    this.showToast(this.state.lang === "ar" ? "تم توسيط الورقة ⛶" : "View Centered ⛶");
   }
 
   render() {
@@ -325,6 +365,12 @@ class SimpleApp {
       params.noiseScale = MathUtils.map(w, 1, 5, 0.002, 0.012);
       params.curlMultiplier = MathUtils.map(w, 1, 5, 1.0, 3.5);
       params.streamAvoidance = 1.0;
+    } else if (algoId === "spirals") {
+      params.turns = Math.round(MathUtils.map(d, 1, 5, 14, 45));
+      params.distortionAmount = MathUtils.map(w, 1, 5, 0, 18);
+      params.distortionMode = w === 1 ? "pure" : "organic";
+      params.distortionFreq = 8;
+      params.dualSpiral = false;
     } else if (algoId === "waveRidges") {
       params.lineCount = Math.round(MathUtils.map(d, 1, 5, 25, 70));
       params.peakHeight = MathUtils.map(w, 1, 5, 12, 34);

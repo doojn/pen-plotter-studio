@@ -706,7 +706,107 @@ const radiusWobble = noise(cos(theta), sin(theta)) * warpAmp;`,
   },
 
   // =========================================================================
-  // 6. FRACTAL TREE & BRANCHING L-SYSTEM
+  // 6. DISTORTED SPIRALS & VORTEX
+  // =========================================================================
+  spirals: {
+    id: "spirals",
+    name: "Distorted Spirals & Vortex",
+    category: "Spirals & Geometry",
+    badge: "Hypnotic Coil",
+    icon: "🌀",
+    shortDesc: "Archimedean spirals with customizable organic noise distortion, waves, and dual arms.",
+    explanation: "Spirals are among the most captivating forms in nature (from galaxies to nautilus shells and fingerprints). An Archimedean spiral winds outward from the center. By applying Perlin noise wobble or harmonic waves to the radius, the pure spiral bends into organic topography, optical illusions, or fingerprints!",
+    beginnerTip: "Set 'Distortion Amount' to 0 for a pure mathematical spiral, or turn it up for stunning fingerprint and galaxy ripples!",
+    codeSnippet: `// Archimedean spiral with organic distortion:
+const baseR = (theta / maxTheta) * maxRadius;
+const wobble = noise(cos(theta) * freq, sin(theta) * freq) * distortionAmount;
+const r = baseR + wobble;
+const x = centerX + Math.cos(theta) * r;
+const y = centerY + Math.sin(theta) * r;`,
+    parameters: [
+      { id: "turns", label: "Spiral Turns (Revolutions)", type: "range", min: 6, max: 60, step: 1, default: 28, unit: "turns", desc: "How many concentric coils the spiral wraps around the center." },
+      { id: "distortionAmount", label: "Distortion Amount", type: "range", min: 0, max: 25, step: 0.5, default: 6.0, unit: "mm", desc: "How strongly the spiral is bent and warped (0 = clean pure spiral)." },
+      { id: "distortionMode", label: "Distortion Style", type: "select", options: [
+        { value: "organic", label: "Organic Wobble (Fingerprint / Tree Rings)" },
+        { value: "waves", label: "Harmonic Waves (Petal Rosette)" },
+        { value: "vortex", label: "Galactic Vortex Swirl" },
+        { value: "pure", label: "Pure Clean Spiral (No Distortion)" }
+      ], default: "organic", desc: "The type of mathematical deformation applied to the spiral." },
+      { id: "distortionFreq", label: "Distortion Frequency", type: "range", min: 2, max: 32, step: 1, default: 8, unit: "", desc: "Number of ripples or noise frequency along each turn." },
+      { id: "dualSpiral", label: "Dual Intertwined Spirals", type: "checkbox", default: false, desc: "Draws two complementary intertwined spiral arms for 2-pen plotting." }
+    ],
+    presets: {
+      "Organic Fingerprint Whorl": { turns: 32, distortionAmount: 7.0, distortionMode: "organic", distortionFreq: 8, dualSpiral: false },
+      "Pure Geometric Spiral": { turns: 24, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 6, dualSpiral: false },
+      "Flower Rosette Spiral": { turns: 20, distortionAmount: 12.0, distortionMode: "waves", distortionFreq: 12, dualSpiral: false },
+      "Galactic Vortex Coil": { turns: 38, distortionAmount: 14.0, distortionMode: "vortex", distortionFreq: 5, dualSpiral: true },
+      "Hypnotic Dual Intertwined": { turns: 26, distortionAmount: 4.0, distortionMode: "organic", distortionFreq: 10, dualSpiral: true }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+      const maxR = Math.min(width, height) * 0.45;
+
+      const turns = params.turns;
+      const maxTheta = turns * Math.PI * 2;
+      const distAmp = params.distortionMode === "pure" ? 0 : params.distortionAmount;
+      const distFreq = params.distortionFreq;
+      const totalPoints = Math.max(1000, turns * 160);
+
+      function buildSpiral(angleOffset) {
+        const path = [];
+        for (let i = 0; i <= totalPoints; i++) {
+          const t = i / totalPoints;
+          const theta = t * maxTheta;
+          const currentAngle = theta + angleOffset;
+          let r = t * maxR;
+
+          if (distAmp > 0 && t > 0.04) {
+            let wobble = 0;
+            if (params.distortionMode === "organic") {
+              const nx = Math.cos(currentAngle) * (distFreq * 0.25);
+              const ny = Math.sin(currentAngle) * (distFreq * 0.25);
+              wobble = noise.noise2D(nx + t * 4, ny + t * 4) * distAmp * Math.min(1, t * 2.5);
+            } else if (params.distortionMode === "waves") {
+              wobble = Math.sin(theta * distFreq * 0.5) * distAmp * t;
+            } else if (params.distortionMode === "vortex") {
+              const swirl = Math.pow(t, 1.5) * 6;
+              const n = noise.noise2D(Math.cos(currentAngle + swirl) * 2, Math.sin(currentAngle + swirl) * 2);
+              wobble = n * distAmp * t;
+            }
+            r += wobble;
+          }
+
+          const x = cx + Math.cos(currentAngle) * r;
+          const y = cy + Math.sin(currentAngle) * r;
+
+          if (x >= minX && x <= bounds.maxX && y >= minY && y <= bounds.maxY) {
+            path.push({ x, y });
+          } else {
+            if (path.length >= 2) break;
+          }
+        }
+        return path;
+      }
+
+      const spiral1 = buildSpiral(0);
+      if (spiral1.length >= 2) pathsLayer1.push(spiral1);
+
+      if (params.dualSpiral) {
+        const spiral2 = buildSpiral(Math.PI);
+        if (spiral2.length >= 2) pathsLayer2.push(spiral2);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 7. FRACTAL TREE & BRANCHING L-SYSTEM
   // =========================================================================
   fractalTree: {
     id: "fractalTree",

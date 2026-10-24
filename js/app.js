@@ -712,10 +712,21 @@ class App {
   }
 
   fitToScreen() {
-    this.state.zoom = 1.0;
     this.state.panX = 0;
     this.state.panY = 0;
+    if (this.canvasWrapper && this.state.bounds) {
+      const wrapperW = Math.max(200, this.canvasWrapper.clientWidth - 80);
+      const wrapperH = Math.max(200, this.canvasWrapper.clientHeight - 80);
+      const paperW = this.state.bounds.paperWidth * 2.8;
+      const paperH = this.state.bounds.paperHeight * 2.8;
+      const scaleX = wrapperW / paperW;
+      const scaleY = wrapperH / paperH;
+      this.state.zoom = Math.min(1.15, Math.max(0.4, Math.min(scaleX, scaleY)));
+    } else {
+      this.state.zoom = 1.0;
+    }
     this.updateTransform();
+    this.showToast("Canvas Centered & Fitted ⛶");
   }
 
   updateTransform() {
