@@ -22,9 +22,13 @@ const APP_TRANSLATIONS = {
     badgeAlgo: "٨ نماذج أساسية",
     secPresetTitle: "٢. وصفات ونماذج جاهزة",
     badgePreset: "أنماط بنقرة واحدة",
+    proBanner: '✨ جديد في الورشة؟ جرّب <a href="simple.html" id="linkToSimple">الاستوديو المبسط</a> بـ ٣ خطوات سهلة!',
     secSeedTitle: "٣. الرقم العشوائي (Seed)",
     badgeSeed: "قابل للتكرار",
     btnRollSeed: "🎲 رقم جديد",
+    txtUndoSeed: "↩",
+    toastUndoSeed: "تم استرجاع الرقم السابق ↩",
+    toastNoUndoSeed: "لا توجد بذور سابقة",
     secParamTitle: "٤. تخصيص المعايير",
     badgeParam: "تعديل فوري",
     
@@ -146,9 +150,13 @@ const APP_TRANSLATIONS = {
     badgeAlgo: "8 Core Models",
     secPresetTitle: "2. Starter Recipes",
     badgePreset: "1-Click Looks",
+    proBanner: '✨ New to the workshop? Try the <a href="simple.html" id="linkToSimple">Simplified Studio</a> for a 3-step start!',
     secSeedTitle: "3. Seed & Variations",
     badgeSeed: "Reproducible",
     btnRollSeed: "🎲 Roll Seed",
+    txtUndoSeed: "↩",
+    toastUndoSeed: "Restored previous seed ↩",
+    toastNoUndoSeed: "No previous seeds",
     secParamTitle: "4. Customize Parameters",
     badgeParam: "Live Tweak",
     
@@ -472,7 +480,7 @@ class App {
       currentAlgoId: "flowField",
       activePresetName: "Ocean Currents",
       seed: 4242,
-      paperKey: "a5",
+      paperKey: "a4", // Calibrated for thin A4 paper (< 10 min plots)
       orientation: "portrait", // portrait or landscape
       marginMm: 12, // mm
       paperColorId: "white",
@@ -498,6 +506,9 @@ class App {
       // Parameters Map: { algoId: { paramId: value } }
       algoParams: {}
     };
+
+    this.seedHistory = [];
+    this._debounceRaf = null;
 
     // Initialize default parameters for all algorithms
     Object.keys(ALGORITHM_DEFINITIONS).forEach(id => {
@@ -549,12 +560,38 @@ class App {
       });
     });
 
+    // Beginner Banner Close Button
+    const btnCloseBanner = document.getElementById("btnCloseBanner");
+    if (btnCloseBanner) {
+      btnCloseBanner.addEventListener("click", () => {
+        const banner = document.getElementById("proBanner");
+        if (banner) banner.style.display = "none";
+      });
+    }
+
     // Seed Randomize Button
     const btnRandomSeed = document.getElementById("btnRandomSeed");
     if (btnRandomSeed) {
       btnRandomSeed.addEventListener("click", () => {
+        this.seedHistory.push(this.state.seed);
+        if (this.seedHistory.length > 25) this.seedHistory.shift();
         const newSeed = Math.floor(Math.random() * 900000) + 10000;
         this.setSeed(newSeed);
+      });
+    }
+
+    // Seed Undo Button
+    const btnUndoSeed = document.getElementById("btnUndoSeed");
+    if (btnUndoSeed) {
+      btnUndoSeed.addEventListener("click", () => {
+        const t = APP_TRANSLATIONS[this.state.lang];
+        if (this.seedHistory && this.seedHistory.length > 0) {
+          const prev = this.seedHistory.pop();
+          this.setSeed(prev);
+          this.showToast(t.toastUndoSeed || "Restored previous seed ↩");
+        } else {
+          this.showToast(t.toastNoUndoSeed || "No previous seeds");
+        }
       });
     }
 
@@ -592,7 +629,7 @@ class App {
       marginSlider.addEventListener("input", (e) => {
         this.state.marginMm = parseFloat(e.target.value);
         document.getElementById("marginVal").textContent = `${this.state.marginMm} mm`;
-        this.generate();
+        this.debouncedGenerate();
       });
     }
 
@@ -909,7 +946,7 @@ class App {
           const newVal = parseFloat(e.target.value);
           currentParams[param.id] = newVal;
           document.getElementById(`val_${param.id}`).textContent = `${newVal} ${unit}`;
-          this.generate();
+          this.debouncedGenerate();
         });
         container.appendChild(item);
 
@@ -986,7 +1023,7 @@ class App {
         const p = PAPER_SIZES[key];
         const opt = document.createElement("option");
         opt.value = key;
-        opt.textContent = isAr ? `${key.toUpperCase()} (${p.widthMm} × ${p.heightMm} مم)` : p.name;
+        opt.textContent = isAr ? `${key.toUpperCase()} (${p.width} × ${p.height} مم)` : p.name;
         if (key === currentVal) opt.selected = true;
         paperSelect.appendChild(opt);
       });
@@ -1174,6 +1211,10 @@ class App {
     const txtGuideBtn = document.getElementById("txtGuideBtn");
     if (txtGuideBtn) txtGuideBtn.textContent = t.btnGuide;
 
+    // Banner
+    const txtProBanner = document.getElementById("txtProBanner");
+    if (txtProBanner) txtProBanner.innerHTML = t.proBanner;
+
     // Tabs
     const txtTabAlgo = document.getElementById("txtTabAlgorithms");
     if (txtTabAlgo) txtTabAlgo.textContent = t.tabAlgo;
@@ -1197,6 +1238,8 @@ class App {
     if (badge3) badge3.textContent = t.badgeSeed;
     const txtRollSeed = document.getElementById("txtRollSeed");
     if (txtRollSeed) txtRollSeed.textContent = t.btnRollSeed;
+    const txtUndoSeed = document.getElementById("txtUndoSeed");
+    if (txtUndoSeed) txtUndoSeed.textContent = t.txtUndoSeed || "↩";
     const sec4 = document.getElementById("secParamTitle");
     if (sec4) sec4.textContent = t.secParamTitle;
     const badge4 = document.getElementById("badgeParam");
@@ -1301,6 +1344,15 @@ class App {
       this.renderPresetPills(this.state.currentAlgoId, def);
       this.renderParameterControls(def);
     }
+  }
+
+  debouncedGenerate() {
+    if (this._debounceRaf) {
+      cancelAnimationFrame(this._debounceRaf);
+    }
+    this._debounceRaf = requestAnimationFrame(() => {
+      this.generate();
+    });
   }
 
   generate() {

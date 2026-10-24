@@ -21,11 +21,11 @@ const angle = noise(x * scale, y * scale) * Math.PI * 2 * curl;
 const nextX = x + Math.cos(angle) * stepLength;
 const nextY = y + Math.sin(angle) * stepLength;`,
     parameters: [
-      { id: "streamCount", label: "Number of Streams", type: "range", min: 100, max: 1200, step: 20, default: 450, unit: "lines", desc: "Total count of stream traces drawn across the page." },
-      { id: "stepCount", label: "Stream Length (Steps)", type: "range", min: 10, max: 250, step: 5, default: 90, unit: "steps", desc: "How far each particle travels before lifting the pen." },
-      { id: "stepLength", label: "Step Resolution", type: "range", min: 0.5, max: 4.0, step: 0.1, default: 1.5, unit: "mm", desc: "Distance between consecutive points in a line." },
+      { id: "streamCount", label: "Number of Streams", type: "range", min: 80, max: 350, step: 10, default: 200, unit: "lines", desc: "Total count of stream traces drawn across the page." },
+      { id: "stepCount", label: "Stream Length (Steps)", type: "range", min: 20, max: 90, step: 5, default: 55, unit: "steps", desc: "How far each particle travels before lifting the pen." },
+      { id: "stepLength", label: "Step Resolution", type: "range", min: 0.8, max: 2.2, step: 0.1, default: 1.4, unit: "mm", desc: "Distance between consecutive points in a line." },
       { id: "noiseScale", label: "Noise Field Zoom", type: "range", min: 0.001, max: 0.025, step: 0.001, default: 0.005, unit: "", desc: "Scale of the noise grid. Smaller values create large calm waves; larger values create turbulent swirls." },
-      { id: "curlMultiplier", label: "Swirl / Curl Intensity", type: "range", min: 0.5, max: 6.0, step: 0.1, default: 2.0, unit: "x", desc: "How sharply angles rotate across the field." },
+      { id: "curlMultiplier", label: "Swirl / Curl Intensity", type: "range", min: 0.5, max: 5.0, step: 0.1, default: 2.0, unit: "x", desc: "How sharply angles rotate across the field." },
       { id: "spawnMode", label: "Starting Placement", type: "select", options: [
         { value: "random", label: "Random Scatter (Uniform)" },
         { value: "circle", label: "Concentric Ring Burst" },
@@ -33,15 +33,15 @@ const nextY = y + Math.sin(angle) * stepLength;`,
         { value: "center", label: "Central Core Outward" },
         { value: "edges", label: "Inward from Margins" }
       ], default: "random", desc: "Where particles are initially dropped." },
-      { id: "streamAvoidance", label: "Spacing Collision Avoidance", type: "range", min: 0, max: 4.0, step: 0.2, default: 1.0, unit: "mm", desc: "Stops streams if they get too close to existing lines (wood-grain effect). 0 disables." },
+      { id: "streamAvoidance", label: "Spacing Collision Avoidance", type: "range", min: 0, max: 4.0, step: 0.2, default: 1.8, unit: "mm", desc: "Stops streams if they get too close to existing lines (prevents ink puddles on thin paper). 0 disables." },
       { id: "dualColorAccent", label: "Dual Layer (Pen 2 Accent)", type: "checkbox", default: false, desc: "Splits streams into two layers for 2-color plotting (e.g. Black + Gold)." }
     ],
     presets: {
-      "Ocean Currents": { streamCount: 500, stepCount: 110, stepLength: 1.6, noiseScale: 0.004, curlMultiplier: 1.8, spawnMode: "random", streamAvoidance: 1.2, dualColorAccent: false },
-      "Turbulent Vortex": { streamCount: 650, stepCount: 85, stepLength: 1.2, noiseScale: 0.012, curlMultiplier: 4.2, spawnMode: "random", streamAvoidance: 0.8, dualColorAccent: true },
-      "Cosmic Ripple": { streamCount: 400, stepCount: 140, stepLength: 1.4, noiseScale: 0.006, curlMultiplier: 2.5, spawnMode: "circle", streamAvoidance: 1.0, dualColorAccent: true },
-      "Wood Grain Flow": { streamCount: 800, stepCount: 120, stepLength: 1.5, noiseScale: 0.003, curlMultiplier: 1.2, spawnMode: "edges", streamAvoidance: 1.8, dualColorAccent: false },
-      "Lattice Drift": { streamCount: 360, stepCount: 100, stepLength: 1.8, noiseScale: 0.008, curlMultiplier: 2.0, spawnMode: "grid", streamAvoidance: 0.5, dualColorAccent: false }
+      "Ocean Currents": { streamCount: 200, stepCount: 55, stepLength: 1.4, noiseScale: 0.004, curlMultiplier: 1.8, spawnMode: "random", streamAvoidance: 1.8, dualColorAccent: false },
+      "Turbulent Vortex": { streamCount: 240, stepCount: 50, stepLength: 1.2, noiseScale: 0.012, curlMultiplier: 3.5, spawnMode: "random", streamAvoidance: 1.5, dualColorAccent: true },
+      "Cosmic Ripple": { streamCount: 170, stepCount: 60, stepLength: 1.3, noiseScale: 0.006, curlMultiplier: 2.2, spawnMode: "circle", streamAvoidance: 1.6, dualColorAccent: true },
+      "Wood Grain Flow": { streamCount: 260, stepCount: 50, stepLength: 1.4, noiseScale: 0.003, curlMultiplier: 1.2, spawnMode: "edges", streamAvoidance: 2.0, dualColorAccent: false },
+      "Lattice Drift": { streamCount: 160, stepCount: 45, stepLength: 1.5, noiseScale: 0.008, curlMultiplier: 1.8, spawnMode: "grid", streamAvoidance: 1.6, dualColorAccent: false }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, maxX, maxY, width, height } = bounds;
@@ -175,21 +175,21 @@ const elevation = Math.exp(-Math.pow((x - centerX) / width, 2)) * noise(x, y) * 
 const finalY = baseY - elevation;
 // If finalY is lower than previous horizon, occlude it!`,
     parameters: [
-      { id: "lineCount", label: "Number of Ridges", type: "range", min: 15, max: 90, step: 1, default: 50, unit: "lines", desc: "Total count of stacked horizontal wave lines." },
-      { id: "peakHeight", label: "Peak Elevation Height", type: "range", min: 4, max: 45, step: 1, default: 22, unit: "mm", desc: "Maximum height of the mountain peaks." },
-      { id: "samplesPerLine", label: "Curve Smoothness", type: "range", min: 80, max: 320, step: 10, default: 200, unit: "pts", desc: "Number of evaluated sample points per ridge line." },
+      { id: "lineCount", label: "Number of Ridges", type: "range", min: 15, max: 55, step: 1, default: 35, unit: "lines", desc: "Total count of stacked horizontal wave lines." },
+      { id: "peakHeight", label: "Peak Elevation Height", type: "range", min: 4, max: 40, step: 1, default: 22, unit: "mm", desc: "Maximum height of the mountain peaks." },
+      { id: "samplesPerLine", label: "Curve Smoothness", type: "range", min: 80, max: 240, step: 10, default: 180, unit: "pts", desc: "Number of evaluated sample points per ridge line." },
       { id: "noiseScale", label: "Mountain Ruggedness", type: "range", min: 0.005, max: 0.05, step: 0.002, default: 0.016, unit: "", desc: "Frequency of jagged bumps. Low is smooth hills; high is rugged peaks." },
       { id: "gaussianWidth", label: "Mountain Peak Width", type: "range", min: 0.15, max: 0.85, step: 0.05, default: 0.38, unit: "", desc: "Width of the central peak concentration area." },
       { id: "occlusion", label: "3D Hidden-Line Occlusion", type: "checkbox", default: true, desc: "Hides lines behind foreground peaks so the landscape looks 3D and solid." },
-      { id: "ridgeNoiseOctaves", label: "Multi-Octave Detail", type: "range", min: 1, max: 4, step: 1, default: 2, unit: "octaves", desc: "Adds fine secondary ridges on top of the main peaks." },
+      { id: "ridgeNoiseOctaves", label: "Multi-Octave Detail", type: "range", min: 1, max: 3, step: 1, default: 2, unit: "octaves", desc: "Adds fine secondary ridges on top of the main peaks." },
       { id: "dualColorAccent", label: "Dual Layer (Pen 2 Peaks)", type: "checkbox", default: false, desc: "Draws peaks in Pen 2 and flat valley baselines in Pen 1." }
     ],
     presets: {
-      "Joy Division Classic": { lineCount: 55, peakHeight: 24, samplesPerLine: 200, noiseScale: 0.018, gaussianWidth: 0.35, occlusion: true, ridgeNoiseOctaves: 2, dualColorAccent: false },
-      "Alpine Horizon": { lineCount: 40, peakHeight: 32, samplesPerLine: 240, noiseScale: 0.025, gaussianWidth: 0.55, occlusion: true, ridgeNoiseOctaves: 3, dualColorAccent: true },
-      "Desert Sand Dunes": { lineCount: 65, peakHeight: 14, samplesPerLine: 180, noiseScale: 0.008, gaussianWidth: 0.70, occlusion: true, ridgeNoiseOctaves: 1, dualColorAccent: false },
-      "Audio Frequency Spectrogram": { lineCount: 75, peakHeight: 28, samplesPerLine: 260, noiseScale: 0.035, gaussianWidth: 0.45, occlusion: true, ridgeNoiseOctaves: 2, dualColorAccent: false },
-      "Transparent Wireframe (No Occlude)": { lineCount: 30, peakHeight: 20, samplesPerLine: 160, noiseScale: 0.015, gaussianWidth: 0.40, occlusion: false, ridgeNoiseOctaves: 2, dualColorAccent: false }
+      "Joy Division Classic": { lineCount: 38, peakHeight: 22, samplesPerLine: 180, noiseScale: 0.018, gaussianWidth: 0.35, occlusion: true, ridgeNoiseOctaves: 2, dualColorAccent: false },
+      "Alpine Horizon": { lineCount: 30, peakHeight: 28, samplesPerLine: 200, noiseScale: 0.025, gaussianWidth: 0.55, occlusion: true, ridgeNoiseOctaves: 3, dualColorAccent: true },
+      "Desert Sand Dunes": { lineCount: 42, peakHeight: 14, samplesPerLine: 160, noiseScale: 0.008, gaussianWidth: 0.70, occlusion: true, ridgeNoiseOctaves: 1, dualColorAccent: false },
+      "Audio Frequency Spectrogram": { lineCount: 45, peakHeight: 24, samplesPerLine: 200, noiseScale: 0.035, gaussianWidth: 0.45, occlusion: true, ridgeNoiseOctaves: 2, dualColorAccent: false },
+      "Transparent Wireframe (No Occlude)": { lineCount: 25, peakHeight: 18, samplesPerLine: 150, noiseScale: 0.015, gaussianWidth: 0.40, occlusion: false, ridgeNoiseOctaves: 2, dualColorAccent: false }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, maxX, maxY, width, height } = bounds;
@@ -297,17 +297,17 @@ y = A3 * sin(f3 * t + p3) * exp(-d3 * t) + A4 * sin(f4 * t + p4) * exp(-d4 * t);
       { id: "freqX", label: "X-Axis Frequency", type: "range", min: 1.0, max: 8.0, step: 0.01, default: 2.01, unit: "Hz", desc: "Primary oscillation frequency for horizontal motion." },
       { id: "freqY", label: "Y-Axis Frequency", type: "range", min: 1.0, max: 8.0, step: 0.01, default: 3.00, unit: "Hz", desc: "Primary oscillation frequency for vertical motion." },
       { id: "phaseShift", label: "Phase Shift", type: "range", min: 0, max: 360, step: 5, default: 45, unit: "°", desc: "Angular offset between pendulum swings." },
-      { id: "damping", label: "Pendulum Friction (Decay)", type: "range", min: 0.0002, max: 0.006, step: 0.0002, default: 0.0018, unit: "", desc: "How quickly the pendulum loses energy as it spirals inward." },
-      { id: "loopCount", label: "Drawing Duration / Detail", type: "range", min: 1500, max: 12000, step: 500, default: 5500, unit: "steps", desc: "Total number of steps evaluated along the curve." },
+      { id: "damping", label: "Pendulum Friction (Decay)", type: "range", min: 0.0004, max: 0.006, step: 0.0002, default: 0.0022, unit: "", desc: "How quickly the pendulum loses energy as it spirals inward." },
+      { id: "loopCount", label: "Drawing Duration / Detail", type: "range", min: 1200, max: 4000, step: 200, default: 2000, unit: "steps", desc: "Total number of steps evaluated along the curve." },
       { id: "secondaryFreq", label: "Secondary Oscillation", type: "range", min: 0, max: 6.0, step: 0.1, default: 1.0, unit: "x", desc: "Adds a second coupled pendulum arm for richer geometric folds." },
       { id: "dualColorAccent", label: "Dual Layer (Pen 2 Mirror)", type: "checkbox", default: false, desc: "Adds a second phase-inverted curve on Layer 2 for stunning 2-pen interference." }
     ],
     presets: {
-      "Pendulum Waltz": { geometryMode: "harmonograph", freqX: 2.01, freqY: 3.00, phaseShift: 45, damping: 0.0018, loopCount: 5500, secondaryFreq: 1.0, dualColorAccent: false },
-      "Hypnotic Spirograph": { geometryMode: "spirograph", freqX: 3.0, freqY: 7.0, phaseShift: 90, damping: 0.0004, loopCount: 7000, secondaryFreq: 2.5, dualColorAccent: true },
-      "Banknote Rosette": { geometryMode: "guilloche", freqX: 4.0, freqY: 4.0, phaseShift: 0, damping: 0.0006, loopCount: 8000, secondaryFreq: 12.0, dualColorAccent: true },
-      "Infinity Resonance": { geometryMode: "harmonograph", freqX: 2.00, freqY: 1.002, phaseShift: 90, damping: 0.0012, loopCount: 6500, secondaryFreq: 0.5, dualColorAccent: false },
-      "Sacred Geometry": { geometryMode: "guilloche", freqX: 6.0, freqY: 6.0, phaseShift: 30, damping: 0.0008, loopCount: 9000, secondaryFreq: 18.0, dualColorAccent: false }
+      "Pendulum Waltz": { geometryMode: "harmonograph", freqX: 2.01, freqY: 3.00, phaseShift: 45, damping: 0.0022, loopCount: 2000, secondaryFreq: 1.0, dualColorAccent: false },
+      "Hypnotic Spirograph": { geometryMode: "spirograph", freqX: 3.0, freqY: 7.0, phaseShift: 90, damping: 0.0008, loopCount: 3200, secondaryFreq: 2.5, dualColorAccent: true },
+      "Banknote Rosette": { geometryMode: "guilloche", freqX: 4.0, freqY: 4.0, phaseShift: 0, damping: 0.0010, loopCount: 3400, secondaryFreq: 8.0, dualColorAccent: true },
+      "Infinity Resonance": { geometryMode: "harmonograph", freqX: 2.00, freqY: 1.002, phaseShift: 90, damping: 0.0016, loopCount: 2600, secondaryFreq: 0.5, dualColorAccent: false },
+      "Sacred Geometry": { geometryMode: "guilloche", freqX: 6.0, freqY: 6.0, phaseShift: 30, damping: 0.0012, loopCount: 3600, secondaryFreq: 12.0, dualColorAccent: false }
     },
     generate(bounds, params, rng) {
       const { minX, minY, width, height } = bounds;
@@ -420,29 +420,29 @@ if (rotation === 0) {
   drawArc(bottomLeft, radius);
 }`,
     parameters: [
-      { id: "gridCols", label: "Grid Columns", type: "range", min: 4, max: 32, step: 1, default: 14, unit: "cols", desc: "Number of horizontal tile cells." },
+      { id: "gridCols", label: "Grid Columns", type: "range", min: 4, max: 16, step: 1, default: 10, unit: "cols", desc: "Number of horizontal tile cells." },
       { id: "tileStyle", label: "Tile Motif", type: "select", options: [
         { value: "arcs", label: "Smith Curved Arcs (Flowing Maze)" },
         { value: "diagonal", label: "Diagonal Slash (Straight Maze)" },
         { value: "triangles", label: "Chevron & Diamond Triangles" },
         { value: "meander", label: "Orthogonal Meanders (Circuit Board)" }
       ], default: "arcs", desc: "Geometric pattern placed inside each tile." },
-      { id: "arcsPerTile", label: "Concentric Arcs per Tile", type: "range", min: 1, max: 5, step: 1, default: 2, unit: "tracks", desc: "Draws parallel concentric ribbons for dense line quality." },
+      { id: "arcsPerTile", label: "Concentric Arcs per Tile", type: "range", min: 1, max: 3, step: 1, default: 2, unit: "tracks", desc: "Draws parallel concentric ribbons for dense line quality." },
       { id: "rotationRule", label: "Rotation Rule", type: "select", options: [
         { value: "random", label: "Random 50/50 Coin Flip" },
         { value: "noise", label: "Perlin Noise Directional Flow" },
         { value: "checkerboard", label: "Alternating Checkerboard" },
         { value: "concentric", label: "Concentric Rings Orientation" }
       ], default: "random", desc: "Determines how tile rotation is decided." },
-      { id: "cornerPadding", label: "Tile Margin Gap", type: "range", min: 0, max: 5, step: 0.5, default: 0, unit: "mm", desc: "Leaves tiny gaps between tiles for an etched tile look." },
+      { id: "cornerPadding", label: "Tile Margin Gap", type: "range", min: 0, max: 4, step: 0.5, default: 0, unit: "mm", desc: "Leaves tiny gaps between tiles for an etched tile look." },
       { id: "dualColorAccent", label: "Dual Layer (Pen 2 Checker)", type: "checkbox", default: false, desc: "Draws alternate tiles in Pen 2 for dual-ink geometric plots." }
     ],
     presets: {
-      "Woven Ribbon Labyrinth": { gridCols: 12, tileStyle: "arcs", arcsPerTile: 3, rotationRule: "random", cornerPadding: 0, dualColorAccent: false },
-      "Circuit Board Maze": { gridCols: 18, tileStyle: "meander", arcsPerTile: 1, rotationRule: "noise", cornerPadding: 0.5, dualColorAccent: true },
-      "Diagonal Slash Network": { gridCols: 20, tileStyle: "diagonal", arcsPerTile: 2, rotationRule: "random", cornerPadding: 0, dualColorAccent: false },
-      "Optical Ripple Grid": { gridCols: 16, tileStyle: "arcs", arcsPerTile: 2, rotationRule: "concentric", cornerPadding: 0, dualColorAccent: true },
-      "Smooth Minimal Arcs": { gridCols: 8, tileStyle: "arcs", arcsPerTile: 1, rotationRule: "random", cornerPadding: 0, dualColorAccent: false }
+      "Woven Ribbon Labyrinth": { gridCols: 10, tileStyle: "arcs", arcsPerTile: 2, rotationRule: "random", cornerPadding: 0, dualColorAccent: false },
+      "Circuit Board Maze": { gridCols: 12, tileStyle: "meander", arcsPerTile: 1, rotationRule: "noise", cornerPadding: 0.5, dualColorAccent: true },
+      "Diagonal Slash Network": { gridCols: 12, tileStyle: "diagonal", arcsPerTile: 1, rotationRule: "random", cornerPadding: 0, dualColorAccent: false },
+      "Optical Ripple Grid": { gridCols: 11, tileStyle: "arcs", arcsPerTile: 2, rotationRule: "concentric", cornerPadding: 0, dualColorAccent: true },
+      "Smooth Minimal Arcs": { gridCols: 7, tileStyle: "arcs", arcsPerTile: 1, rotationRule: "random", cornerPadding: 0, dualColorAccent: false }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, width, height } = bounds;
@@ -614,19 +614,19 @@ const d1 = Math.hypot(x - center1.x, y - center1.y);
 const d2 = Math.hypot(x - center2.x, y - center2.y);
 const radiusWobble = noise(cos(theta), sin(theta)) * warpAmp;`,
     parameters: [
-      { id: "centerCount", label: "Number of Wave Centers", type: "range", min: 2, max: 5, step: 1, default: 2, unit: "centers", desc: "How many interfering ripple sources are placed." },
-      { id: "ringCount", label: "Rings per Center", type: "range", min: 15, max: 70, step: 1, default: 42, unit: "rings", desc: "Density of concentric circles radiating outward." },
-      { id: "ringSpacing", label: "Ring Spacing (mm)", type: "range", min: 0.8, max: 4.5, step: 0.1, default: 1.8, unit: "mm", desc: "Distance between consecutive concentric circles." },
-      { id: "noiseWobble", label: "Organic Warp / Wobble", type: "range", min: 0, max: 15, step: 0.5, default: 0, unit: "mm", desc: "Distorts clean circles into organic tree rings or ripple waves." },
+      { id: "centerCount", label: "Number of Wave Centers", type: "range", min: 2, max: 4, step: 1, default: 2, unit: "centers", desc: "How many interfering ripple sources are placed." },
+      { id: "ringCount", label: "Rings per Center", type: "range", min: 12, max: 34, step: 1, default: 22, unit: "rings", desc: "Density of concentric circles radiating outward." },
+      { id: "ringSpacing", label: "Ring Spacing (mm)", type: "range", min: 1.8, max: 5.0, step: 0.1, default: 2.6, unit: "mm", desc: "Distance between consecutive concentric circles (kept safe for thin paper)." },
+      { id: "noiseWobble", label: "Organic Warp / Wobble", type: "range", min: 0, max: 12, step: 0.5, default: 0, unit: "mm", desc: "Distorts clean circles into organic tree rings or ripple waves." },
       { id: "interlaceLayers", label: "Separate Centers to Layer 2", type: "checkbox", default: true, desc: "Assigns Center 1 to Pen 1 and Center 2 to Pen 2 for stunning 2-color moiré." },
       { id: "clipBoundary", label: "Clip to Margins", type: "checkbox", default: true, desc: "Cuts lines cleanly at paper margins." }
     ],
     presets: {
-      "Dual Moiré Interference": { centerCount: 2, ringCount: 48, ringSpacing: 1.6, noiseWobble: 0, interlaceLayers: true, clipBoundary: true },
-      "Triple Harmonic Echo": { centerCount: 3, ringCount: 36, ringSpacing: 2.0, noiseWobble: 0, interlaceLayers: true, clipBoundary: true },
-      "Organic Tree Cross-Section": { centerCount: 1, ringCount: 60, ringSpacing: 1.2, noiseWobble: 8.0, interlaceLayers: false, clipBoundary: true },
-      "Pond Rain Drops": { centerCount: 4, ringCount: 25, ringSpacing: 2.2, noiseWobble: 1.5, interlaceLayers: true, clipBoundary: true },
-      "Hypnotic Lens": { centerCount: 2, ringCount: 55, ringSpacing: 1.3, noiseWobble: 0, interlaceLayers: false, clipBoundary: true }
+      "Dual Moiré Interference": { centerCount: 2, ringCount: 24, ringSpacing: 2.6, noiseWobble: 0, interlaceLayers: true, clipBoundary: true },
+      "Triple Harmonic Echo": { centerCount: 3, ringCount: 18, ringSpacing: 2.8, noiseWobble: 0, interlaceLayers: true, clipBoundary: true },
+      "Organic Tree Cross-Section": { centerCount: 1, ringCount: 28, ringSpacing: 2.2, noiseWobble: 6.0, interlaceLayers: false, clipBoundary: true },
+      "Pond Rain Drops": { centerCount: 3, ringCount: 15, ringSpacing: 3.0, noiseWobble: 1.5, interlaceLayers: true, clipBoundary: true },
+      "Hypnotic Lens": { centerCount: 2, ringCount: 26, ringSpacing: 2.4, noiseWobble: 0, interlaceLayers: false, clipBoundary: true }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, maxX, maxY, width, height } = bounds;
@@ -722,23 +722,23 @@ const r = (theta / maxTheta) * maxRadius + algorithmicDistortion;
 const x = centerX + Math.cos(theta) * r;
 const y = centerY + Math.sin(theta) * r;`,
     parameters: [
-      { id: "turns", label: "Spiral Turns (Revolutions)", type: "range", min: 6, max: 60, step: 1, default: 25, unit: "turns", desc: "How many concentric coils the spiral wraps around the center." },
-      { id: "distortionAmount", label: "Algorithmic Distortion", type: "range", min: 0, max: 25, step: 0.5, default: 0.0, unit: "mm", desc: "0 = mathematically perfect pure spiral. Increase to add organic ripples and waves." },
+      { id: "turns", label: "Spiral Turns (Revolutions)", type: "range", min: 6, max: 32, step: 1, default: 20, unit: "turns", desc: "How many concentric coils the spiral wraps around the center." },
+      { id: "distortionAmount", label: "Algorithmic Distortion", type: "range", min: 0, max: 20, step: 0.5, default: 0.0, unit: "mm", desc: "0 = mathematically perfect pure spiral. Increase to add organic ripples and waves." },
       { id: "distortionMode", label: "Distortion Algorithm", type: "select", options: [
         { value: "pure", label: "Pure Perfect Spiral (0 Distortion)" },
         { value: "organic", label: "Organic Noise (Fingerprint / Tree Rings)" },
         { value: "waves", label: "Harmonic Waves (Petal Rosette)" },
         { value: "vortex", label: "Galactic Vortex Swirl" }
       ], default: "pure", desc: "The mathematical rule used to deform the spiral." },
-      { id: "distortionFreq", label: "Distortion Frequency", type: "range", min: 2, max: 32, step: 1, default: 8, unit: "", desc: "Number of ripples along each spiral turn." },
+      { id: "distortionFreq", label: "Distortion Frequency", type: "range", min: 2, max: 24, step: 1, default: 8, unit: "", desc: "Number of ripples along each spiral turn." },
       { id: "dualSpiral", label: "Dual Intertwined Spirals", type: "checkbox", default: false, desc: "Draws two complementary intertwined spiral arms for 2-pen plotting." }
     ],
     presets: {
-      "Pure Geometric Spiral": { turns: 25, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 6, dualSpiral: false },
-      "Organic Fingerprint Whorl": { turns: 32, distortionAmount: 7.0, distortionMode: "organic", distortionFreq: 8, dualSpiral: false },
-      "Flower Rosette Spiral": { turns: 20, distortionAmount: 11.0, distortionMode: "waves", distortionFreq: 12, dualSpiral: false },
-      "Galactic Vortex Coil": { turns: 36, distortionAmount: 12.0, distortionMode: "vortex", distortionFreq: 5, dualSpiral: true },
-      "Hypnotic Dual Intertwined": { turns: 24, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 8, dualSpiral: true }
+      "Pure Geometric Spiral": { turns: 20, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 6, dualSpiral: false },
+      "Organic Fingerprint Whorl": { turns: 24, distortionAmount: 6.0, distortionMode: "organic", distortionFreq: 8, dualSpiral: false },
+      "Flower Rosette Spiral": { turns: 18, distortionAmount: 9.0, distortionMode: "waves", distortionFreq: 10, dualSpiral: false },
+      "Galactic Vortex Coil": { turns: 26, distortionAmount: 10.0, distortionMode: "vortex", distortionFreq: 5, dualSpiral: true },
+      "Hypnotic Dual Intertwined": { turns: 18, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 8, dualSpiral: true }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, width, height } = bounds;
@@ -827,19 +827,19 @@ function branch(x, y, length, angle, depth) {
   branch(nextX, nextY, length * ratio, angle + spread, depth - 1);
 }`,
     parameters: [
-      { id: "recursionDepth", label: "Branching Depth", type: "range", min: 4, max: 9, step: 1, default: 7, unit: "levels", desc: "How many times branches split recursively (higher = exponentially more twigs)." },
-      { id: "branchAngle", label: "Branch Spread Angle", type: "range", min: 15, max: 60, step: 2, default: 28, unit: "°", desc: "Angle between child branches." },
-      { id: "lengthRatio", label: "Branch Shrink Ratio", type: "range", min: 0.55, max: 0.82, step: 0.01, default: 0.72, unit: "", desc: "How much shorter each generation of branches becomes." },
-      { id: "trunkLength", label: "Trunk Height", type: "range", min: 20, max: 70, step: 2, default: 45, unit: "mm", desc: "Initial starting height of the main trunk." },
-      { id: "windSway", label: "Wind Sway / Curvature", type: "range", min: -25, max: 25, step: 1, default: 4, unit: "°", desc: "Tilts the tree organically in the wind." },
-      { id: "treeCount", label: "Number of Trees", type: "range", min: 1, max: 4, step: 1, default: 1, unit: "trees", desc: "Draws a solitary specimen or a forest horizon." },
+      { id: "recursionDepth", label: "Branching Depth", type: "range", min: 4, max: 7, step: 1, default: 6, unit: "levels", desc: "How many times branches split recursively." },
+      { id: "branchAngle", label: "Branch Spread Angle", type: "range", min: 15, max: 55, step: 2, default: 28, unit: "°", desc: "Angle between child branches." },
+      { id: "lengthRatio", label: "Branch Shrink Ratio", type: "range", min: 0.55, max: 0.80, step: 0.01, default: 0.72, unit: "", desc: "How much shorter each generation of branches becomes." },
+      { id: "trunkLength", label: "Trunk Height", type: "range", min: 20, max: 65, step: 2, default: 42, unit: "mm", desc: "Initial starting height of the main trunk." },
+      { id: "windSway", label: "Wind Sway / Curvature", type: "range", min: -20, max: 20, step: 1, default: 4, unit: "°", desc: "Tilts the tree organically in the wind." },
+      { id: "treeCount", label: "Number of Trees", type: "range", min: 1, max: 3, step: 1, default: 1, unit: "trees", desc: "Draws a solitary specimen or a forest horizon." },
       { id: "dualColorAccent", label: "Dual Layer (Pen 2 Twigs)", type: "checkbox", default: true, desc: "Plots sturdy main branches in Pen 1 and delicate leaf twigs in Pen 2." }
     ],
     presets: {
-      "Ancient Bonsai": { recursionDepth: 7, branchAngle: 34, lengthRatio: 0.70, trunkLength: 42, windSway: 8, treeCount: 1, dualColorAccent: true },
-      "Winter Birch Forest": { recursionDepth: 6, branchAngle: 22, lengthRatio: 0.74, trunkLength: 48, windSway: -3, treeCount: 3, dualColorAccent: true },
-      "Fractal Lightning Bolt": { recursionDepth: 8, branchAngle: 45, lengthRatio: 0.65, trunkLength: 60, windSway: 0, treeCount: 1, dualColorAccent: false },
-      "Grand Victorian Oak": { recursionDepth: 7, branchAngle: 30, lengthRatio: 0.75, trunkLength: 40, windSway: 2, treeCount: 1, dualColorAccent: true }
+      "Ancient Bonsai": { recursionDepth: 6, branchAngle: 34, lengthRatio: 0.70, trunkLength: 42, windSway: 8, treeCount: 1, dualColorAccent: true },
+      "Winter Birch Forest": { recursionDepth: 5, branchAngle: 22, lengthRatio: 0.74, trunkLength: 44, windSway: -3, treeCount: 2, dualColorAccent: true },
+      "Fractal Lightning Bolt": { recursionDepth: 7, branchAngle: 45, lengthRatio: 0.65, trunkLength: 55, windSway: 0, treeCount: 1, dualColorAccent: false },
+      "Grand Victorian Oak": { recursionDepth: 6, branchAngle: 30, lengthRatio: 0.75, trunkLength: 40, windSway: 2, treeCount: 1, dualColorAccent: true }
     },
     generate(bounds, params, rng) {
       const { minX, minY, width, height } = bounds;
@@ -909,20 +909,20 @@ function branch(x, y, length, angle, depth) {
     codeSnippet: `// Recursive Hilbert space-filling curve:
 // 1 single continuous vector path traversing the entire paper!`,
     parameters: [
-      { id: "curveOrder", label: "Curve Detail Order", type: "range", min: 3, max: 6, step: 1, default: 4, unit: "order", desc: "Density of the space-filling grid (Order 4 = 256 cells, Order 5 = 1024 cells)." },
+      { id: "curveOrder", label: "Curve Detail Order", type: "range", min: 2, max: 5, step: 1, default: 4, unit: "order", desc: "Density of the space-filling grid (Order 4 = 256 cells, Order 5 = 1024 cells)." },
       { id: "curveStyle", label: "Curve Style", type: "select", options: [
         { value: "hilbert", label: "Hilbert Space-Filling Curve" },
         { value: "organicWander", label: "Organic Self-Avoiding Meander" },
         { value: "peanoSpiral", label: "Serpentine Spiral Meander" }
       ], default: "hilbert", desc: "Select the continuous line path trajectory." },
       { id: "cornerRoundness", label: "Corner Smoothing", type: "range", min: 0, max: 0.45, step: 0.05, default: 0.25, unit: "", desc: "Rounds sharp 90° corners for smooth continuous pen gliding." },
-      { id: "wobble", label: "Hand-Drawn Organic Wobble", type: "range", min: 0, max: 3.0, step: 0.2, default: 0.4, unit: "mm", desc: "Adds subtle hand-drawn organic vibration to the line." }
+      { id: "wobble", label: "Hand-Drawn Organic Wobble", type: "range", min: 0, max: 2.0, step: 0.2, default: 0.4, unit: "mm", desc: "Adds subtle hand-drawn organic vibration to the line." }
     ],
     presets: {
       "Continuous Hilbert Labyrinth": { curveOrder: 4, curveStyle: "hilbert", cornerRoundness: 0.25, wobble: 0.2 },
-      "Smooth Silk Maze": { curveOrder: 5, curveStyle: "hilbert", cornerRoundness: 0.40, wobble: 0.0 },
-      "Hand-Drawn Explorer": { curveOrder: 4, curveStyle: "organicWander", cornerRoundness: 0.15, wobble: 1.2 },
-      "Serpentine Labyrinth": { curveOrder: 5, curveStyle: "peanoSpiral", cornerRoundness: 0.30, wobble: 0.4 }
+      "Smooth Silk Maze": { curveOrder: 4, curveStyle: "hilbert", cornerRoundness: 0.40, wobble: 0.0 },
+      "Hand-Drawn Explorer": { curveOrder: 3, curveStyle: "organicWander", cornerRoundness: 0.15, wobble: 1.0 },
+      "Serpentine Labyrinth": { curveOrder: 4, curveStyle: "peanoSpiral", cornerRoundness: 0.30, wobble: 0.4 }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, width, height } = bounds;
@@ -1079,14 +1079,14 @@ function generateArt(bounds, noise, rng) {
       { id: "customFormula", label: "Math Formula Expression", type: "text", default: "Math.cos((A/B) * theta) * (1 + 0.2 * Math.sin(A * theta))", desc: "Type any JS math expression using theta, A, B, Math.sin, Math.cos, etc." },
       { id: "multiplierA", label: "Parameter A (Tweak in formula)", type: "range", min: 1, max: 15, step: 0.5, default: 5, unit: "", desc: "Exposed as variable 'A' inside your code snippet." },
       { id: "multiplierB", label: "Parameter B (Tweak in formula)", type: "range", min: 1, max: 15, step: 0.5, default: 8, unit: "", desc: "Exposed as variable 'B' inside your code snippet." },
-      { id: "density", label: "Point Resolution", type: "range", min: 500, max: 6000, step: 250, default: 2500, unit: "pts", desc: "Number of points calculated by your loop." }
+      { id: "density", label: "Point Resolution", type: "range", min: 500, max: 3500, step: 250, default: 2000, unit: "pts", desc: "Number of points calculated by your loop." }
     ],
     presets: {
-      "Mathematical Rose Curve (r = cos(k * theta))": { codePreset: "roseMath", customFormula: "Math.cos((A/B) * theta)", multiplierA: 5, multiplierB: 7, density: 3000 },
-      "Lissajous Resonance Mesh": { codePreset: "lissajousGrid", customFormula: "Math.sin(A * theta)", multiplierA: 3, multiplierB: 4, density: 2500 },
-      "Custom Math Expression": { codePreset: "customFormula", customFormula: "Math.cos((A/B) * theta) * (1 + 0.2 * Math.sin(A * theta))", multiplierA: 6, multiplierB: 4, density: 3500 },
-      "Gielis Superformula Organic Shapes": { codePreset: "superFormula", customFormula: "superformula(theta)", multiplierA: 6, multiplierB: 2, density: 3500 },
-      "Archimedean Modulated Spiral": { codePreset: "archimedesSpiral", customFormula: "spiral(theta)", multiplierA: 8, multiplierB: 4, density: 4000 }
+      "Mathematical Rose Curve (r = cos(k * theta))": { codePreset: "roseMath", customFormula: "Math.cos((A/B) * theta)", multiplierA: 5, multiplierB: 7, density: 2200 },
+      "Lissajous Resonance Mesh": { codePreset: "lissajousGrid", customFormula: "Math.sin(A * theta)", multiplierA: 3, multiplierB: 4, density: 2000 },
+      "Custom Math Expression": { codePreset: "customFormula", customFormula: "Math.cos((A/B) * theta) * (1 + 0.2 * Math.sin(A * theta))", multiplierA: 6, multiplierB: 4, density: 2400 },
+      "Gielis Superformula Organic Shapes": { codePreset: "superFormula", customFormula: "superformula(theta)", multiplierA: 6, multiplierB: 2, density: 2400 },
+      "Archimedean Modulated Spiral": { codePreset: "archimedesSpiral", customFormula: "spiral(theta)", multiplierA: 8, multiplierB: 4, density: 2600 }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, width, height } = bounds;

@@ -74,6 +74,42 @@ body {
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
 }
 
+/* Beginner Welcome Banner in Pro Mode */
+.pro-welcome-banner {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.14), rgba(168, 85, 247, 0.14));
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 8px 16px;
+  font-size: 12.5px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pro-welcome-banner a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.banner-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.banner-close-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .sidebar-header {
   padding: 16px 20px;
   background: rgba(19, 23, 34, 0.95);
@@ -416,6 +452,32 @@ body {
 }
 
 .btn-random:active {
+  transform: translateY(0);
+}
+
+.btn-undo-seed {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-undo-seed:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.btn-undo-seed:active {
   transform: translateY(0);
 }
 

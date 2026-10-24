@@ -241,23 +241,29 @@ body[dir="ltr"] {
   color: var(--text-sub);
 }
 
-/* Big Shuffle Button */
+/* Big Shuffle & Undo Group */
+.shuffle-btn-group {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
 .btn-big-shuffle {
+  flex: 1;
   background: linear-gradient(135deg, #f59e0b, #ef4444);
   color: #ffffff;
   border: none;
-  padding: 14px 18px;
+  padding: 13px 16px;
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
   transition: all 0.2s ease;
-  width: 100%;
 }
 
 .btn-big-shuffle:hover {
@@ -267,6 +273,34 @@ body[dir="ltr"] {
 }
 
 .btn-big-shuffle:active {
+  transform: translateY(0);
+}
+
+.btn-undo-shape {
+  flex-shrink: 0;
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 13px 15px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-undo-shape:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.btn-undo-shape:active {
   transform: translateY(0);
 }
 
@@ -448,6 +482,33 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .btn-action-secondary:hover {
   background: var(--bg-card-hover);
   border-color: var(--text-sub);
+}
+
+.btn-action-secondary.btn-png {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+.btn-action-secondary.btn-png:hover {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: #38bdf8;
+}
+
+.time-estimate-pill {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
 }
 
 /* =========================================================================

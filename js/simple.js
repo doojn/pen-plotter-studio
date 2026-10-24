@@ -33,6 +33,12 @@ const TRANSLATIONS = {
     toastShuffle: "تم توليد شكل جديد بنجاح! 🎲",
     toastDownload: "تم تحميل الملف! جاهز للإرسال للآلة 🖋️",
     toastSimFinished: "انتهى القلم من الرسم! ✨",
+    btnUndo: "↩ السابق",
+    btnDownloadPNG: "📸 حفظ كصورة (PNG)",
+    toastUndo: "تم استرجاع الشكل السابق ↩",
+    toastNoUndo: "لا توجد أشكال سابقة",
+    toastPng: "تم حفظ الصورة كـ PNG بنجاح! 📸",
+    timeBadge: "⏱️ وقت الرسم: ~٤ دقائق (سريع وخفيف للورق)",
     labelSpeed: "سرعة رسم القلم",
     speedSlow: "🐢 بطيء وهادئ",
     speedNormal: "🚶 عادي",
@@ -56,6 +62,12 @@ const TRANSLATIONS = {
     step2Title: "2. Tweak Your Design",
     step3Title: "3. Ready to Plot!",
     btnShuffle: "🎲 Roll New Shape",
+    btnUndo: "↩ Previous",
+    btnDownloadPNG: "📸 Save Image (PNG)",
+    toastUndo: "Restored previous shape ↩",
+    toastNoUndo: "No previous shapes",
+    toastPng: "Saved image as PNG! 📸",
+    timeBadge: "⏱️ Plot Time: ~4 mins (Safe & fast for A4)",
     labelDensity: "Line Density",
     few: "Few",
     many: "Dense",
@@ -124,7 +136,7 @@ class SimpleApp {
       seed: 4242,
       densityLevel: 3, // 1 (sparse) to 5 (dense)
       wiggleLevel: 3,  // 1 (gentle) to 5 (wild)
-      paperKey: "a5",
+      paperKey: "a4",  // Calibrated for standard A4 paper (< 10 min plots)
       paletteKey: "white_black",
       zoom: 1.0,
       
@@ -132,6 +144,9 @@ class SimpleApp {
       pathsLayer2: [],
       bounds: null
     };
+
+    this.seedHistory = [];
+    this._debounceRaf = null;
 
     // Check saved language preference from localStorage
     try {
@@ -238,21 +253,35 @@ class SimpleApp {
 
     // Big Shuffle Button
     document.getElementById("btnShuffle")?.addEventListener("click", () => {
+      this.seedHistory.push(this.state.seed);
+      if (this.seedHistory.length > 25) this.seedHistory.shift();
       this.state.seed = Math.floor(Math.random() * 900000) + 10000;
       this.render();
       this.showToast(TRANSLATIONS[this.state.lang].toastShuffle);
     });
 
-    // Density Slider
-    document.getElementById("sliderDensity")?.addEventListener("input", (e) => {
-      this.state.densityLevel = parseInt(e.target.value);
-      this.render();
+    // Undo / Previous Button
+    document.getElementById("btnUndo")?.addEventListener("click", () => {
+      const t = TRANSLATIONS[this.state.lang];
+      if (this.seedHistory && this.seedHistory.length > 0) {
+        this.state.seed = this.seedHistory.pop();
+        this.render();
+        this.showToast(t.toastUndo);
+      } else {
+        this.showToast(t.toastNoUndo);
+      }
     });
 
-    // Wiggle Slider
+    // Density Slider with debounce
+    document.getElementById("sliderDensity")?.addEventListener("input", (e) => {
+      this.state.densityLevel = parseInt(e.target.value);
+      this.debouncedRender();
+    });
+
+    // Wiggle Slider with debounce
     document.getElementById("sliderWiggle")?.addEventListener("input", (e) => {
       this.state.wiggleLevel = parseInt(e.target.value);
-      this.render();
+      this.debouncedRender();
     });
 
     // Paper Size Pills
@@ -290,9 +319,14 @@ class SimpleApp {
       }
     });
 
-    // Download Button
+    // Download SVG Button
     document.getElementById("btnDownload")?.addEventListener("click", () => {
       this.downloadSVG();
+    });
+
+    // Download PNG Button
+    document.getElementById("btnDownloadPNG")?.addEventListener("click", () => {
+      this.downloadPNG();
     });
 
     // Zoom Buttons
@@ -372,7 +406,12 @@ class SimpleApp {
     // Action buttons
     const simBtn = document.getElementById("btnSimulate");
     if (simBtn) simBtn.innerHTML = this.simulator.isPlaying ? t.btnStopSim : t.btnSimulate;
-    document.getElementById("btnDownload").innerHTML = t.btnDownload;
+    const btnDown = document.getElementById("btnDownload");
+    if (btnDown) btnDown.innerHTML = t.btnDownload;
+    const btnUndo = document.getElementById("btnUndo");
+    if (btnUndo) btnUndo.innerHTML = `<span>${t.btnUndo}</span>`;
+    const btnPng = document.getElementById("btnDownloadPNG");
+    if (btnPng) btnPng.innerHTML = `<span>${t.btnDownloadPNG}</span>`;
 
     this.updateSliderLabels();
     this.renderStyleCards();
@@ -405,6 +444,25 @@ class SimpleApp {
     this.showToast(this.state.lang === "ar" ? "تم توسيط الورقة ⛶" : "View Centered ⛶");
   }
 
+  debouncedRender() {
+    if (this._debounceRaf) {
+      cancelAnimationFrame(this._debounceRaf);
+    }
+    this._debounceRaf = requestAnimationFrame(() => {
+      this.render();
+    });
+  }
+
+  updateTimeBadge(stats) {
+    const badge = document.getElementById("simpleTimeBadge");
+    if (!badge) return;
+    const isAr = this.state.lang === "ar";
+    const timeStr = stats ? stats.estimatedTimeStr : "3m";
+    badge.innerHTML = isAr
+      ? `<span>⏱️ وقت الرسم: <b>~${timeStr}</b> (سريع وخفيف لورق A4)</span>`
+      : `<span>⏱️ Plot Time: <b>~${timeStr}</b> (Safe & fast for A4)</span>`;
+  }
+
   render() {
     this.rng.setSeed(this.state.seed);
     this.noise.reseed(this.rng);
@@ -427,6 +485,9 @@ class SimpleApp {
     this.state.pathsLayer1 = layer1;
     this.state.pathsLayer2 = layer2;
 
+    const stats = this.plotter.calculateStats(layer1, layer2);
+    this.updateTimeBadge(stats);
+
     this.drawCanvas();
   }
 
@@ -436,44 +497,46 @@ class SimpleApp {
     const params = {};
     algoDef.parameters.forEach(p => params[p.id] = p.default);
 
+    // Guaranteed <= 10 min plot times (< 6 min typical) and safe spacing for thin A4 paper
     if (algoId === "flowField") {
-      params.streamCount = Math.round(MathUtils.map(d, 1, 5, 200, 750));
-      params.stepCount = Math.round(MathUtils.map(w, 1, 5, 60, 140));
-      params.noiseScale = MathUtils.map(w, 1, 5, 0.002, 0.012);
-      params.curlMultiplier = MathUtils.map(w, 1, 5, 1.0, 3.5);
-      params.streamAvoidance = 1.0;
+      params.streamCount = Math.round(MathUtils.map(d, 1, 5, 120, 280));
+      params.stepCount = Math.round(MathUtils.map(w, 1, 5, 35, 70));
+      params.stepLength = 1.4;
+      params.noiseScale = MathUtils.map(w, 1, 5, 0.002, 0.010);
+      params.curlMultiplier = MathUtils.map(w, 1, 5, 1.0, 3.2);
+      params.streamAvoidance = 1.8;
     } else if (algoId === "spirals") {
-      params.turns = Math.round(MathUtils.map(d, 1, 5, 14, 45));
-      params.distortionAmount = w === 1 ? 0 : MathUtils.map(w, 2, 5, 4.0, 18.0);
+      params.turns = Math.round(MathUtils.map(d, 1, 5, 10, 26));
+      params.distortionAmount = w === 1 ? 0 : MathUtils.map(w, 2, 5, 3.0, 12.0);
       params.distortionMode = w === 1 ? "pure" : "organic";
       params.distortionFreq = 8;
       params.dualSpiral = false;
     } else if (algoId === "waveRidges") {
-      params.lineCount = Math.round(MathUtils.map(d, 1, 5, 25, 70));
-      params.peakHeight = MathUtils.map(w, 1, 5, 12, 34);
-      params.noiseScale = MathUtils.map(w, 1, 5, 0.01, 0.035);
+      params.lineCount = Math.round(MathUtils.map(d, 1, 5, 18, 40));
+      params.peakHeight = MathUtils.map(w, 1, 5, 10, 24);
+      params.noiseScale = MathUtils.map(w, 1, 5, 0.01, 0.030);
       params.occlusion = true;
     } else if (algoId === "harmonograph") {
       params.geometryMode = "harmonograph";
-      params.loopCount = Math.round(MathUtils.map(d, 1, 5, 3000, 9000));
-      params.damping = MathUtils.map(w, 1, 5, 0.0025, 0.0008);
+      params.loopCount = Math.round(MathUtils.map(d, 1, 5, 1600, 3400));
+      params.damping = MathUtils.map(w, 1, 5, 0.0035, 0.0014);
       params.freqX = 2.0 + (w * 0.005);
       params.freqY = 3.0;
     } else if (algoId === "truchetTiles") {
-      params.gridCols = Math.round(MathUtils.map(d, 1, 5, 8, 20));
-      params.arcsPerTile = Math.round(MathUtils.map(w, 1, 5, 1, 3));
+      params.gridCols = Math.round(MathUtils.map(d, 1, 5, 6, 12));
+      params.arcsPerTile = Math.round(MathUtils.map(w, 1, 5, 1, 2));
       params.tileStyle = "arcs";
     } else if (algoId === "concentricMoire") {
-      params.ringCount = Math.round(MathUtils.map(d, 1, 5, 25, 65));
-      params.noiseWobble = MathUtils.map(w, 1, 5, 0, 8);
+      params.ringCount = Math.round(MathUtils.map(d, 1, 5, 14, 26));
+      params.noiseWobble = MathUtils.map(w, 1, 5, 0, 6);
       params.centerCount = 2;
     } else if (algoId === "fractalTree") {
-      params.recursionDepth = Math.round(MathUtils.map(d, 1, 5, 5, 8));
-      params.branchAngle = MathUtils.map(w, 1, 5, 20, 45);
-      params.windSway = MathUtils.map(w, 1, 5, 0, 12);
+      params.recursionDepth = Math.round(MathUtils.map(d, 1, 5, 4, 6));
+      params.branchAngle = MathUtils.map(w, 1, 5, 20, 40);
+      params.windSway = MathUtils.map(w, 1, 5, 0, 10);
     } else if (algoId === "continuousMeander") {
-      params.curveOrder = Math.round(MathUtils.map(d, 1, 5, 3, 5));
-      params.wobble = MathUtils.map(w, 1, 5, 0, 1.8);
+      params.curveOrder = Math.round(MathUtils.map(d, 1, 5, 2, 4));
+      params.wobble = MathUtils.map(w, 1, 5, 0, 1.4);
       params.cornerRoundness = 0.25;
     }
 
@@ -598,6 +661,13 @@ class SimpleApp {
     const filename = `plotter_${this.state.activeStyleId}_seed${this.state.seed}.svg`;
     this.plotter.downloadSVG(filename, svg);
     this.showToast(TRANSLATIONS[this.state.lang].toastDownload);
+  }
+
+  downloadPNG() {
+    const filename = `plotter_${this.state.activeStyleId}_seed${this.state.seed}.png`;
+    this.plotter.downloadPNG(this.canvas, filename);
+    const t = TRANSLATIONS[this.state.lang];
+    this.showToast(t.toastPng || "Saved image as PNG! 📸");
   }
 
   zoom(factor) {

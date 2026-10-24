@@ -55,10 +55,15 @@
           <h2 class="step-title" id="step2Title">٢. غيّر وبدّل بالتصميم</h2>
         </div>
 
-        <!-- Big Random Shuffle Button -->
-        <button class="btn-big-shuffle" id="btnShuffle">
-          <span>🎲 شكلاً جديداً (تغيير)</span>
-        </button>
+        <!-- Big Random Shuffle & Undo Button Row -->
+        <div class="shuffle-btn-group">
+          <button class="btn-big-shuffle" id="btnShuffle">
+            <span>🎲 شكلاً جديداً (تغيير)</span>
+          </button>
+          <button class="btn-undo-shape" id="btnUndo" title="Undo / Previous Shape">
+            <span>↩ السابق</span>
+          </button>
+        </div>
 
         <!-- Density Slider -->
         <div class="simple-slider-row">
@@ -90,8 +95,8 @@
             <span id="labelPaper">حجم الورقة</span>
           </div>
           <div class="paper-pills">
-            <button type="button" class="paper-pill active" data-paper="a5">A5 (١٤٨ × ٢١٠ مم)</button>
-            <button type="button" class="paper-pill" data-paper="a4">A4 (٢١٠ × ٢٩٧ مم)</button>
+            <button type="button" class="paper-pill active" data-paper="a4">A4 (٢١٠ × ٢٩٧ مم)</button>
+            <button type="button" class="paper-pill" data-paper="a5">A5 (١٤٨ × ٢١٠ مم)</button>
           </div>
         </div>
 
@@ -151,12 +156,21 @@
           </div>
         </div>
 
+        <!-- Time Estimate Reassuring Badge -->
+        <div class="time-estimate-pill" id="simpleTimeBadge">
+          <span>⏱️ وقت الرسم: ~٤ دقائق (سريع ومناسب لورق A4)</span>
+        </div>
+
         <button class="btn-action-secondary" id="btnSimulate">
           <span>▶️ شاهد القلم يرسم</span>
         </button>
 
         <button class="btn-action-primary" id="btnDownload">
           <span>📥 تحميل ملف الرسم (SVG)</span>
+        </button>
+
+        <button class="btn-action-secondary btn-png" id="btnDownloadPNG">
+          <span>📸 حفظ كصورة (PNG)</span>
         </button>
       </section>
 
