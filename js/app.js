@@ -1,6 +1,443 @@
 /**
  * Workshop Pen Plotter Studio - Main Application Controller
+ * Bilingual (Arabic RTL & English LTR) with customizable parameters & simulation.
  */
+
+const APP_TRANSLATIONS = {
+  ar: {
+    langLabel: "English",
+    logoTitle: "استوديو الراسم الآلي",
+    logoSub: "ورشة الفن الخوارزمي بالقلم",
+    linkSimple: "✨ الوضع المبسط",
+    linkPhoto: "📷 صورة إلى مسار",
+    btnGuide: "🎓 دليل الورشة",
+    
+    // Tabs
+    tabAlgo: "🎨 الخوارزميات",
+    tabSetup: "📐 الورق والقلم",
+    tabCode: "💻 الرياضيات والكود",
+    
+    // Tab 1: Algorithms
+    secAlgoTitle: "١. اختر الخوارزمية",
+    badgeAlgo: "٨ نماذج أساسية",
+    secPresetTitle: "٢. وصفات ونماذج جاهزة",
+    badgePreset: "أنماط بنقرة واحدة",
+    secSeedTitle: "٣. الرقم العشوائي (Seed)",
+    badgeSeed: "قابل للتكرار",
+    btnRollSeed: "🎲 رقم جديد",
+    secParamTitle: "٤. تخصيص المعايير",
+    badgeParam: "تعديل فوري",
+    
+    // Tab 2: Setup
+    secPaperTitle: "أبعاد الورقة الفعلية",
+    badgeHardware: "مواصفات الآلة",
+    lblPaperSize: "حجم الورقة",
+    lblOrientation: "اتجاه الورقة",
+    optPortrait: "عمودي (رأسي)",
+    optLandscape: "أفقي (عرضي)",
+    lblMargin: "هامش الأمان (تجنب مشابك الورق)",
+    lblPaperColor: "معاينة لون الورق والخامة",
+    paperColors: {
+      white: "ورق بريستول أبيض ناصع",
+      cream: "ورق مولسكين كريمي دافئ",
+      black: "ورق مقوى أسود فاحم",
+      kraft: "كرتون طبيعي (كرافت)",
+      indigo: "ورق نيلي مخطط ليلي"
+    },
+    secPenTitle: "اختيار الأقلام وتأثير الحبر",
+    badgePen: "حبر الرسم",
+    lblPen1: "القلم ١ (القلم الأساسي)",
+    lblPen2: "القلم ٢ (قلم الزخرفة الإضافي)",
+    pens: {
+      micron_black: "ساكورا ميكرون ٠.٣ مم (أسود)",
+      gelly_white: "جيلي رول ٠.٥ مم (جل أبيض)",
+      metallic_gold: "جل ذهبي معدني ٠.٤ مم",
+      fountain_blue: "قلم حبر سائل أزرق بروسي",
+      crimson_red: "شاربي أحمر قرمزي زاهي",
+      cyan_fine: "قلم سماوي دقيق ٠.٣ مم"
+    },
+    secOptTitle: "تحسين مسار القلم للراسمة",
+    badgeOpt: "تسريع الرسم",
+    lblOpt: "⚡ خوارزمية TSP (ترتيب المسارات الأقرب)",
+    descOpt: "عند التفعيل، يعاد ترتيب الخطوط المنفصلة ليتنقل القلم دائماً إلى أقرب خط، وتعكس الخطوط إذا كان البدء من نهايتها أسرع، مما يقلل وقت رفع القلم بنسبة تصل إلى ٥٠٪.",
+    secImageTitle: "التبديل إلى استوديو الصور",
+    descImage: "هل ترغب في تحويل صورة شخصية أو فوتوغرافية إلى خطوط حلزونية متصلة بدلاً من الرياضيات التوليدية؟",
+    btnImageStudio: "📷 فتح استوديو تحويل الصور إلى مسار",
+    
+    // Tab 3: Code & Math
+    secCodeTitle: "منطق الخوارزمية والمعادلة",
+    badgeCode: "جافاسكريبت",
+    descCode: "كل عمل فني توليدي ينتج عن قواعد رياضية تنفذ بالتكرار داخل حلقات برمجية. هذا هو المنطق الأساسي للخوارزمية المحددة:",
+    secRecipeTitle: "الوصفة الفنية الخوارزمية",
+    recipePoint1: "<b>١. الأرقام العشوائية المحددة (Seeds):</b> يعتمد الفن الخوارزمي على أرقام شبه عشوائية تبدأ برقم محدد (مثل <code>4242</code>). في كل مرة تستخدم فيها نفس الرقم، تعيد الرياضيات رسم نفس الخطوط تماماً.",
+    recipePoint2: "<b>٢. الخطوط المتجهة (Vectors):</b> بدلاً من بكسلات الشاشة، لا تفهم الراسمات الآلية إلا نقاط إحداثيات متصلة: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.",
+    recipePoint3: "<b>٣. القيود الميكانيكية للآلة:</b> بخلاف الشاشات، تمتلك الأقلام الحقيقية احتكاكاً، ويمتص الورق الحبر، وتستغرق رفعة القلم وقتاً ميكانيكياً. الخوارزميات ذات الرفعات الأقل ترسم أسرع وبنقاء أكبر!",
+    
+    // Top Toolbar
+    btnFitView: "⛶ ملء الشاشة / توسيط",
+    btnSimStart: "▶️ محاكاة الرسم",
+    btnSimStop: "⏹ إيقاف المحاكاة",
+    
+    // Simulator panel
+    simTitle: "🤖 محاكي الراسمة الآلية",
+    simReady: "القلم جاهز",
+    simDrawing: "جاري الرسم...",
+    simSpeeds: {
+      "0.25": "🐢 ٠.٢٥× (بطيء جداً)",
+      "0.5": "🐢 ٠.٥× (بطيء وهادئ)",
+      "1": "🚶 ١× (وقت حقيقي)",
+      "2": "🐇 ٢× (سريع)",
+      "5": "⚡ ٥× (فائق السرعة)"
+    },
+    
+    // Bottom Dock Stats & Actions
+    statDist: "مسافة الرسم",
+    statLifts: "رفعات القلم",
+    statTime: "الوقت المقدر",
+    statPaths: "عدد المسارات",
+    btnDownloadSVG: "📥 تحميل SVG",
+    btnCopySVG: "📋 نسخ SVG",
+    btnDownloadPNG: "📸 صورة PNG",
+    
+    // Toast messages
+    toastSeed: "تم تحديث الرقم العشوائي إلى: ",
+    toastPreset: 'تم تطبيق النمط: "',
+    toastCopySuccess: "تم نسخ كود SVG إلى الحافظة! 📋",
+    toastCopyFail: "فشل نسخ الكود، يرجى التنزيل كملف.",
+    toastDownload: "تم بدء تنزيل ملف SVG! 🖋️",
+    toastFitView: "تم توسيط الورقة وضبط العرض ⛶",
+    
+    // Modal Guide
+    guideTitle: "🎓 دليل الورشة وورقة تعليمات الراسمة الآلية",
+    guideH3_1: "🌟 ما هو الفن التوليدي الخوارزمي؟",
+    guideP_1: "الفن التوليدي هو عمل فني ينشأ من تعاون وثيق بين الفنان البشري ونظام مستقل (الخوارزمية). بدلاً من رسم كل خط بيدك مباشرة، تقوم بتصميم القواعد والمعادلات الرياضية والتغيرات العشوائية. يحسب الحاسوب آلاف نقاط الإحداثيات، وتتولى الراسمة الآلية تحويلها إلى ضربات قلم ملموسة بالحبر على الورق الحقيقي!",
+    guideH3_2: "🖋️ الخطوات الأربع: من الشاشة إلى الورق الملموس",
+    guideStep1Title: "اختر خوارزميتك وخصصها:",
+    guideStep1Desc: "اختر خوارزمية من القائمة الجانبية (حقول التدفق، السلاسل الجبلية، البندول، الحلزونات، إلخ). حرّك المنزلقات، وجرّب الوصفات الجاهزة، واضغط 🎲 رقم جديد حتى تصل إلى تكوين فني يعجبك.",
+    guideStep2Title: "تأكد من هوامش الأمان للراسمة:",
+    guideStep2Desc: "احرص على إبقاء هامش الأمان عند ١٢ مم أو أكثر لتجنب اصطدام رأس القلم بالمشابك المعدنية التي تثبت الورقة على سطح الآلة!",
+    guideStep3Title: "شاهد محاكاة الرسم:",
+    guideStep3Desc: "انقر على ▶️ محاكاة الرسم لمشاهدة حركة القلم الافتراضية فوق صفحتك، وانتبه لمسافة الرسم وعدد مرات رفع القلم.",
+    guideStep4Title: "حمّل ملف SVG وابدأ الرسم الآلي:",
+    guideStep4Desc: "انقر 📥 تحميل SVG، ثم افتح الملف في برنامج Inkscape المجاني، وصل الراسمة (مثل AxiDraw) عبر USB، واختر Extensions > AxiDraw > Plot، وشاهد أسطر الكود تتحول إلى لوحة فنية بالحبر الحقيقي!",
+    guideH3_3: "💡 ٣ قواعد ذهبية للمبتدئين في الرسم بالآلة",
+    guideRule1: "<b>لا توجد تعبئة، فقط خطوط:</b> الراسمة بالقلم لا تستطيع تلوين مساحات مصمتة مثل الطابعة المكتبية. التظليل يتم بالخطوط المتوازية الكثيفة، أو التهشير المتقاطع، أو التموجات المتشابكة.",
+    guideRule2: "<b>انتبه لتشرب الحبر:</b> إذا توقف القلم في نقطة واحدة طويلاً أو كرر المرور، قد يتسرب الحبر في الورق. يقوم مصلح المسارات (TSP Optimizer) بإلغاء التكرارات لتفادي ذلك!",
+    guideRule3: "<b>اضبط ارتفاع القلم أولاً:</b> عند تثبيت قلمك (ساكورا ميكرون، جل، أو حبر سائل)، تأكد أن سن القلم يرتفع نحو ٣ مم عن الورقة في وضع الرفع، ويلامس الورقة برفق وانسيابية في وضع الرسم.",
+    guideH3_4: "🚀 ترشيحات الأقلام والأوراق المثالية",
+    guidePensRec: "<b>أفضل الأقلام:</b> Sakura Pigma Micron (0.3mm / 0.5mm), Uni-ball Signo Broad (أبيض أو ذهبي ميتاليك), Pilot G2 Gel.",
+    guidePapersRec: "<b>أفضل الورق:</b> ورق بريستول الناعم، ورق مقوى ثقيل (250+ جرام)، أو ورق Clairefontaine المخصص للأرشفة."
+  },
+  en: {
+    langLabel: "العربية",
+    logoTitle: "Plotter Studio",
+    logoSub: "Algorithmic Art Workshop",
+    linkSimple: "✨ Simple Mode",
+    linkPhoto: "📷 Photo to Path",
+    btnGuide: "🎓 Guide",
+    
+    // Tabs
+    tabAlgo: "🎨 Algorithms",
+    tabSetup: "📐 Paper & Pen",
+    tabCode: "💻 Math & Code",
+    
+    // Tab 1: Algorithms
+    secAlgoTitle: "1. Choose an Algorithm",
+    badgeAlgo: "8 Core Models",
+    secPresetTitle: "2. Starter Recipes",
+    badgePreset: "1-Click Looks",
+    secSeedTitle: "3. Seed & Variations",
+    badgeSeed: "Reproducible",
+    btnRollSeed: "🎲 Roll Seed",
+    secParamTitle: "4. Customize Parameters",
+    badgeParam: "Live Tweak",
+    
+    // Tab 2: Setup
+    secPaperTitle: "Physical Paper Dimensions",
+    badgeHardware: "Hardware Specs",
+    lblPaperSize: "Paper Size Format",
+    lblOrientation: "Paper Orientation",
+    optPortrait: "Portrait (Vertical)",
+    optLandscape: "Landscape (Horizontal)",
+    lblMargin: "Safe Margin (Clips Clearance)",
+    lblPaperColor: "Paper Color / Stock Preview",
+    paperColors: {
+      white: "Heavy White Bristol Paper",
+      cream: "Warm Cream Moleskine",
+      black: "Charcoal Black Heavy Cardstock",
+      kraft: "Natural Kraft Cardboard",
+      indigo: "Midnight Blueprint Indigo"
+    },
+    secPenTitle: "Pen Selection & Stroke Preview",
+    badgePen: "Drawing Ink",
+    lblPen1: "Pen 1 (Primary Pen)",
+    lblPen2: "Pen 2 (Accent Pen / Dual-Layer)",
+    pens: {
+      micron_black: "Sakura Micron 0.3mm (Black)",
+      gelly_white: "Gelly Roll 0.5mm (White Gel)",
+      metallic_gold: "Metallic Gold Gel 0.4mm",
+      fountain_blue: "Prussian Blue Fountain Pen",
+      crimson_red: "Vivid Crimson Sharpie",
+      cyan_fine: "Electric Cyan Fine 0.3mm"
+    },
+    secOptTitle: "Plotter Path Optimization",
+    badgeOpt: "AxiDraw Speedup",
+    lblOpt: "⚡ TSP Path Optimization (Sort Nearest)",
+    descOpt: "When enabled, disconnected lines are reordered so the pen always moves to the closest line next, and paths are reversed when drawing from the tail is faster.",
+    secImageTitle: "Switch to Image Studio",
+    descImage: "Want to vectorize a portrait or photo into continuous squiggles instead of purely generative math?",
+    btnImageStudio: "📷 Open Image-to-Path Studio",
+    
+    // Tab 3: Code & Math
+    secCodeTitle: "Algorithm Logic & Formula",
+    badgeCode: "JavaScript",
+    descCode: "Every generative artwork is produced by mathematical rules executed repeatedly in loops. Here is the core logic running your selected algorithm:",
+    secRecipeTitle: "The Generative Recipe",
+    recipePoint1: "<b>1. Deterministic Seeds:</b> Generative art uses pseudo-random numbers seeded by a specific number (like <code>4242</code>). Every time you use that seed, the math reproduces the exact same strokes.",
+    recipePoint2: "<b>2. Vector Polylines:</b> Instead of raster pixels, pen plotters only understand continuous coordinate points: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.",
+    recipePoint3: "<b>3. Physical Constraints:</b> Unlike screens, physical pens have friction, paper absorbs ink, and pen lifts take mechanical time. Algorithms with fewer lifts plot faster and cleaner!",
+    
+    // Top Toolbar
+    btnFitView: "⛶ Fit View",
+    btnSimStart: "▶️ Simulate Draw",
+    btnSimStop: "⏹ Stop Simulation",
+    
+    // Simulator panel
+    simTitle: "🤖 Pen Plotter Simulator",
+    simReady: "PEN READY",
+    simDrawing: "DRAWING...",
+    simSpeeds: {
+      "0.25": "🐢 0.25x (Super Slow)",
+      "0.5": "🐢 0.5x (Slow & Relaxed)",
+      "1": "🚶 1x (Real Time)",
+      "2": "🐇 2x Speed",
+      "5": "⚡ 5x Speed"
+    },
+    
+    // Bottom Dock Stats & Actions
+    statDist: "Draw Distance",
+    statLifts: "Pen Lifts",
+    statTime: "Est. Plot Time",
+    statPaths: "Paths Count",
+    btnDownloadSVG: "📥 Download SVG",
+    btnCopySVG: "📋 Copy SVG",
+    btnDownloadPNG: "📸 PNG",
+    
+    // Toast messages
+    toastSeed: "Seed updated to: ",
+    toastPreset: 'Applied preset: "',
+    toastCopySuccess: "Copied SVG markup to clipboard! 📋",
+    toastCopyFail: "Failed to copy SVG. Please download instead.",
+    toastDownload: "Downloaded SVG! Ready to plot 🖋️",
+    toastFitView: "View fitted to screen ⛶",
+    
+    // Modal Guide
+    guideTitle: "🎓 Workshop Guide & Pen Plotter Cheatsheet",
+    guideH3_1: "🌟 What is Algorithmic Generative Art?",
+    guideP_1: "Generative art is art made by a collaboration between a human artist and an autonomous system (an algorithm). Instead of manually drawing individual lines, you design the <b>rules</b>, <b>mathematical formulas</b>, and <b>random variations</b>. The computer computes thousands of coordinate points, and a mechanical pen plotter physically draws the artwork with real ink on paper!",
+    guideH3_2: "🖋️ The 4 Steps: From Screen to Physical Paper",
+    guideStep1Title: "Choose & Tweak Your Algorithm:",
+    guideStep1Desc: "Pick an algorithm on the left sidebar (Flow Fields, Mountain Ridges, Harmonographs, etc.). Tweak the sliders, test starter recipes, and hit <b>🎲 Roll Seed</b> until you love the composition.",
+    guideStep2Title: "Check Plotter Safety Margins:",
+    guideStep2Desc: "Keep the <i>Safe Margin</i> at 12mm or higher. This ensures the pen head never bumps into the metal binder clips holding your paper to the board!",
+    guideStep3Title: "Simulate the Draw:",
+    guideStep3Desc: "Click <b>▶️ Simulate Draw</b> to watch the virtual pen move across your page. Look out for pen lifts and total distance.",
+    guideStep4Title: "Download SVG & Plot:",
+    guideStep4Desc: "Click <b>📥 Download SVG</b>. Open the SVG in <b>Inkscape</b>, connect your AxiDraw or plotter via USB, select <i>Extensions > AxiDraw > Plot</i>, and watch your code come to life in physical ink!",
+    guideH3_3: "💡 3 Golden Rules for Pen Plotting Beginners",
+    guideRule1: "<b>No Fills, Only Strokes:</b> A pen plotter cannot paint solid fills like a desktop printer. Shading is achieved by dense parallel lines, cross-hatching, or tight squiggles.",
+    guideRule2: "<b>Mind the Pen Bleed:</b> If a line stops for too long or overlaps repeatedly, wet ink can bleed through paper. Our TSP Path Optimizer eliminates duplicate visits!",
+    guideRule3: "<b>Test Your Pen Height First:</b> When clamping your pen (Sakura Micron, gel pen, or fountain pen), ensure the pen tip sits ~3mm above the paper when raised, and rests gently on paper when lowered.",
+    guideH3_4: "🚀 Recommended Pens & Papers",
+    guidePensRec: "<b>Best Pens:</b> Sakura Pigma Micron (0.3mm or 0.5mm), Uni-ball Signo Broad (White or Metallic Gold), Pilot G2 Gel.",
+    guidePapersRec: "<b>Best Paper:</b> Bristol Board (Smooth), Heavy Cardstock (250+ gsm), or Clairefontaine archival sketch paper."
+  }
+};
+
+const ALGO_TRANSLATIONS = {
+  ar: {
+    flowField: {
+      name: "حقل تدفق بيرلن",
+      category: "ضجيج عضوي",
+      explanation: "تتبع مسار مئات الجزيئات العائمة في نهر سائل خفي أو تيار رياح انسيابي.",
+      beginnerTip: "جرّب زيادة 'تكبير الضجيج' للحصول على منحنيات ناعمة وواسعة!"
+    },
+    waveRidges: {
+      name: "تضاريس السلاسل الجبلية",
+      category: "تضاريس ثلاثية الأبعاد",
+      explanation: "قمم تضاريس متدرجة مستوحاة من مخطط بلوزار جوي ديفيجن الكلاسيكي مع حجب الخطوط الخلفية.",
+      beginnerTip: "فعّل 'حجب الخطوط الخلفية' للحصول على تأثير عمق ثلاثي الأبعاد واقعي!"
+    },
+    harmonograph: {
+      name: "هارمونوغراف وبندول ليساجو",
+      category: "فيزياء ميكانيكية",
+      explanation: "محاكاة حركة نواسير متأرجحة متناغمة تضمحل تدريجياً لترسم منحنيات بصرية ساحرة.",
+      beginnerTip: "فوارق التردد البسيطة (مثل 2.01 مقابل 3.0) تصنع مدارات هندسية آسرة!"
+    },
+    truchetTiles: {
+      name: "بلاطات تروشيه الهندسية",
+      category: "هندسة معمارية إسلامية",
+      explanation: "بلاطات شبكية تدور عشوائياً لتشكل متاهات وأشرطة متداخلة لا نهائية.",
+      beginnerTip: "اختر 'أشرطة ثلاثية' مع ٣ أقواس لمظهر مستوحى من الزخارف الهندسية الإسلامية."
+    },
+    concentricMoire: {
+      name: "تموجات مواريه المتداخلة",
+      category: "فن الخداع البصري",
+      explanation: "دوائر متحدة وحلقات متداخلة تنتج أنماط تداخل وتموجات بصرية مذهلة.",
+      beginnerTip: "إزاحة المركزين قليلاً يولد خطوط خداع بصري نابضة بالحياة عند رسمها بالقلم."
+    },
+    spirals: {
+      name: "حلزونات هندسية ومشوهة",
+      category: "منحنيات قطبية متصلة",
+      explanation: "حلزون أرخميدس نقي يبدأ بدقة هندسية مطلقة، مع إمكانية إضافة تشويه بالضجيج أو الموجات.",
+      beginnerTip: "ابدأ بتشويه صفر لرؤية حلزون هندسي نقي متزن، ثم حرّك منزلق التشويه لترى التموجات الرائعة!"
+    },
+    fractalTree: {
+      name: "شجرة التفرع الكسوري",
+      category: "نمو كسوري متفرع",
+      explanation: "خوارزمية تفرع نباتي ذاتي التشابه تحاكي نمو الأشجار وشبكات الجذور والشعب المرجانية.",
+      beginnerTip: "ارفع تمايل الرياح قليلاً للحصول على شكل شجرة طبيعية عضوية متوازنة."
+    },
+    continuousMeander: {
+      name: "خط متصل واحد مستمر",
+      category: "رسمة بخط واحد (بدون رفع قلم)",
+      explanation: "منحنى هيلبرت يملأ مساحة الورقة بالكامل في ضربة قلم واحدة متصلة بدون أي رفع للقلم.",
+      beginnerTip: "انعدام رفعات القلم يعني أن الراسمة الآلية ستعمل بأعلى كفاءة وسرعة ممكنة!"
+    },
+    codeSandbox: {
+      name: "مختبر الكود والرياضيات المباشر",
+      category: "رياضيات برمجية حرة",
+      explanation: "اكتب معادلتك البارامترية f(t) -> {x, y} لتجربة أفكارك الرياضية الخاصة في الورشة.",
+      beginnerTip: "جرّب الجمع بين Math.sin() و Math.cos() بترددات مختلفة لابتكار أشكال جديدة!"
+    }
+  }
+};
+
+const PARAM_LABELS_AR = {
+  streamCount: "عدد مسارات التدفق",
+  stepCount: "طول الخط (عدد الخطوات)",
+  stepLength: "دقة الخطوة (مسافة النقطة)",
+  noiseScale: "حجم تفاصيل الضجيج",
+  curlMultiplier: "شدة الدوران والانحناء",
+  spawnMode: "موضع البداية",
+  streamAvoidance: "تجنب تصادم الخطوط",
+  dualColorAccent: "طبقة ثانية (قلم إضافي)",
+  lineCount: "عدد خطوط التضاريس",
+  resolution: "دقة التضاريس",
+  peakHeight: "ارتفاع القمم",
+  noiseFreq: "تردد التموجات",
+  noiseOctaves: "طبقات التفاصيل",
+  occlusion: "حجب الخطوط الخلفية (عمق 3D)",
+  twoColorLayer: "طبقتان لونيتان",
+  loopCount: "عدد الدورات",
+  damping: "معدل خمود النواسير",
+  freqX: "تردد المحور الأفقي X",
+  freqY: "تردد المحور الرأسي Y",
+  freqZ: "تردد دوران الطاولة Z",
+  phaseDiff: "فرق الطور",
+  geometryMode: "نوع المنحنى الهيكلي",
+  gridCols: "أعمدة الشبكة",
+  tileStyle: "نمط البلاطة",
+  arcsPerTile: "عدد الأقواس في كل بلاطة",
+  alternatingColor: "تبديل لون الأقواس",
+  ringCount: "عدد الحلقات",
+  centerCount: "عدد المراكز",
+  centerSpacing: "المسافة بين المراكز",
+  noiseWobble: "تموجات الضجيج",
+  spiralMode: "التحويل إلى نمط حلزوني",
+  turns: "عدد اللفات (الدورات)",
+  distortionAmount: "التشويه الخوارزمي",
+  distortionMode: "نوع التشويه الخوارزمي",
+  distortionFreq: "تردد التشويه",
+  dualSpiral: "حلزون مزدوج متشابك (لقلمين)",
+  recursionDepth: "عمق التفرع الشجري",
+  branchAngle: "زاوية انحناء الأغصان",
+  lengthDecay: "نسبة تناقص طول الغصن",
+  windSway: "تمايل تأثير الرياح",
+  randomness: "تنوع عشوائي طبيعي",
+  foliageStyle: "نمط تفرع الأوراق",
+  curveOrder: "درجة المنحنى (الكثافة)",
+  cornerRoundness: "استدارة الزوايا",
+  wobble: "تموج يدوي طبيعي",
+  pointCount: "عدد النقاط المحسوبة",
+  scale: "مقياس الرسم",
+  freqA: "التردد A",
+  freqB: "التردد B"
+};
+
+const SELECT_OPTIONS_AR = {
+  "Random Scatter (Uniform)": "تناثر عشوائي (منتظم)",
+  "Concentric Ring Burst": "انفجار حلقي متمركز",
+  "Structured Grid Lattice": "شبكة منتظمة مرتبة",
+  "Central Core Outward": "من المركز إلى الخارج",
+  "Inward from Margins": "من الأطراف إلى الداخل",
+  "Curved Arcs (Woven Ribbons)": "أقواس منحنية (أشرطة منسوجة)",
+  "Straight Diagonals (Maze)": "خطوط مائلة (متاهة مستقيمة)",
+  "Quarter Circles": "أرباع دوائر كلاسيكية",
+  "Pure Perfect Spiral (0 Distortion)": "حلزون نقي ومثالي (بدون تشويه)",
+  "Organic Noise (Fingerprint / Tree Rings)": "ضجيج عضوي (بصمة إصبع / حلقات شجر)",
+  "Harmonic Waves (Petal Rosette)": "موجات توافقية (بتلات زهور)",
+  "Galactic Vortex Swirl": "دوامة مجرية ملتفة",
+  "Dual Lateral Pendulums (2-Axis)": "بندولان جانبيان (محوران)",
+  "Rotary Harmonograph (3-Axis)": "هارمونوغراف دوراني (٣ محاور)",
+  "Lissajous Orbit": "مدار ليساجو المغلق",
+  "Hypotrochoid Spirograph": "سبايروغراف تروس دائرية",
+  "Classic Clean Branches": "أغصان كلاسيكية نظيفة",
+  "Dense Leaf Clusters": "كتل أوراق كثيفة",
+  "Bud / Blossom Crosses": "براعم أزهار متقاطعة"
+};
+
+const PRESET_NAMES_AR = {
+  "Pure Geometric Spiral": "حلزون هندسي نقي",
+  "Organic Fingerprint Whorl": "دوامة بصمة إصبع",
+  "Flower Rosette Spiral": "حلزون بتلات الزهور",
+  "Galactic Vortex Coil": "لولب الدوامة المجرية",
+  "Hypnotic Dual Intertwined": "حلزون مزدوج متشابك",
+  "Ocean Currents": "تيارات المحيط",
+  "Turbulent Vortex": "دوامة عاصفة",
+  "Cosmic Ripple": "تموج كوني",
+  "Wood Grain Flow": "تدفق عروق الخشب",
+  "Lattice Drift": "انجراف شبكي",
+  "Joy Division Classic": "تضاريس جوي ديفيجن",
+  "Serene Mountain Valley": "وادي جبلي هادئ",
+  "Alien Crag Peaks": "قمم صخرية شاهقة",
+  "Low Frequency Waves": "موجات منخفضة التردد",
+  "Subtle Sand Dunes": "كثبان رملية ناعمة",
+  "Pendulum Waltz": "فالس البندول",
+  "Elliptical Rose": "وردة بيضاوية",
+  "Complex Harmonograph": "هارمونوغراف مركب",
+  "Triple Harmonic Orbit": "مدار توافقي ثلاثي",
+  "Woven Ribbon Labyrinth": "متاهة أشرطة منسوجة",
+  "Islamic Archwork": "أقواس معمارية إسلامية",
+  "High-Density Maze": "متاهة عالية الكثافة",
+  "Geometric Circuit": "دارات هندسية",
+  "Dual Moiré Interference": "تداخل مواريه ثنائي",
+  "Triple Radiant Ripple": "تموج إشعاعي ثلاثي",
+  "Eccentric Vortex": "دوامة لا مركزية",
+  "Optical Pulsar Target": "هدف نبضي بصري",
+  "Ancient Bonsai": "شجرة بونساي عريقة",
+  "Dense Forest Canopy": "غابة وارفة الظلال",
+  "Wind-Swept Willow": "صفصافة في مهب الريح",
+  "Coral Network": "شبكة مرجانية",
+  "Continuous Hilbert Labyrinth": "متاهة هيلبرت المتصلة",
+  "Smooth Hilbert Flow": "تدفق هيلبرت الانسيابي",
+  "Rounded Snake Path": "مسار الثعبان المستدير",
+  "Golden Ratio Rose": "وردة النسبة الذهبية",
+  "Fermat Spiral Daisy": "زهرة حلزون فيرما",
+  "Star Polygon Knot": "عقدة نجمية متعددة الأضلاع",
+  "Lissajous Knot (3:4)": "عقدة ليساجو (٣:٤)"
+};
+
+const UNITS_AR = {
+  "lines": "خط",
+  "steps": "خطوة",
+  "mm": "مم",
+  "x": "×",
+  "turns": "لفة",
+  "rings": "حلقة",
+  "deg": "درجة",
+  "pts": "نقطة"
+};
 
 class App {
   constructor() {
@@ -8,8 +445,30 @@ class App {
     this.rng = new RandomGenerator(42);
     this.noise = new SimplexNoise(this.rng);
 
+    // Read initial language preference from localStorage or URL parameter
+    let initialLang = "en";
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        const savedLang = localStorage.getItem("plotter_lang");
+        if (savedLang === "ar" || savedLang === "en") {
+          initialLang = savedLang;
+        }
+      }
+    } catch (_) {}
+
+    try {
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("lang")) {
+          const l = urlParams.get("lang");
+          if (l === "en" || l === "ar") initialLang = l;
+        }
+      }
+    } catch (_) {}
+
     // Application State
     this.state = {
+      lang: initialLang,
       currentAlgoId: "flowField",
       activePresetName: "Ocean Currents",
       seed: 4242,
@@ -52,6 +511,7 @@ class App {
     this.initDOM();
     this.initEvents();
     this.selectAlgorithm("flowField");
+    this.setLanguage(this.state.lang);
   }
 
   initDOM() {
@@ -67,44 +527,17 @@ class App {
       this.updateSimulatorUI(simState);
     });
 
-    // Populate paper dropdown
-    const paperSelect = document.getElementById("paperSelect");
-    if (paperSelect) {
-      paperSelect.innerHTML = "";
-      Object.keys(PAPER_SIZES).forEach(key => {
-        const p = PAPER_SIZES[key];
-        const opt = document.createElement("option");
-        opt.value = key;
-        opt.textContent = p.name;
-        if (key === this.state.paperKey) opt.selected = true;
-        paperSelect.appendChild(opt);
-      });
-    }
-
-    // Populate algorithm selector cards
-    const algoGrid = document.getElementById("algoGrid");
-    if (algoGrid) {
-      algoGrid.innerHTML = "";
-      Object.values(ALGORITHM_DEFINITIONS).forEach(def => {
-        const card = document.createElement("div");
-        card.className = `algo-card ${def.id === this.state.currentAlgoId ? "active" : ""}`;
-        card.dataset.algoId = def.id;
-        card.innerHTML = `
-          <div class="algo-card-top">
-            <span class="algo-card-icon">${def.icon}</span>
-            <div>
-              <div class="algo-card-name">${def.name}</div>
-              <div class="algo-card-category">${def.category}</div>
-            </div>
-          </div>
-        `;
-        card.addEventListener("click", () => this.selectAlgorithm(def.id));
-        algoGrid.appendChild(card);
-      });
-    }
+    this.renderAlgorithmCards();
+    this.updateDropdowns();
   }
 
   initEvents() {
+    // Language Switcher Toggle
+    document.getElementById("btnLangSwitch")?.addEventListener("click", () => {
+      const nextLang = this.state.lang === "ar" ? "en" : "ar";
+      this.setLanguage(nextLang);
+    });
+
     // Tab switching (Algorithms vs Setup vs Code)
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -334,49 +767,91 @@ class App {
       c.classList.toggle("active", c.dataset.algoId === algoId);
     });
 
-    // Update algorithm banner info
+    this.updateAlgorithmInfo(def);
+    this.renderPresetPills(algoId, def);
+    this.renderParameterControls(def);
+
+    // Regenerate
+    this.generate();
+  }
+
+  updateAlgorithmInfo(def) {
+    const isAr = this.state.lang === "ar";
+    const trans = (isAr && ALGO_TRANSLATIONS.ar[def.id]) || null;
+    const name = trans ? trans.name : def.name;
+    const explanation = trans ? trans.explanation : def.explanation;
+    const beginnerTip = trans ? trans.beginnerTip : def.beginnerTip;
+    const tipPrefix = isAr ? "💡 <b>نصيحة للمبتدئين:</b> " : "💡 <b>Beginner Tip:</b> ";
+
     const infoTitle = document.getElementById("algoInfoTitle");
     const infoDesc = document.getElementById("algoInfoDesc");
     const infoTip = document.getElementById("algoInfoTip");
     const codeSnippet = document.getElementById("algoCodeSnippet");
 
-    if (infoTitle) infoTitle.innerHTML = `${def.icon} ${def.name}`;
-    if (infoDesc) infoDesc.textContent = def.explanation;
-    if (infoTip) infoTip.innerHTML = `💡 <b>Beginner Tip:</b> ${def.beginnerTip}`;
+    if (infoTitle) infoTitle.innerHTML = `${def.icon} ${name}`;
+    if (infoDesc) infoDesc.textContent = explanation;
+    if (infoTip) infoTip.innerHTML = `${tipPrefix}${beginnerTip}`;
     if (codeSnippet) codeSnippet.textContent = def.codeSnippet || "// Algorithmic generative math";
+  }
 
-    // Build Preset Pills
+  renderAlgorithmCards() {
+    const algoGrid = document.getElementById("algoGrid");
+    if (!algoGrid) return;
+    algoGrid.innerHTML = "";
+
+    const isAr = this.state.lang === "ar";
+
+    Object.values(ALGORITHM_DEFINITIONS).forEach(def => {
+      const trans = (isAr && ALGO_TRANSLATIONS.ar[def.id]) || null;
+      const name = trans ? trans.name : def.name;
+      const category = trans ? trans.category : def.category;
+
+      const card = document.createElement("div");
+      card.className = `algo-card ${def.id === this.state.currentAlgoId ? "active" : ""}`;
+      card.dataset.algoId = def.id;
+      card.innerHTML = `
+        <div class="algo-card-top">
+          <span class="algo-card-icon">${def.icon}</span>
+          <div>
+            <div class="algo-card-name">${name}</div>
+            <div class="algo-card-category">${category}</div>
+          </div>
+        </div>
+      `;
+      card.addEventListener("click", () => this.selectAlgorithm(def.id));
+      algoGrid.appendChild(card);
+    });
+  }
+
+  renderPresetPills(algoId, def) {
     const presetPills = document.getElementById("presetPills");
-    if (presetPills) {
-      presetPills.innerHTML = "";
-      const presets = def.presets || {};
-      const presetNames = Object.keys(presets);
+    if (!presetPills) return;
+    presetPills.innerHTML = "";
+    const presets = def.presets || {};
+    const presetNames = Object.keys(presets);
+    const isAr = this.state.lang === "ar";
 
-      if (presetNames.length > 0) {
-        const firstPreset = presetNames[0];
-        this.state.activePresetName = firstPreset;
-        const presetValues = presets[firstPreset];
+    if (presetNames.length > 0) {
+      if (!this.state.activePresetName || !presets[this.state.activePresetName]) {
+        this.state.activePresetName = presetNames[0];
+        const presetValues = presets[presetNames[0]];
         Object.keys(presetValues).forEach(k => {
           this.state.algoParams[algoId][k] = presetValues[k];
         });
-
-        presetNames.forEach(name => {
-          const pill = document.createElement("button");
-          pill.className = `preset-pill ${name === this.state.activePresetName ? "active" : ""}`;
-          pill.textContent = name;
-          pill.addEventListener("click", () => {
-            this.applyPreset(algoId, name);
-          });
-          presetPills.appendChild(pill);
-        });
       }
+
+      presetNames.forEach(name => {
+        const pill = document.createElement("button");
+        pill.className = `preset-pill ${name === this.state.activePresetName ? "active" : ""}`;
+        const displayName = (isAr && PRESET_NAMES_AR[name]) ? PRESET_NAMES_AR[name] : name;
+        pill.textContent = displayName;
+        pill.dataset.presetName = name;
+        pill.addEventListener("click", () => {
+          this.applyPreset(algoId, name);
+        });
+        presetPills.appendChild(pill);
+      });
     }
-
-    // Build Parameter Sliders
-    this.renderParameterControls(def);
-
-    // Regenerate
-    this.generate();
   }
 
   applyPreset(algoId, presetName) {
@@ -393,14 +868,17 @@ class App {
 
     // Update active class on preset pills
     document.querySelectorAll(".preset-pill").forEach(p => {
-      p.classList.toggle("active", p.textContent === presetName);
+      p.classList.toggle("active", p.dataset.presetName === presetName);
     });
 
     // Re-render sliders
     this.renderParameterControls(def);
 
     this.generate();
-    this.showToast(`Applied preset: "${presetName}"`);
+    const isAr = this.state.lang === "ar";
+    const displayName = (isAr && PRESET_NAMES_AR[presetName]) ? PRESET_NAMES_AR[presetName] : presetName;
+    const t = APP_TRANSLATIONS[this.state.lang];
+    this.showToast(`${t.toastPreset}${displayName}"`);
   }
 
   renderParameterControls(def) {
@@ -409,17 +887,20 @@ class App {
     container.innerHTML = "";
 
     const currentParams = this.state.algoParams[def.id];
+    const isAr = this.state.lang === "ar";
 
     def.parameters.forEach(param => {
       const val = currentParams[param.id] !== undefined ? currentParams[param.id] : param.default;
+      const paramLabel = (isAr && PARAM_LABELS_AR[param.id]) ? PARAM_LABELS_AR[param.id] : param.label;
+      const unit = (isAr && param.unit && UNITS_AR[param.unit]) ? UNITS_AR[param.unit] : (param.unit || "");
 
       if (param.type === "range") {
         const item = document.createElement("div");
         item.className = "param-item";
         item.innerHTML = `
           <div class="param-header">
-            <label class="param-label" title="${param.desc}">${param.label}</label>
-            <span class="param-value" id="val_${param.id}">${val} ${param.unit || ""}</span>
+            <label class="param-label" title="${param.desc}">${paramLabel}</label>
+            <span class="param-value" id="val_${param.id}">${val} ${unit}</span>
           </div>
           <input type="range" id="input_${param.id}" min="${param.min}" max="${param.max}" step="${param.step}" value="${val}">
         `;
@@ -427,7 +908,7 @@ class App {
         slider.addEventListener("input", (e) => {
           const newVal = parseFloat(e.target.value);
           currentParams[param.id] = newVal;
-          document.getElementById(`val_${param.id}`).textContent = `${newVal} ${param.unit || ""}`;
+          document.getElementById(`val_${param.id}`).textContent = `${newVal} ${unit}`;
           this.generate();
         });
         container.appendChild(item);
@@ -437,11 +918,12 @@ class App {
         item.className = "param-item";
         let optionsHtml = "";
         param.options.forEach(opt => {
-          optionsHtml += `<option value="${opt.value}" ${opt.value === val ? "selected" : ""}>${opt.label}</option>`;
+          const optLabel = (isAr && SELECT_OPTIONS_AR[opt.label]) ? SELECT_OPTIONS_AR[opt.label] : opt.label;
+          optionsHtml += `<option value="${opt.value}" ${opt.value === val ? "selected" : ""}>${optLabel}</option>`;
         });
         item.innerHTML = `
           <div class="param-header">
-            <label class="param-label" title="${param.desc}">${param.label}</label>
+            <label class="param-label" title="${param.desc}">${paramLabel}</label>
           </div>
           <select class="param-select" id="input_${param.id}">
             ${optionsHtml}
@@ -458,7 +940,7 @@ class App {
         const item = document.createElement("div");
         item.className = "param-checkbox-row";
         item.innerHTML = `
-          <label class="param-label" title="${param.desc}">${param.label}</label>
+          <label class="param-label" title="${param.desc}">${paramLabel}</label>
           <label class="switch">
             <input type="checkbox" id="input_${param.id}" ${val ? "checked" : ""}>
             <span class="slider-switch"></span>
@@ -476,7 +958,7 @@ class App {
         item.className = "param-item";
         item.innerHTML = `
           <div class="param-header">
-            <label class="param-label" title="${param.desc}">${param.label}</label>
+            <label class="param-label" title="${param.desc}">${paramLabel}</label>
           </div>
           <input type="text" class="seed-input" id="input_${param.id}" value="${val}" style="font-family: monospace; font-size: 11.5px; padding: 6px 10px;">
         `;
@@ -488,6 +970,337 @@ class App {
         container.appendChild(item);
       }
     });
+  }
+
+  updateDropdowns() {
+    const isAr = this.state.lang === "ar";
+    const t = APP_TRANSLATIONS[this.state.lang];
+    if (!t) return;
+
+    // Paper Select
+    const paperSelect = document.getElementById("paperSelect");
+    if (paperSelect) {
+      const currentVal = this.state.paperKey;
+      paperSelect.innerHTML = "";
+      Object.keys(PAPER_SIZES).forEach(key => {
+        const p = PAPER_SIZES[key];
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = isAr ? `${key.toUpperCase()} (${p.widthMm} × ${p.heightMm} مم)` : p.name;
+        if (key === currentVal) opt.selected = true;
+        paperSelect.appendChild(opt);
+      });
+    }
+
+    // Orientation Select
+    const optPort = document.getElementById("optPortrait");
+    if (optPort) optPort.textContent = t.optPortrait;
+    const optLand = document.getElementById("optLandscape");
+    if (optLand) optLand.textContent = t.optLandscape;
+
+    // Paper Color Select
+    const paperColorSelect = document.getElementById("paperColorSelect");
+    if (paperColorSelect && paperColorSelect.options) {
+      Array.from(paperColorSelect.options).forEach(opt => {
+        if (t.paperColors && t.paperColors[opt.value]) {
+          opt.textContent = t.paperColors[opt.value];
+        }
+      });
+    }
+
+    // Pen Selects
+    const pen1Select = document.getElementById("pen1Select");
+    if (pen1Select && pen1Select.options) {
+      Array.from(pen1Select.options).forEach(opt => {
+        if (t.pens && t.pens[opt.value]) {
+          opt.textContent = t.pens[opt.value];
+        }
+      });
+    }
+    const pen2Select = document.getElementById("pen2Select");
+    if (pen2Select && pen2Select.options) {
+      Array.from(pen2Select.options).forEach(opt => {
+        if (t.pens && t.pens[opt.value]) {
+          opt.textContent = t.pens[opt.value];
+        }
+      });
+    }
+
+    // Simulation Speed Select
+    const simSpeedSelect = document.getElementById("simSpeedSelect");
+    if (simSpeedSelect && simSpeedSelect.options) {
+      Array.from(simSpeedSelect.options).forEach(opt => {
+        if (t.simSpeeds && t.simSpeeds[opt.value]) {
+          opt.textContent = t.simSpeeds[opt.value];
+        }
+      });
+    }
+  }
+
+  updateModalGuide() {
+    const isAr = this.state.lang === "ar";
+    const t = APP_TRANSLATIONS[this.state.lang];
+    const titleEl = document.getElementById("modalGuideTitle");
+    const bodyEl = document.getElementById("modalGuideBody");
+    if (!titleEl || !bodyEl || !t) return;
+
+    titleEl.innerHTML = `<span>${t.guideTitle}</span>`;
+
+    if (isAr) {
+      bodyEl.innerHTML = `
+        <h3>${t.guideH3_1}</h3>
+        <p>${t.guideP_1}</p>
+
+        <h3>${t.guideH3_2}</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="guide-step-card">
+            <div class="guide-step-num">١</div>
+            <div>
+              <b>${t.guideStep1Title}</b> ${t.guideStep1Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">٢</div>
+            <div>
+              <b>${t.guideStep2Title}</b> ${t.guideStep2Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">٣</div>
+            <div>
+              <b>${t.guideStep3Title}</b> ${t.guideStep3Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">٤</div>
+            <div>
+              <b>${t.guideStep4Title}</b> ${t.guideStep4Desc}
+            </div>
+          </div>
+        </div>
+
+        <h3>${t.guideH3_3}</h3>
+        <ul>
+          <li>${t.guideRule1}</li>
+          <li>${t.guideRule2}</li>
+          <li>${t.guideRule3}</li>
+        </ul>
+
+        <h3>${t.guideH3_4}</h3>
+        <ul>
+          <li>${t.guidePensRec}</li>
+          <li>${t.guidePapersRec}</li>
+        </ul>
+      `;
+    } else {
+      bodyEl.innerHTML = `
+        <h3>${t.guideH3_1}</h3>
+        <p>${t.guideP_1}</p>
+
+        <h3>${t.guideH3_2}</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="guide-step-card">
+            <div class="guide-step-num">1</div>
+            <div>
+              <b>${t.guideStep1Title}</b> ${t.guideStep1Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">2</div>
+            <div>
+              <b>${t.guideStep2Title}</b> ${t.guideStep2Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">3</div>
+            <div>
+              <b>${t.guideStep3Title}</b> ${t.guideStep3Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">4</div>
+            <div>
+              <b>${t.guideStep4Title}</b> ${t.guideStep4Desc}
+            </div>
+          </div>
+        </div>
+
+        <h3>${t.guideH3_3}</h3>
+        <ul>
+          <li>${t.guideRule1}</li>
+          <li>${t.guideRule2}</li>
+          <li>${t.guideRule3}</li>
+        </ul>
+
+        <h3>${t.guideH3_4}</h3>
+        <ul>
+          <li>${t.guidePensRec}</li>
+          <li>${t.guidePapersRec}</li>
+        </ul>
+      `;
+    }
+  }
+
+  setLanguage(lang) {
+    this.state.lang = lang;
+    const isAr = lang === "ar";
+    document.documentElement.setAttribute("lang", lang);
+    document.body.setAttribute("dir", isAr ? "rtl" : "ltr");
+    
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem("plotter_lang", lang);
+      }
+    } catch (_) {}
+
+    // Update simple mode link with query param
+    const linkSimple = document.getElementById("linkSimpleMode");
+    if (linkSimple) linkSimple.href = `simple.html?lang=${lang}`;
+
+    const t = APP_TRANSLATIONS[lang];
+    if (!t) return;
+
+    // Header
+    const langLabel = document.getElementById("langLabel");
+    if (langLabel) langLabel.textContent = isAr ? "English" : "العربية";
+    const logoTitle = document.getElementById("logoTitle");
+    if (logoTitle) logoTitle.textContent = t.logoTitle;
+    const logoSub = document.getElementById("logoSub");
+    if (logoSub) logoSub.textContent = t.logoSub;
+    const txtSimpleLink = document.getElementById("txtSimpleLink");
+    if (txtSimpleLink) txtSimpleLink.textContent = t.linkSimple;
+    const txtPhotoLink = document.getElementById("txtPhotoLink");
+    if (txtPhotoLink) txtPhotoLink.textContent = t.linkPhoto;
+    const txtGuideBtn = document.getElementById("txtGuideBtn");
+    if (txtGuideBtn) txtGuideBtn.textContent = t.btnGuide;
+
+    // Tabs
+    const txtTabAlgo = document.getElementById("txtTabAlgorithms");
+    if (txtTabAlgo) txtTabAlgo.textContent = t.tabAlgo;
+    const txtTabSetup = document.getElementById("txtTabSetup");
+    if (txtTabSetup) txtTabSetup.textContent = t.tabSetup;
+    const txtTabCode = document.getElementById("txtTabCode");
+    if (txtTabCode) txtTabCode.textContent = t.tabCode;
+
+    // Tab 1 Section Titles
+    const sec1 = document.getElementById("secAlgoTitle");
+    if (sec1) sec1.textContent = t.secAlgoTitle;
+    const badge1 = document.getElementById("badgeAlgo");
+    if (badge1) badge1.textContent = t.badgeAlgo;
+    const sec2 = document.getElementById("secPresetTitle");
+    if (sec2) sec2.textContent = t.secPresetTitle;
+    const badge2 = document.getElementById("badgePreset");
+    if (badge2) badge2.textContent = t.badgePreset;
+    const sec3 = document.getElementById("secSeedTitle");
+    if (sec3) sec3.textContent = t.secSeedTitle;
+    const badge3 = document.getElementById("badgeSeed");
+    if (badge3) badge3.textContent = t.badgeSeed;
+    const txtRollSeed = document.getElementById("txtRollSeed");
+    if (txtRollSeed) txtRollSeed.textContent = t.btnRollSeed;
+    const sec4 = document.getElementById("secParamTitle");
+    if (sec4) sec4.textContent = t.secParamTitle;
+    const badge4 = document.getElementById("badgeParam");
+    if (badge4) badge4.textContent = t.badgeParam;
+
+    // Tab 2 Setup
+    const secPaper = document.getElementById("secPaperTitle");
+    if (secPaper) secPaper.textContent = t.secPaperTitle;
+    const badgeHw = document.getElementById("badgeHardware");
+    if (badgeHw) badgeHw.textContent = t.badgeHardware;
+    const lblSize = document.getElementById("lblPaperSize");
+    if (lblSize) lblSize.textContent = t.lblPaperSize;
+    const lblOrient = document.getElementById("lblOrientation");
+    if (lblOrient) lblOrient.textContent = t.lblOrientation;
+    const optPort = document.getElementById("optPortrait");
+    if (optPort) optPort.textContent = t.optPortrait;
+    const optLand = document.getElementById("optLandscape");
+    if (optLand) optLand.textContent = t.optLandscape;
+    const lblMargin = document.getElementById("lblMargin");
+    if (lblMargin) lblMargin.textContent = t.lblMargin;
+    const lblPaperColor = document.getElementById("lblPaperColor");
+    if (lblPaperColor) lblPaperColor.textContent = t.lblPaperColor;
+
+    const secPen = document.getElementById("secPenTitle");
+    if (secPen) secPen.textContent = t.secPenTitle;
+    const badgePen = document.getElementById("badgePen");
+    if (badgePen) badgePen.textContent = t.badgePen;
+    const lblPen1 = document.getElementById("lblPen1");
+    if (lblPen1) lblPen1.textContent = t.lblPen1;
+    const lblPen2 = document.getElementById("lblPen2");
+    if (lblPen2) lblPen2.textContent = t.lblPen2;
+
+    const secOpt = document.getElementById("secOptTitle");
+    if (secOpt) secOpt.textContent = t.secOptTitle;
+    const badgeOpt = document.getElementById("badgeOpt");
+    if (badgeOpt) badgeOpt.textContent = t.badgeOpt;
+    const lblOpt = document.getElementById("lblOpt");
+    if (lblOpt) lblOpt.textContent = t.lblOpt;
+    const descOpt = document.getElementById("descOpt");
+    if (descOpt) descOpt.textContent = t.descOpt;
+
+    const secImg = document.getElementById("secImageTitle");
+    if (secImg) secImg.textContent = t.secImageTitle;
+    const descImg = document.getElementById("descImage");
+    if (descImg) descImg.textContent = t.descImage;
+    const btnImg = document.getElementById("btnImageStudio");
+    if (btnImg) btnImg.textContent = t.btnImageStudio;
+
+    // Tab 3 Code & Math
+    const secCode = document.getElementById("secCodeTitle");
+    if (secCode) secCode.textContent = t.secCodeTitle;
+    const badgeCode = document.getElementById("badgeCode");
+    if (badgeCode) badgeCode.textContent = t.badgeCode;
+    const descCode = document.getElementById("descCode");
+    if (descCode) descCode.textContent = t.descCode;
+    const secRecipe = document.getElementById("secRecipeTitle");
+    if (secRecipe) secRecipe.textContent = t.secRecipeTitle;
+    const r1 = document.getElementById("recipePoint1");
+    if (r1) r1.innerHTML = t.recipePoint1;
+    const r2 = document.getElementById("recipePoint2");
+    if (r2) r2.innerHTML = t.recipePoint2;
+    const r3 = document.getElementById("recipePoint3");
+    if (r3) r3.innerHTML = t.recipePoint3;
+
+    // Viewport Toolbar
+    const txtFit = document.getElementById("txtBtnZoomFit");
+    if (txtFit) txtFit.textContent = t.btnFitView;
+    const txtSimToggle = document.getElementById("txtSimToggle");
+    if (txtSimToggle) {
+      txtSimToggle.textContent = this.simulator && this.simulator.isPlaying ? t.btnSimStop : t.btnSimStart;
+    }
+
+    // Simulator
+    const simTitle = document.getElementById("txtSimTitle");
+    if (simTitle) simTitle.textContent = t.simTitle;
+
+    // Bottom Dock Stats
+    const lblDist = document.getElementById("lblStatDist");
+    if (lblDist) lblDist.textContent = t.statDist;
+    const lblLifts = document.getElementById("lblStatLifts");
+    if (lblLifts) lblLifts.textContent = t.statLifts;
+    const lblTime = document.getElementById("lblStatTime");
+    if (lblTime) lblTime.textContent = t.statTime;
+    const lblPaths = document.getElementById("lblStatPaths");
+    if (lblPaths) lblPaths.textContent = t.statPaths;
+
+    const txtDown = document.getElementById("txtBtnDownloadSVG");
+    if (txtDown) txtDown.textContent = t.btnDownloadSVG;
+    const txtCopy = document.getElementById("txtBtnCopySVG");
+    if (txtCopy) txtCopy.textContent = t.btnCopySVG;
+    const txtPng = document.getElementById("txtBtnDownloadPNG");
+    if (txtPng) txtPng.textContent = t.btnDownloadPNG;
+
+    // Re-populate and re-render dynamic sections
+    this.renderAlgorithmCards();
+    this.updateDropdowns();
+    this.updateModalGuide();
+    
+    const def = ALGORITHM_DEFINITIONS[this.state.currentAlgoId];
+    if (def) {
+      this.updateAlgorithmInfo(def);
+      this.renderPresetPills(this.state.currentAlgoId, def);
+      this.renderParameterControls(def);
+    }
   }
 
   generate() {

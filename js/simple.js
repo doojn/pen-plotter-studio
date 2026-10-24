@@ -133,6 +133,16 @@ class SimpleApp {
       bounds: null
     };
 
+    // Check saved language preference from localStorage
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        const savedLang = localStorage.getItem("plotter_lang");
+        if (savedLang === "ar" || savedLang === "en") {
+          this.state.lang = savedLang;
+        }
+      }
+    } catch (_) {}
+
     // Check URL parameters for direct linking (e.g. ?style=spirals&lang=en)
     try {
       if (typeof window !== "undefined" && window.location && window.location.search) {
@@ -308,12 +318,22 @@ class SimpleApp {
     document.body.setAttribute("dir", isAr ? "rtl" : "ltr");
     document.documentElement.setAttribute("lang", lang);
 
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem("plotter_lang", lang);
+      }
+    } catch (_) {}
+
     const t = TRANSLATIONS[lang];
 
     // Update Header
     document.getElementById("brandTitle").textContent = t.brandTitle;
     document.getElementById("brandSub").textContent = t.brandSub;
-    document.getElementById("proLink").textContent = t.proLink;
+    const proLink = document.getElementById("proLink");
+    if (proLink) {
+      proLink.textContent = t.proLink;
+      proLink.href = `index.html?lang=${lang}`;
+    }
     document.getElementById("langLabel").textContent = isAr ? "English" : "العربية";
 
     // Update Step Titles

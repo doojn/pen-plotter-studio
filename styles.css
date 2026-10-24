@@ -1000,3 +1000,63 @@ input:checked + .slider-switch:before {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* =========================================================================
+   RTL & ARABIC SUPPORT
+   ========================================================================= */
+body[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Arabic", "Geeza Pro", "Noto Sans Arabic", "Segoe UI", Roboto, sans-serif;
+}
+
+body[dir="rtl"] .sidebar {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
+}
+
+body[dir="rtl"] .algo-card {
+  text-align: right;
+}
+
+body[dir="rtl"] .algo-info-box {
+  border-left: none;
+  border-right: 3px solid var(--primary);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+body[dir="rtl"] .plot-stats {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  padding-right: 0;
+  padding-left: 16px;
+}
+
+body[dir="rtl"] .simulator-panel {
+  right: auto;
+  left: 20px;
+}
+
+body[dir="rtl"] .toast {
+  right: auto;
+  left: 24px;
+}
+
+body[dir="rtl"] .guide-step-card {
+  text-align: right;
+}
+
+.lang-switch-btn {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: var(--primary) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lang-switch-btn:hover {
+  background: rgba(56, 189, 248, 0.25) !important;
+}

@@ -17,33 +17,37 @@
       <div class="logo-area">
         <div class="logo-icon">🖋️</div>
         <div class="logo-text">
-          <h1>Plotter Studio</h1>
-          <p>Algorithmic Art Workshop</p>
+          <h1 id="logoTitle">Plotter Studio</h1>
+          <p id="logoSub">Algorithmic Art Workshop</p>
         </div>
       </div>
       <div class="header-actions">
-        <a href="simple.html" class="btn-guide" style="text-decoration: none; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.12); font-weight: 700;" title="Switch to Simple Bilingual Mode (عربي / EN)">
-          <span>✨ الوضع المبسط · Simple</span>
+        <button class="btn-guide lang-switch-btn" id="btnLangSwitch" title="Switch Language / تغيير اللغة">
+          <span>🌐</span>
+          <span id="langLabel">العربية</span>
+        </button>
+        <a href="simple.html" class="btn-guide" id="linkSimpleMode" style="text-decoration: none; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.12); font-weight: 700;" title="Switch to Simple Bilingual Mode (عربي / EN)">
+          <span id="txtSimpleLink">✨ الوضع المبسط</span>
         </a>
-        <a href="image_to_path.html" class="btn-guide" style="text-decoration: none; color: var(--text-secondary); border-color: var(--border-color); background: var(--bg-card);" title="Switch to Photo / Raster Vectorizer">
-          <span>📷 Photo to Path</span>
+        <a href="image_to_path.html" class="btn-guide" id="linkPhotoToPath" style="text-decoration: none; color: var(--text-secondary); border-color: var(--border-color); background: var(--bg-card);" title="Switch to Photo / Raster Vectorizer">
+          <span id="txtPhotoLink">📷 Photo</span>
         </a>
         <button class="btn-guide" id="btnOpenGuide" title="View Workshop Guide & Plotter Instructions">
-          <span>🎓 Guide</span>
+          <span id="txtGuideBtn">🎓 Guide</span>
         </button>
       </div>
     </div>
 
     <!-- Tab navigation -->
     <nav class="sidebar-tabs">
-      <button class="tab-btn active" data-tab="tab-algorithms">
-        <span>🎨 Algorithms</span>
+      <button class="tab-btn active" data-tab="tab-algorithms" id="tabBtnAlgorithms">
+        <span id="txtTabAlgorithms">🎨 Algorithms</span>
       </button>
-      <button class="tab-btn" data-tab="tab-setup">
-        <span>📐 Paper & Pen</span>
+      <button class="tab-btn" data-tab="tab-setup" id="tabBtnSetup">
+        <span id="txtTabSetup">📐 Paper & Pen</span>
       </button>
-      <button class="tab-btn" data-tab="tab-code">
-        <span>💻 Math & Code</span>
+      <button class="tab-btn" data-tab="tab-code" id="tabBtnCode">
+        <span id="txtTabCode">💻 Math & Code</span>
       </button>
     </nav>
 
@@ -57,8 +61,8 @@
         <!-- Algorithm Grid Selection -->
         <div class="control-section">
           <div class="section-title">
-            <span>1. Choose an Algorithm</span>
-            <span class="badge">8 Core Models</span>
+            <span id="secAlgoTitle">1. Choose an Algorithm</span>
+            <span class="badge" id="badgeAlgo">8 Core Models</span>
           </div>
           <div class="algo-grid" id="algoGrid">
             <!-- Populated dynamically by app.js -->
@@ -81,8 +85,8 @@
         <!-- Starter Presets / Recipes -->
         <div class="control-section">
           <div class="section-title">
-            <span>2. Starter Recipes</span>
-            <span class="badge">1-Click Looks</span>
+            <span id="secPresetTitle">2. Starter Recipes</span>
+            <span class="badge" id="badgePreset">1-Click Looks</span>
           </div>
           <div class="preset-bar">
             <div class="preset-pills" id="presetPills">
@@ -94,15 +98,15 @@
         <!-- Random Seed Bar -->
         <div class="control-section">
           <div class="section-title">
-            <span>3. Seed & Variations</span>
-            <span class="badge">Reproducible</span>
+            <span id="secSeedTitle">3. Seed & Variations</span>
+            <span class="badge" id="badgeSeed">Reproducible</span>
           </div>
           <div class="seed-bar">
             <div class="seed-input-wrapper">
               <input type="text" class="seed-input" id="seedInput" value="4242" title="Unique seed number">
             </div>
             <button class="btn-random" id="btnRandomSeed" title="Roll a new random variation (Shortcut: Spacebar)">
-              <span>🎲 Roll Seed</span>
+              <span id="txtRollSeed">🎲 Roll Seed</span>
             </button>
           </div>
         </div>
@@ -110,8 +114,8 @@
         <!-- Dynamic Parameter Sliders -->
         <div class="control-section">
           <div class="section-title">
-            <span>4. Customize Parameters</span>
-            <span class="badge">Live Tweak</span>
+            <span id="secParamTitle">4. Customize Parameters</span>
+            <span class="badge" id="badgeParam">Live Tweak</span>
           </div>
           <div class="param-group" id="paramContainer">
             <!-- Populated dynamically by app.js -->
@@ -127,26 +131,26 @@
 
         <div class="control-section">
           <div class="section-title">
-            <span>Physical Paper Dimensions</span>
-            <span class="badge">Hardware Specs</span>
+            <span id="secPaperTitle">Physical Paper Dimensions</span>
+            <span class="badge" id="badgeHardware">Hardware Specs</span>
           </div>
           <div class="param-group">
             <div class="param-item">
-              <label class="param-label">Paper Size Format</label>
+              <label class="param-label" id="lblPaperSize">Paper Size Format</label>
               <select class="param-select" id="paperSelect">
                 <!-- Populated dynamically -->
               </select>
             </div>
             <div class="param-item">
-              <label class="param-label">Paper Orientation</label>
+              <label class="param-label" id="lblOrientation">Paper Orientation</label>
               <select class="param-select" id="orientationSelect">
-                <option value="portrait" selected>Portrait (Vertical)</option>
-                <option value="landscape">Landscape (Horizontal)</option>
+                <option value="portrait" id="optPortrait" selected>Portrait (Vertical)</option>
+                <option value="landscape" id="optLandscape">Landscape (Horizontal)</option>
               </select>
             </div>
             <div class="param-item">
               <div class="param-header">
-                <label class="param-label" title="Protects your plotter clips from being hit by the pen head">
+                <label class="param-label" id="lblMargin" title="Protects your plotter clips from being hit by the pen head">
                   Safe Margin (Clips Clearance)
                 </label>
                 <span class="param-value" id="marginVal">12 mm</span>
@@ -154,7 +158,7 @@
               <input type="range" id="marginSlider" min="4" max="30" step="1" value="12">
             </div>
             <div class="param-item">
-              <label class="param-label">Paper Color / Stock Preview</label>
+              <label class="param-label" id="lblPaperColor">Paper Color / Stock Preview</label>
               <select class="param-select" id="paperColorSelect">
                 <option value="white" selected>Heavy White Bristol Paper</option>
                 <option value="cream">Warm Cream Moleskine</option>
@@ -168,12 +172,12 @@
 
         <div class="control-section">
           <div class="section-title">
-            <span>Pen Selection & Stroke Preview</span>
-            <span class="badge">Drawing Ink</span>
+            <span id="secPenTitle">Pen Selection & Stroke Preview</span>
+            <span class="badge" id="badgePen">Drawing Ink</span>
           </div>
           <div class="param-group">
             <div class="param-item">
-              <label class="param-label">Pen 1 (Primary Pen)</label>
+              <label class="param-label" id="lblPen1">Pen 1 (Primary Pen)</label>
               <select class="param-select" id="pen1Select">
                 <option value="micron_black" selected>Sakura Micron 0.3mm (Black)</option>
                 <option value="gelly_white">Gelly Roll 0.5mm (White Gel)</option>
@@ -184,7 +188,7 @@
               </select>
             </div>
             <div class="param-item">
-              <label class="param-label">Pen 2 (Accent Pen / Dual-Layer)</label>
+              <label class="param-label" id="lblPen2">Pen 2 (Accent Pen / Dual-Layer)</label>
               <select class="param-select" id="pen2Select">
                 <option value="crimson_red" selected>Vivid Crimson Sharpie</option>
                 <option value="metallic_gold">Metallic Gold Gel 0.4mm</option>
@@ -199,11 +203,11 @@
 
         <div class="control-section">
           <div class="section-title">
-            <span>Plotter Path Optimization</span>
-            <span class="badge">AxiDraw Speedup</span>
+            <span id="secOptTitle">Plotter Path Optimization</span>
+            <span class="badge" id="badgeOpt">AxiDraw Speedup</span>
           </div>
           <div class="param-checkbox-row">
-            <label class="param-label" title="Greedy TSP nearest-neighbor sorting cuts pen-up travel time by up to 50%">
+            <label class="param-label" id="lblOpt" title="Greedy TSP nearest-neighbor sorting cuts pen-up travel time by up to 50%">
               ⚡ TSP Path Optimization (Sort Nearest)
             </label>
             <label class="switch">
@@ -211,19 +215,19 @@
               <span class="slider-switch"></span>
             </label>
           </div>
-          <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+          <p id="descOpt" style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
             When enabled, disconnected lines are reordered so the pen always moves to the closest line next, and paths are reversed when drawing from the tail is faster.
           </p>
         </div>
 
         <div class="control-section">
           <div class="section-title">
-            <span>Switch to Image Studio</span>
+            <span id="secImageTitle">Switch to Image Studio</span>
           </div>
-          <p style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5;">
+          <p id="descImage" style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5;">
             Want to vectorize a portrait or photo into continuous squiggles instead of purely generative math?
           </p>
-          <a href="image_to_path.html" class="btn-secondary" style="text-decoration: none; justify-content: center;">
+          <a href="image_to_path.html" class="btn-secondary" id="btnImageStudio" style="text-decoration: none; justify-content: center;">
             📷 Open Image-to-Path Studio
           </a>
         </div>
@@ -236,10 +240,10 @@
       <div class="tab-pane" id="tab-code">
         <div class="control-section">
           <div class="section-title">
-            <span>Algorithm Logic & Formula</span>
-            <span class="badge">JavaScript</span>
+            <span id="secCodeTitle">Algorithm Logic & Formula</span>
+            <span class="badge" id="badgeCode">JavaScript</span>
           </div>
-          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+          <p id="descCode" style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
             Every generative artwork is produced by mathematical rules executed repeatedly in loops. Here is the core logic running your selected algorithm:
           </p>
           <div class="code-preview-box" id="algoCodeSnippet">
@@ -249,12 +253,12 @@
 
         <div class="control-section">
           <div class="section-title">
-            <span>The Generative Recipe</span>
+            <span id="secRecipeTitle">The Generative Recipe</span>
           </div>
-          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
-            <div><b>1. Deterministic Seeds:</b> Generative art uses pseudo-random numbers seeded by a specific number (like <code>4242</code>). Every time you use that seed, the math reproduces the exact same strokes.</div>
-            <div><b>2. Vector Polylines:</b> Instead of raster pixels, pen plotters only understand continuous coordinate points: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.</div>
-            <div><b>3. Physical Constraints:</b> Unlike screens, physical pens have friction, paper absorbs ink, and pen lifts take mechanical time. Algorithms with fewer lifts plot faster and cleaner!</div>
+          <div id="recipePoints" style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+            <div id="recipePoint1"><b>1. Deterministic Seeds:</b> Generative art uses pseudo-random numbers seeded by a specific number (like <code>4242</code>). Every time you use that seed, the math reproduces the exact same strokes.</div>
+            <div id="recipePoint2"><b>2. Vector Polylines:</b> Instead of raster pixels, pen plotters only understand continuous coordinate points: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.</div>
+            <div id="recipePoint3"><b>3. Physical Constraints:</b> Unlike screens, physical pens have friction, paper absorbs ink, and pen lifts take mechanical time. Algorithms with fewer lifts plot faster and cleaner!</div>
           </div>
         </div>
       </div>
@@ -272,12 +276,12 @@
       <div class="toolbar-group">
         <button class="toolbar-btn" id="btnZoomOut" title="Zoom Out">🔍 -</button>
         <button class="toolbar-btn" id="btnZoomIn" title="Zoom In">🔍 +</button>
-        <button class="toolbar-btn" id="btnZoomFit" title="Fit to Screen (Shortcut: F)">⛶ Fit View</button>
+        <button class="toolbar-btn" id="btnZoomFit" title="Fit to Screen (Shortcut: F)"><span id="txtBtnZoomFit">⛶ Fit View</span></button>
       </div>
 
       <div class="toolbar-group">
         <button class="toolbar-btn" id="btnSimToggle" style="background: rgba(56, 189, 248, 0.15); border-color: var(--primary); color: var(--primary); font-weight: 700;">
-          <span>▶️ Simulate Draw</span>
+          <span id="txtSimToggle">▶️ Simulate Draw</span>
         </button>
       </div>
     </header>
@@ -293,8 +297,8 @@
     <!-- Floating Plotter Simulation Panel (Hidden by default) -->
     <div class="simulator-panel" id="simulatorPanel" style="display: none;">
       <div class="sim-header">
-        <div class="sim-title">
-          <span>🤖 Pen Plotter Simulator</span>
+        <div class="sim-title" id="simTitleBox">
+          <span id="txtSimTitle">🤖 Pen Plotter Simulator</span>
         </div>
         <button class="modal-close" onclick="document.getElementById('simulatorPanel').style.display='none'">✕</button>
       </div>
@@ -323,32 +327,32 @@
     <div class="bottom-dock">
       <div class="plot-stats">
         <div class="stat-item">
-          <span class="stat-label">Draw Distance</span>
+          <span class="stat-label" id="lblStatDist">Draw Distance</span>
           <span class="stat-val" id="statDistance">0.0 m</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Pen Lifts</span>
+          <span class="stat-label" id="lblStatLifts">Pen Lifts</span>
           <span class="stat-val" id="statLifts">0</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Est. Plot Time</span>
+          <span class="stat-label" id="lblStatTime">Est. Plot Time</span>
           <span class="stat-val" id="statTime">0s</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Paths Count</span>
+          <span class="stat-label" id="lblStatPaths">Paths Count</span>
           <span class="stat-val" id="statPaths">0</span>
         </div>
       </div>
 
       <div class="plot-actions">
         <button class="btn-primary" id="btnDownloadSVG" title="Download clean vector SVG with exact millimeter dimensions for AxiDraw / Inkscape">
-          <span>📥 Download SVG</span>
+          <span id="txtBtnDownloadSVG">📥 Download SVG</span>
         </button>
         <button class="btn-secondary" id="btnCopySVG" title="Copy raw SVG markup to paste into Inkscape or Illustrator">
-          <span>📋 Copy SVG</span>
+          <span id="txtBtnCopySVG">📋 Copy SVG</span>
         </button>
         <button class="btn-secondary" id="btnDownloadPNG" title="Download snapshot image for workshop submission">
-          <span>📸 PNG</span>
+          <span id="txtBtnDownloadPNG">📸 PNG</span>
         </button>
       </div>
     </div>
@@ -361,12 +365,12 @@
   <div class="modal-overlay" id="guideModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">
+        <div class="modal-title" id="modalGuideTitle">
           <span>🎓 Workshop Guide & Pen Plotter Cheatsheet</span>
         </div>
         <button class="modal-close" id="btnCloseGuide">✕</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="modalGuideBody">
 
         <h3>🌟 What is Algorithmic Generative Art?</h3>
         <p>
