@@ -19,7 +19,7 @@ const APP_TRANSLATIONS = {
     
     // Tab 1: Algorithms
     secAlgoTitle: "١. اختر الخوارزمية",
-    badgeAlgo: "٨ نماذج أساسية",
+    badgeAlgo: "٩ نماذج أساسية",
     secPresetTitle: "٢. وصفات ونماذج جاهزة",
     badgePreset: "أنماط بنقرة واحدة",
     proBanner: '✨ جديد في الورشة؟ جرّب <a href="simple.html" id="linkToSimple">الاستوديو المبسط</a> بـ ٣ خطوات سهلة!',
@@ -60,10 +60,11 @@ const APP_TRANSLATIONS = {
       crimson_red: "شاربي أحمر قرمزي زاهي",
       cyan_fine: "قلم سماوي دقيق ٠.٣ مم"
     },
-    secOptTitle: "تحسين مسار القلم للراسمة",
-    badgeOpt: "تسريع الرسم",
+    secOptTitle: "تحسين مسار القلم وحماية المحرك",
+    badgeOpt: "تسريع وحماية",
     lblOpt: "⚡ خوارزمية TSP (ترتيب المسارات الأقرب)",
-    descOpt: "عند التفعيل، يعاد ترتيب الخطوط المنفصلة ليتنقل القلم دائماً إلى أقرب خط، وتعكس الخطوط إذا كان البدء من نهايتها أسرع، مما يقلل وقت رفع القلم بنسبة تصل إلى ٥٠٪.",
+    lblServoProtection: "🛡️ حماية محرك القلم (دمج المسارات المتقاربة)",
+    descOpt: "عند التفعيل، يعاد ترتيب الخطوط المنفصلة وتُدمج النقاط المتلاصقة (أقل من ٢ مم) بدون رفع القلم، مما يحمي محرك القلم (سيرفو) من السخونة ويقلل زمن الرسم بنسبة تصل إلى ٥٠٪.",
     secImageTitle: "التبديل إلى استوديو الصور",
     descImage: "هل ترغب في تحويل صورة شخصية أو فوتوغرافية إلى خطوط حلزونية متصلة بدلاً من الرياضيات التوليدية؟",
     btnImageStudio: "📷 فتح استوديو تحويل الصور إلى مسار",
@@ -147,7 +148,7 @@ const APP_TRANSLATIONS = {
     
     // Tab 1: Algorithms
     secAlgoTitle: "1. Choose an Algorithm",
-    badgeAlgo: "8 Core Models",
+    badgeAlgo: "9 Core Models",
     secPresetTitle: "2. Starter Recipes",
     badgePreset: "1-Click Looks",
     proBanner: '✨ New to the workshop? Try the <a href="simple.html" id="linkToSimple">Simplified Studio</a> for a 3-step start!',
@@ -188,10 +189,11 @@ const APP_TRANSLATIONS = {
       crimson_red: "Vivid Crimson Sharpie",
       cyan_fine: "Electric Cyan Fine 0.3mm"
     },
-    secOptTitle: "Plotter Path Optimization",
-    badgeOpt: "AxiDraw Speedup",
+    secOptTitle: "Plotter Path Optimization & Servo Protection",
+    badgeOpt: "Speed & Thermal Safety",
     lblOpt: "⚡ TSP Path Optimization (Sort Nearest)",
-    descOpt: "When enabled, disconnected lines are reordered so the pen always moves to the closest line next, and paths are reversed when drawing from the tail is faster.",
+    lblServoProtection: "🛡️ Servo Thermal Protection (Path Stitching)",
+    descOpt: "When enabled, disconnected lines are reordered and close endpoints (<= 2mm) are seamlessly stitched without lifting the pen, preventing micro-servos from overheating and cutting plot time by up to 50%.",
     secImageTitle: "Switch to Image Studio",
     descImage: "Want to vectorize a portrait or photo into continuous squiggles instead of purely generative math?",
     btnImageStudio: "📷 Open Image-to-Path Studio",
@@ -317,6 +319,12 @@ const ALGO_TRANSLATIONS = {
       category: "رياضيات برمجية حرة",
       explanation: "اكتب معادلتك البارامترية f(t) -> {x, y} لتجربة أفكارك الرياضية الخاصة في الورشة.",
       beginnerTip: "جرّب الجمع بين Math.sin() و Math.cos() بترددات مختلفة لابتكار أشكال جديدة!"
+    },
+    doodles: {
+      name: "خربشات حرة وتأملية",
+      category: "خطوط عضوية حرة",
+      explanation: "شخبطة حرة انسيابية تلتف بحلقات مرحة وزخارف زين تانغل بدون أي رفع للقلم.",
+      beginnerTip: "جرّب التبديل بين 'حلقات مرحة' و'شخبطة سحابية' لمشاهدة الحركة الانسيابية الناعمة!"
     }
   }
 };
@@ -370,7 +378,12 @@ const PARAM_LABELS_AR = {
   pointCount: "عدد النقاط المحسوبة",
   scale: "مقياس الرسم",
   freqA: "التردد A",
-  freqB: "التردد B"
+  freqB: "التردد B",
+  doodleStyle: "نمط الخربشة والشخبطة",
+  loopDensity: "طول الخط (عدد الخطوات)",
+  curliness: "درجة التفاف الحلقات",
+  wanderSpeed: "دقة الخطوة (مسافة النقطة)",
+  coverage: "مدى انتشار الرسمة على الورقة"
 };
 
 const SELECT_OPTIONS_AR = {
@@ -392,7 +405,11 @@ const SELECT_OPTIONS_AR = {
   "Hypotrochoid Spirograph": "سبايروغراف تروس دائرية",
   "Classic Clean Branches": "أغصان كلاسيكية نظيفة",
   "Dense Leaf Clusters": "كتل أوراق كثيفة",
-  "Bud / Blossom Crosses": "براعم أزهار متقاطعة"
+  "Bud / Blossom Crosses": "براعم أزهار متقاطعة",
+  "Whimsical Loop-de-Loop (Cursive Ribbon)": "حلقات مرحة متصلة (شريط خطي)",
+  "Mindful Cloud Scribble (Soft Wandering)": "شخبطة سحابية تأملية (حركة هادئة)",
+  "Zentangle Ribbon Swirls (Rhythmic Loops)": "زخارف زين تانغل (حلقات إيقاعية)",
+  "Botanical Ivy Tendrils (Organic Vines)": "خربشة الكرمة والبراعم (أغصان ملتفة)"
 };
 
 const PRESET_NAMES_AR = {
@@ -433,7 +450,12 @@ const PRESET_NAMES_AR = {
   "Golden Ratio Rose": "وردة النسبة الذهبية",
   "Fermat Spiral Daisy": "زهرة حلزون فيرما",
   "Star Polygon Knot": "عقدة نجمية متعددة الأضلاع",
-  "Lissajous Knot (3:4)": "عقدة ليساجو (٣:٤)"
+  "Lissajous Knot (3:4)": "عقدة ليساجو (٣:٤)",
+  "Whimsical Loop-de-Loop": "حلقات مرحة متصلة",
+  "Mindful Cloud Scribble": "شخبطة سحابية تأملية",
+  "Zentangle Ribbon Swirls": "زخارف زين تانغل الانسيابية",
+  "Botanical Ivy Tendrils": "خربشة الكرمة الملتفة",
+  "Cursive Notepad Wander": "شخبطة دفتر الملاحظات"
 };
 
 const UNITS_AR = {
@@ -488,6 +510,7 @@ class App {
       pen2ColorId: "crimson_red",
       strokeWidthMm: 0.35,
       optimizePaths: true,
+      servoProtection: true,
       
       // Pan & Zoom
       zoom: 1.0,
@@ -665,6 +688,15 @@ class App {
     if (optToggle) {
       optToggle.addEventListener("change", (e) => {
         this.state.optimizePaths = e.target.checked;
+        this.generate();
+      });
+    }
+
+    // Servo Thermal Protection Toggle
+    const servoToggle = document.getElementById("servoProtectionToggle");
+    if (servoToggle) {
+      servoToggle.addEventListener("change", (e) => {
+        this.state.servoProtection = e.target.checked;
         this.generate();
       });
     }
@@ -1278,6 +1310,8 @@ class App {
     if (badgeOpt) badgeOpt.textContent = t.badgeOpt;
     const lblOpt = document.getElementById("lblOpt");
     if (lblOpt) lblOpt.textContent = t.lblOpt;
+    const lblServo = document.getElementById("lblServoProtection");
+    if (lblServo && t.lblServoProtection) lblServo.textContent = t.lblServoProtection;
     const descOpt = document.getElementById("descOpt");
     if (descOpt) descOpt.textContent = t.descOpt;
 
@@ -1377,10 +1411,11 @@ class App {
     let layer1 = result.layer1 || [];
     let layer2 = result.layer2 || [];
 
-    // Apply TSP Path Optimization if enabled
+    // Apply TSP Path Optimization & Servo Thermal Protection if enabled
     if (this.state.optimizePaths) {
-      layer1 = this.plotter.optimizePaths(layer1);
-      layer2 = this.plotter.optimizePaths(layer2);
+      const stitchThreshold = this.state.servoProtection !== false ? 2.0 : 0;
+      layer1 = this.plotter.optimizePaths(layer1, { stitchThreshold });
+      layer2 = this.plotter.optimizePaths(layer2, { stitchThreshold });
     }
 
     this.state.pathsLayer1 = layer1;
@@ -1403,9 +1438,19 @@ class App {
   updateStatsUI() {
     const s = this.state.stats;
     if (!s) return;
+    const isAr = this.state.lang === "ar";
 
     document.getElementById("statDistance").textContent = `${s.drawDistanceM} m`;
-    document.getElementById("statLifts").textContent = s.totalLifts;
+
+    const liftsEl = document.getElementById("statLifts");
+    if (liftsEl) {
+      const isCool = s.servoStatus === "cool";
+      const statusText = isCool
+        ? (isAr ? "🟢 بارد وآمن" : "🟢 Cool & Safe")
+        : (isAr ? "🟡 معتدل" : "🟡 Moderate");
+      liftsEl.innerHTML = `${s.totalLifts} <small style="font-size: 11px; font-weight: 500; color: ${isCool ? '#10b981' : '#f59e0b'};">(${statusText})</small>`;
+    }
+
     document.getElementById("statTime").textContent = s.estimatedTimeStr;
     document.getElementById("statPaths").textContent = s.pathCount;
   }

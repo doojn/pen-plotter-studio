@@ -211,12 +211,16 @@ const finalY = baseY - elevation;
       const horizon = new Float32Array(horizonResolution).fill(Infinity);
 
       // Iterate front-to-back (bottom ridge to top ridge) for accurate hidden-line removal
+      let continuousNoOccludePath = [];
+
       for (let l = lineCount - 1; l >= 0; l--) {
         const baseY = startY + l * yStep;
+        const isReverse = ((lineCount - 1 - l) % 2 === 1); // alternate left-to-right, right-to-left
         let currentPath = [];
 
         for (let s = 0; s <= samples; s++) {
-          const t = s / samples;
+          const stepIdx = isReverse ? (samples - s) : s;
+          const t = stepIdx / samples;
           const x = minX + t * width;
 
           // Gaussian bell envelope centered in middle of page
@@ -233,8 +237,12 @@ const finalY = baseY - elevation;
           const hIdx = Math.min(horizonResolution - 1, Math.floor(t * (horizonResolution - 1)));
 
           if (!params.occlusion) {
-            // No occlusion: continuous line
-            currentPath.push({ x, y });
+            // No occlusion: add to continuous serpentine stroke
+            if (!params.dualColorAccent) {
+              continuousNoOccludePath.push({ x, y });
+            } else {
+              currentPath.push({ x, y });
+            }
           } else {
             // Point is visible if it rises higher (lower Y) than foreground horizon
             const isVisible = y <= horizon[hIdx];
@@ -256,13 +264,19 @@ const finalY = baseY - elevation;
           }
         }
 
-        if (currentPath.length >= 2) {
-          if (params.dualColorAccent && l % 2 === 1) {
-            pathsLayer2.push(currentPath);
-          } else {
-            pathsLayer1.push(currentPath);
+        if (params.occlusion || params.dualColorAccent) {
+          if (currentPath.length >= 2) {
+            if (params.dualColorAccent && l % 2 === 1) {
+              pathsLayer2.push(currentPath);
+            } else {
+              pathsLayer1.push(currentPath);
+            }
           }
         }
+      }
+
+      if (!params.occlusion && !params.dualColorAccent && continuousNoOccludePath.length >= 2) {
+        pathsLayer1.push(continuousNoOccludePath);
       }
 
       // Reverse order so top-to-bottom draw order is preserved if desired
@@ -480,24 +494,25 @@ if (rotation === 0) {
           }
 
           if (params.tileStyle === "arcs") {
-            // Smith quarter circles
+            // Smith quarter circles with complementary matching radii for continuous ribbon stitching
             for (let a = 1; a <= arcsCount; a++) {
-              const radius = (tileSize / (arcsCount + 1)) * a;
+              const rTL = (tileSize / (arcsCount + 1)) * a;
+              const rBR = tileSize - rTL;
 
               if (rot === 0) {
                 // Top-Left corner arc
                 const arc1 = [];
                 for (let s = 0; s <= segmentsPerArc; s++) {
                   const th = (s / segmentsPerArc) * (Math.PI * 0.5);
-                  arc1.push({ x: x0 + Math.cos(th) * radius, y: y0 + Math.sin(th) * radius });
+                  arc1.push({ x: x0 + Math.cos(th) * rTL, y: y0 + Math.sin(th) * rTL });
                 }
                 targetLayer.push(arc1);
 
-                // Bottom-Right corner arc
+                // Bottom-Right corner arc (matched to neighbor)
                 const arc2 = [];
                 for (let s = 0; s <= segmentsPerArc; s++) {
                   const th = Math.PI + (s / segmentsPerArc) * (Math.PI * 0.5);
-                  arc2.push({ x: x0 + tileSize + Math.cos(th) * radius, y: y0 + tileSize + Math.sin(th) * radius });
+                  arc2.push({ x: x0 + tileSize + Math.cos(th) * rBR, y: y0 + tileSize + Math.sin(th) * rBR });
                 }
                 targetLayer.push(arc2);
               } else {
@@ -505,15 +520,15 @@ if (rotation === 0) {
                 const arc1 = [];
                 for (let s = 0; s <= segmentsPerArc; s++) {
                   const th = Math.PI * 0.5 + (s / segmentsPerArc) * (Math.PI * 0.5);
-                  arc1.push({ x: x0 + tileSize + Math.cos(th) * radius, y: y0 + Math.sin(th) * radius });
+                  arc1.push({ x: x0 + tileSize + Math.cos(th) * rTL, y: y0 + Math.sin(th) * rTL });
                 }
                 targetLayer.push(arc1);
 
-                // Bottom-Left corner arc
+                // Bottom-Left corner arc (matched to neighbor)
                 const arc2 = [];
                 for (let s = 0; s <= segmentsPerArc; s++) {
                   const th = Math.PI * 1.5 + (s / segmentsPerArc) * (Math.PI * 0.5);
-                  arc2.push({ x: x0 + Math.cos(th) * radius, y: y0 + tileSize + Math.sin(th) * radius });
+                  arc2.push({ x: x0 + Math.cos(th) * rBR, y: y0 + tileSize + Math.sin(th) * rBR });
                 }
                 targetLayer.push(arc2);
               }
@@ -1187,6 +1202,176 @@ function generateArt(bounds, noise, rng) {
           path.push({ x, y });
         }
         if (path.length >= 2) pathsLayer1.push(path);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 9. GENERATIVE DOODLES & MINDFUL SCRIBBLING (ZERO LIFT ORGANIC LOOPS)
+  // =========================================================================
+  doodles: {
+    id: "doodles",
+    name: "Generative Doodles & Scribbles",
+    category: "Organic & Freeform",
+    badge: "Zero Pen Lifts",
+    icon: "✏️",
+    shortDesc: "Playful continuous wandering loops, mindful scribbles, and flowing Zentangle ribbon curls.",
+    explanation: "Inspired by the intuitive scribbles people draw while daydreaming or on the phone. A virtual drawing tip wanders across the paper with natural inertia, curling into whimsical loop-de-loops, soft cloud-like squiggles, or meditative Zentangles. Designed to be completely continuous—drawing a full, rich composition in a single fluid stroke with zero pen lifts, keeping the plotter servo cool and safe!",
+    beginnerTip: "Switch between 'Whimsical Loops' and 'Mindful Cloud' to see how curling frequency transforms the doodle!",
+    codeSnippet: `// Organic wandering doodle steering:
+angularVel += Math.sin(step * curliness) * 0.35 + noise(x, y) * 0.3;
+x += Math.cos(angle) * stepSize;
+y += Math.sin(angle) * stepSize;`,
+    parameters: [
+      { id: "doodleStyle", label: "Doodle Style", type: "select", options: [
+        { value: "loops", label: "Whimsical Loop-de-Loop (Cursive Ribbon)" },
+        { value: "scribble", label: "Mindful Cloud Scribble (Soft Wandering)" },
+        { value: "zentangle", label: "Zentangle Ribbon Swirls (Rhythmic Loops)" },
+        { value: "botanical", label: "Botanical Ivy Tendrils (Organic Vines)" }
+      ], default: "loops", desc: "The character and curvature rule of the wandering pen." },
+      { id: "loopDensity", label: "Doodle Length (Steps)", type: "range", min: 1000, max: 3600, step: 200, default: 2200, unit: "steps", desc: "Total length of the continuous doodle stroke (calibrated < 5 mins)." },
+      { id: "curliness", label: "Loop Curliness", type: "range", min: 1.0, max: 4.0, step: 0.2, default: 2.2, unit: "x", desc: "How tightly the pen curls into circular loop-de-loops." },
+      { id: "wanderSpeed", label: "Step Resolution", type: "range", min: 1.0, max: 2.4, step: 0.1, default: 1.5, unit: "mm", desc: "Distance between consecutive coordinates in the stroke." },
+      { id: "coverage", label: "Paper Coverage Spread", type: "range", min: 0.55, max: 0.90, step: 0.05, default: 0.80, unit: "", desc: "Boundary envelope determining how wide the doodle spreads across the page." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Accent)", type: "checkbox", default: false, desc: "Splits the doodle into two continuous layers for 2-pen plotting." }
+    ],
+    presets: {
+      "Whimsical Loop-de-Loop": { doodleStyle: "loops", loopDensity: 2200, curliness: 2.4, wanderSpeed: 1.5, coverage: 0.80, dualColorAccent: false },
+      "Mindful Cloud Scribble": { doodleStyle: "scribble", loopDensity: 2400, curliness: 1.8, wanderSpeed: 1.6, coverage: 0.85, dualColorAccent: false },
+      "Zentangle Ribbon Swirls": { doodleStyle: "zentangle", loopDensity: 2600, curliness: 2.5, wanderSpeed: 1.4, coverage: 0.78, dualColorAccent: false },
+      "Botanical Ivy Tendrils": { doodleStyle: "botanical", loopDensity: 2000, curliness: 2.0, wanderSpeed: 1.6, coverage: 0.82, dualColorAccent: true },
+      "Cursive Notepad Wander": { doodleStyle: "loops", loopDensity: 1800, curliness: 1.6, wanderSpeed: 1.8, coverage: 0.75, dualColorAccent: false }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, maxX, maxY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const style = params.doodleStyle || "loops";
+      const totalSteps = params.loopDensity || 2200;
+      const curliness = params.curliness || 2.2;
+      const stepSize = params.wanderSpeed || 1.5;
+      const coverage = params.coverage || 0.80;
+
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+      const boundRadiusX = width * 0.5 * coverage;
+      const boundRadiusY = height * 0.5 * coverage;
+
+      let x = cx + rng.range(-8, 8);
+      let y = cy + rng.range(-8, 8);
+      let angle = rng.range(0, Math.PI * 2);
+      let angularVel = 0.05;
+
+      const fullPath = [{ x, y }];
+
+      // Spatial visited grid to ensure mindful space-filling (prevents tight ink balls)
+      const gridSize = 4.0; // mm
+      const gridW = Math.ceil(width / gridSize);
+      const gridH = Math.ceil(height / gridSize);
+      const visited = new Float32Array(gridW * gridH);
+
+      function getVisit(px, py) {
+        const gx = Math.floor((px - minX) / gridSize);
+        const gy = Math.floor((py - minY) / gridSize);
+        if (gx >= 0 && gx < gridW && gy >= 0 && gy < gridH) {
+          return visited[gy * gridW + gx];
+        }
+        return 10.0;
+      }
+
+      function addVisit(px, py, amount) {
+        const gx = Math.floor((px - minX) / gridSize);
+        const gy = Math.floor((py - minY) / gridSize);
+        if (gx >= 0 && gx < gridW && gy >= 0 && gy < gridH) {
+          visited[gy * gridW + gx] += amount;
+        }
+      }
+
+      for (let s = 0; s < totalSteps; s++) {
+        addVisit(x, y, 0.4);
+
+        if (style === "loops") {
+          // Continuous whimsical loop-de-loops
+          const n = noise.noise2D(x * 0.008, y * 0.008);
+          const curlWave = Math.sin(s * 0.045 * curliness) * 0.35 * curliness;
+          angularVel += (curlWave + n * 0.35 - angularVel) * 0.12;
+
+        } else if (style === "scribble") {
+          // Mindful cloud / organic wandering scribble
+          const n = noise.noise2D(x * 0.012, y * 0.012);
+          const jitter = (rng.next() - 0.5) * 0.32 * curliness;
+          angularVel += jitter + n * 0.22;
+          angularVel = Math.max(-0.55, Math.min(0.55, angularVel));
+
+        } else if (style === "zentangle") {
+          // Rhythmic serpentine ribbon with loopy curls
+          const freq = 0.055 * curliness;
+          const wave = Math.cos(s * freq) * 0.42;
+          const looper = (s % 85 < 20) ? (0.55 * curliness) : 0;
+          angularVel = wave + looper + noise.noise2D(x * 0.005, y * 0.005) * 0.2;
+
+        } else if (style === "botanical") {
+          // Botanical tendrils and curling vines
+          const curl = (s % 110 < 40) ? (0.42 * curliness) : (-0.22 * curliness);
+          const n = noise.noise2D(x * 0.007, y * 0.007);
+          angularVel += (curl + n * 0.28 - angularVel) * 0.15;
+        }
+
+        // Sensory probe to gently steer away from heavily visited areas (self-avoidance)
+        const probeDist = stepSize * 4.5;
+        const leftAngle = angle - 0.65;
+        const rightAngle = angle + 0.65;
+        const lx = x + Math.cos(leftAngle) * probeDist;
+        const ly = y + Math.sin(leftAngle) * probeDist;
+        const rx = x + Math.cos(rightAngle) * probeDist;
+        const ry = y + Math.sin(rightAngle) * probeDist;
+
+        const vLeft = getVisit(lx, ly);
+        const vRight = getVisit(rx, ry);
+
+        if (vLeft > vRight + 0.4) {
+          angularVel += 0.07;
+        } else if (vRight > vLeft + 0.4) {
+          angularVel -= 0.07;
+        }
+
+        // Soft boundary reflection: steer smoothly back towards paper center
+        const dxFromCenter = (x - cx) / boundRadiusX;
+        const dyFromCenter = (y - cy) / boundRadiusY;
+        const distSq = dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter;
+
+        if (distSq > 0.85) {
+          const angleToCenter = Math.atan2(cy - y, cx - x);
+          let diff = angleToCenter - angle;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          angularVel += diff * 0.18;
+        }
+
+        // Clamp angular velocity for smooth pen motion
+        angularVel = Math.max(-0.7, Math.min(0.7, angularVel));
+        angle += angularVel;
+
+        const nextX = x + Math.cos(angle) * stepSize;
+        const nextY = y + Math.sin(angle) * stepSize;
+
+        // Hard clamp within margins
+        x = Math.max(minX + 2, Math.min(maxX - 2, nextX));
+        y = Math.max(minY + 2, Math.min(maxY - 2, nextY));
+
+        fullPath.push({ x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) });
+      }
+
+      // Handle Dual Pen Accent if enabled
+      if (params.dualColorAccent) {
+        const half = Math.floor(fullPath.length * 0.55);
+        pathsLayer1.push(fullPath.slice(0, half));
+        pathsLayer2.push(fullPath.slice(half - 1));
+      } else {
+        pathsLayer1.push(fullPath);
       }
 
       return { layer1: pathsLayer1, layer2: pathsLayer2 };

@@ -4,7 +4,1133 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pen Plotter Studio - Algorithmic Generative Art Workshop</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+:root {
+  --bg-app: #0c0e14;
+  --bg-sidebar: #131722;
+  --bg-card: #1a2030;
+  --bg-card-hover: #222b40;
+  --bg-input: #0f131d;
+  --border-color: #273149;
+  --border-focus: #38bdf8;
+  
+  --text-main: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #8292aa;
+  
+  --primary: #38bdf8;
+  --primary-hover: #0ea5e9;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #a855f7;
+  --accent-rose: #f43f5e;
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
+  
+  --sidebar-width: 440px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* =========================================================================
+   SIDEBAR
+   ========================================================================= */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: 380px;
+  max-width: 500px;
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Beginner Welcome Banner in Pro Mode */
+.pro-welcome-banner {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.14), rgba(168, 85, 247, 0.14));
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 8px 16px;
+  font-size: 12.5px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pro-welcome-banner a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.banner-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.banner-close-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header {
+  padding: 16px 20px;
+  background: rgba(19, 23, 34, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.logo-text h1 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.logo-text p {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-guide {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--primary);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.btn-guide:hover {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: var(--primary);
+}
+
+/* Sidebar navigation tabs */
+.sidebar-tabs {
+  display: flex;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border-color);
+  padding: 4px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-btn.active {
+  background: var(--bg-card);
+  color: var(--primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar Scroll Content */
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tab-pane {
+  display: none;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tab-pane.active {
+  display: flex;
+}
+
+/* Section Cards */
+.control-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title span.badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--primary);
+}
+
+/* Algorithm selector cards */
+.algo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.algo-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: left;
+}
+
+.algo-card:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.algo-card.active {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
+
+.algo-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.algo-card-icon {
+  font-size: 18px;
+}
+
+.algo-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.algo-card-category {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Algorithm Banner Info Box */
+.algo-info-box {
+  background: rgba(56, 189, 248, 0.06);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.algo-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.algo-info-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.algo-info-desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.algo-tip {
+  font-size: 11px;
+  color: var(--accent-amber);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+/* Preset Pill Selector */
+.preset-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preset-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset-pill {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preset-pill:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--text-muted);
+  color: var(--text-main);
+}
+
+.preset-pill.active {
+  background: var(--primary);
+  color: #0b1120;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Seed & Randomizer Bar */
+.seed-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seed-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.seed-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.seed-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.btn-random {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.btn-random:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.btn-random:active {
+  transform: translateY(0);
+}
+
+.btn-undo-seed {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-undo-seed:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.btn-undo-seed:active {
+  transform: translateY(0);
+}
+
+/* Parameter Controls */
+.param-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.param-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.param-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.param-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.param-value {
+  font-size: 11px;
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--bg-input);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Custom styled range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: 3px;
+  outline: none;
+  border: 1px solid var(--border-color);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--bg-sidebar);
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+  transition: transform 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+select.param-select {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+select.param-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+/* Checkbox Toggle Switch */
+.param-checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-switch {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  transition: .3s;
+  border-radius: 20px;
+}
+
+.slider-switch:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--text-muted);
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider-switch {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+input:checked + .slider-switch:before {
+  transform: translateX(16px);
+  background-color: #0b1120;
+}
+
+/* Code Snippet Box */
+.code-preview-box {
+  background: #090c13;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #38bdf8;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* =========================================================================
+   MAIN VIEWPORT & CANVAS
+   ========================================================================= */
+.main-viewport {
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #090a0f;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top Toolbar */
+.top-toolbar {
+  height: 52px;
+  background: rgba(19, 23, 34, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 15;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+
+.paper-selector, .pen-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: inline-block;
+}
+
+/* Canvas Container with Pan/Zoom */
+.canvas-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.canvas-wrapper.panning {
+  cursor: grabbing;
+}
+
+.paper-sheet {
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.2s ease;
+  transform-origin: center center;
+}
+
+#artCanvas {
+  display: block;
+}
+
+/* Margin Indicator Overlay */
+.margin-overlay {
+  position: absolute;
+  pointer-events: none;
+  border: 1px dashed rgba(239, 68, 68, 0.45);
+}
+
+.margin-overlay::after {
+  content: "Safe Plotting Area";
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(239, 68, 68, 0.7);
+  letter-spacing: 0.05em;
+}
+
+/* Floating Plotter Diagnostics & Actions Bar */
+.bottom-dock {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(19, 23, 34, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 15;
+}
+
+.plot-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-right: 1px solid var(--border-color);
+  padding-right: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.stat-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  font-family: monospace;
+}
+
+.plot-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  color: #0b1120;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--text-muted);
+}
+
+/* Simulation Floating Panel */
+.simulator-panel {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  width: 320px;
+  background: rgba(19, 23, 34, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 15;
+}
+
+.sim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sim-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sim-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-btn:hover {
+  background: var(--primary);
+  color: #0b1120;
+  border-color: var(--primary);
+}
+
+.sim-btn.play-btn {
+  background: var(--primary);
+  color: #0b1120;
+  border-color: var(--primary);
+}
+
+.sim-scrubber {
+  width: 100%;
+}
+
+.sim-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Modal Dialogs */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 680px;
+  max-height: 85vh;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  padding: 18px 24px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal-close:hover {
+  color: var(--text-main);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-body h3 {
+  font-size: 15px;
+  color: var(--primary);
+  margin-top: 8px;
+}
+
+.modal-body ul {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide-step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.guide-step-num {
+  width: 26px;
+  height: 26px;
+  background: var(--primary);
+  color: #0b1120;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.toast {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-focus);
+  color: var(--text-main);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 110;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s ease;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================================================
+   RTL & ARABIC SUPPORT
+   ========================================================================= */
+body[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Arabic", "Geeza Pro", "Noto Sans Arabic", "Segoe UI", Roboto, sans-serif;
+}
+
+body[dir="rtl"] .sidebar {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
+}
+
+body[dir="rtl"] .algo-card {
+  text-align: right;
+}
+
+body[dir="rtl"] .algo-info-box {
+  border-left: none;
+  border-right: 3px solid var(--primary);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+body[dir="rtl"] .plot-stats {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  padding-right: 0;
+  padding-left: 16px;
+}
+
+body[dir="rtl"] .simulator-panel {
+  right: auto;
+  left: 20px;
+}
+
+body[dir="rtl"] .toast {
+  right: auto;
+  left: 24px;
+}
+
+body[dir="rtl"] .guide-step-card {
+  text-align: right;
+}
+
+.lang-switch-btn {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: var(--primary) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lang-switch-btn:hover {
+  background: rgba(56, 189, 248, 0.25) !important;
+}
+
+</style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖋️</text></svg>">
 </head>
 <body>
@@ -212,8 +1338,8 @@
 
         <div class="control-section">
           <div class="section-title">
-            <span id="secOptTitle">Plotter Path Optimization</span>
-            <span class="badge" id="badgeOpt">AxiDraw Speedup</span>
+            <span id="secOptTitle">Plotter Path Optimization & Servo Protection</span>
+            <span class="badge" id="badgeOpt">Speed & Safety</span>
           </div>
           <div class="param-checkbox-row">
             <label class="param-label" id="lblOpt" title="Greedy TSP nearest-neighbor sorting cuts pen-up travel time by up to 50%">
@@ -224,8 +1350,17 @@
               <span class="slider-switch"></span>
             </label>
           </div>
-          <p id="descOpt" style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-            When enabled, disconnected lines are reordered so the pen always moves to the closest line next, and paths are reversed when drawing from the tail is faster.
+          <div class="param-checkbox-row" style="margin-top: 8px;">
+            <label class="param-label" id="lblServoProtection" title="Stitches endpoints closer than 2mm without lifting pen to protect micro-servos from thermal overheating">
+              🛡️ Servo Thermal Protection (Path Stitching)
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="servoProtectionToggle" checked>
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+          <p id="descOpt" style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-top: 6px;">
+            When enabled, disconnected lines are reordered and close endpoints (≤ 2mm) are seamlessly stitched without lifting the pen, preventing micro-servos from overheating and reducing plot time.
           </p>
         </div>
 
@@ -432,10 +1567,3832 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/noise.js"></script>
-  <script src="js/algorithms.js"></script>
-  <script src="js/plotter.js"></script>
-  <script src="js/simulator.js"></script>
-  <script src="js/app.js"></script>
+  <script>
+/**
+ * Seedable PRNG & Fast 2D/3D Simplex & Perlin Noise Engine
+ * Built for generative vector art & deterministic reproducibility.
+ */
+
+class MathUtils {
+  // Hash a string into a 32-bit integer seed
+  static hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  // Linear interpolation
+  static lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  // Map value from one range to another with optional clamp
+  static map(value, inMin, inMax, outMin, outMax, clamp = false) {
+    let out = ((value - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin;
+    if (clamp) {
+      const min = Math.min(outMin, outMax);
+      const max = Math.max(outMin, outMax);
+      out = Math.max(min, Math.min(max, out));
+    }
+    return out;
+  }
+
+  static clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+  }
+
+  static dist(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+
+  static radians(degrees) {
+    return (degrees * Math.PI) / 180;
+  }
+
+  static degrees(radians) {
+    return (radians * 180) / Math.PI;
+  }
+}
+
+// Deterministic fast PRNG (Mulberry32)
+class RandomGenerator {
+  constructor(seed = 1337) {
+    this.setSeed(seed);
+  }
+
+  setSeed(seed) {
+    if (typeof seed === 'string') {
+      this.seed = MathUtils.hashString(seed);
+    } else {
+      this.seed = Math.floor(Math.abs(seed)) || 1337;
+    }
+    this.state = this.seed;
+  }
+
+  // Returns float in [0, 1)
+  next() {
+    this.state = (this.state + 0x6d2b79f5) | 0;
+    let t = Math.imul(this.state ^ (this.state >>> 15), 1 | this.state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+
+  // Range [min, max)
+  range(min, max) {
+    return min + this.next() * (max - min);
+  }
+
+  // Random integer [min, max]
+  rangeInt(min, max) {
+    return Math.floor(this.range(min, max + 1));
+  }
+
+  // Random boolean with chance probability
+  chance(prob = 0.5) {
+    return this.next() < prob;
+  }
+
+  // Gaussian / Normal distribution random number (Box-Muller)
+  gaussian(mean = 0, stdev = 1) {
+    let u1 = this.next();
+    let u2 = this.next();
+    while (u1 === 0) u1 = this.next();
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    return z0 * stdev + mean;
+  }
+
+  // Pick random element from array
+  pick(array) {
+    if (!array || array.length === 0) return null;
+    return array[this.rangeInt(0, array.length - 1)];
+  }
+}
+
+// 2D Simplex Noise Implementation (Deterministic & Seedable)
+class SimplexNoise {
+  constructor(randomInstance = new RandomGenerator(42)) {
+    this.reseed(randomInstance);
+  }
+
+  reseed(randomInstance) {
+    this.p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) {
+      this.p[i] = i;
+    }
+
+    // Shuffle using Fisher-Yates with our seedable PRNG
+    for (let i = 255; i > 0; i--) {
+      const j = randomInstance.rangeInt(0, i);
+      const tmp = this.p[i];
+      this.p[i] = this.p[j];
+      this.p[j] = tmp;
+    }
+
+    // Duplicate permutation array to avoid modulo
+    this.perm = new Uint8Array(512);
+    this.permMod12 = new Uint8Array(512);
+    for (let i = 0; i < 512; i++) {
+      this.perm[i] = this.p[i & 255];
+      this.permMod12[i] = this.perm[i] % 12;
+    }
+  }
+
+  // 2D Simplex Noise in range [-1, 1]
+  noise2D(xin, yin) {
+    const F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
+    const G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
+
+    let n0 = 0, n1 = 0, n2 = 0;
+
+    // Skew the input space to determine which simplex cell we're in
+    const s = (xin + yin) * F2;
+    const i = Math.floor(xin + s);
+    const j = Math.floor(yin + s);
+    const t = (i + j) * G2;
+    const X0 = i - t; // Unskew the cell origin back to (x,y) space
+    const Y0 = j - t;
+    const x0 = xin - X0; // The x,y distances from the cell origin
+    const y0 = yin - Y0;
+
+    // For the 2D case, the simplex shape is an equilateral triangle.
+    // Determine which simplex we are in.
+    let i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
+    if (x0 > y0) {
+      i1 = 1;
+      j1 = 0;
+    } else {
+      i1 = 0;
+      j1 = 1;
+    }
+
+    // A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
+    // a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where c = (3-sqrt(3))/6
+    const x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
+    const y1 = y0 - j1 + G2;
+    const x2 = x0 - 1.0 + 2.0 * G2; // Offsets for last corner in (x,y) unskewed coords
+    const y2 = y0 - 1.0 + 2.0 * G2;
+
+    // Work out the hashed gradient indices of the three simplex corners
+    const ii = i & 255;
+    const jj = j & 255;
+
+    // Calculate contribution from three corners
+    const grad3 = [
+      [1, 1], [-1, 1], [1, -1], [-1, -1],
+      [1, 0], [-1, 0], [1, 0], [-1, 0],
+      [0, 1], [0, -1], [0, 1], [0, -1]
+    ];
+
+    let t0 = 0.5 - x0 * x0 - y0 * y0;
+    if (t0 > 0) {
+      t0 *= t0;
+      const gi0 = this.permMod12[ii + this.perm[jj]];
+      n0 = t0 * t0 * (grad3[gi0][0] * x0 + grad3[gi0][1] * y0);
+    }
+
+    let t1 = 0.5 - x1 * x1 - y1 * y1;
+    if (t1 > 0) {
+      t1 *= t1;
+      const gi1 = this.permMod12[ii + i1 + this.perm[jj + j1]];
+      n1 = t1 * t1 * (grad3[gi1][0] * x1 + grad3[gi1][1] * y1);
+    }
+
+    let t2 = 0.5 - x2 * x2 - y2 * y2;
+    if (t2 > 0) {
+      t2 *= t2;
+      const gi2 = this.permMod12[ii + 1 + this.perm[jj + 1]];
+      n2 = t2 * t2 * (grad3[gi2][0] * x2 + grad3[gi2][1] * y2);
+    }
+
+    // Add contributions from each corner to get the final noise value.
+    // Result is scaled to return values in the interval [-1, 1].
+    return 70.0 * (n0 + n1 + n2);
+  }
+
+  // Fractal Brownian Motion (octaves, persistence, lacunarity)
+  fBm(x, y, octaves = 4, persistence = 0.5, lacunarity = 2.0) {
+    let total = 0;
+    let frequency = 1.0;
+    let amplitude = 1.0;
+    let maxValue = 0; // Used for normalizing result
+
+    for (let i = 0; i < octaves; i++) {
+      total += this.noise2D(x * frequency, y * frequency) * amplitude;
+      maxValue += amplitude;
+      amplitude *= persistence;
+      frequency *= lacunarity;
+    }
+
+    return total / maxValue;
+  }
+
+  // Curl noise for ultra-smooth fluid flow fields
+  curl(x, y, eps = 0.001) {
+    const n1 = this.noise2D(x, y + eps);
+    const n2 = this.noise2D(x, y - eps);
+    const n3 = this.noise2D(x + eps, y);
+    const n4 = this.noise2D(x - eps, y);
+
+    const dx = (n1 - n2) / (2 * eps);
+    const dy = (n3 - n4) / (2 * eps);
+
+    return { x: dy, y: -dx, angle: Math.atan2(-dx, dy) };
+  }
+}
+
+// Global instances for convenience
+window.MathUtils = MathUtils;
+window.RandomGenerator = RandomGenerator;
+window.SimplexNoise = SimplexNoise;
+
+
+/**
+ * Algorithmic Pen Plotter Art Workshop - Core Algorithms Engine
+ * Designed for beginners: intuitive parameters, reproducible seeds, and clean vector polylines.
+ */
+
+const ALGORITHM_DEFINITIONS = {
+  // =========================================================================
+  // 1. PERLIN FLOW FIELD
+  // =========================================================================
+  flowField: {
+    id: "flowField",
+    name: "Perlin Flow Field",
+    category: "Organic / Natural",
+    badge: "Most Popular",
+    icon: "🌊",
+    shortDesc: "Trace hundreds of particles drifting through an invisible fluid river or wind current.",
+    explanation: "Imagine dropping dandelion seeds into swirling water. At every point on the paper, a 2D Perlin noise mathematical equation calculates a specific compass direction. We drop virtual particles and let them take small steps following these angles, drawing smooth, hypnotic ribbon currents.",
+    beginnerTip: "Try increasing 'Noise Zoom' for broad gentle curves, or decrease it for tight turbulent eddies!",
+    codeSnippet: `// Flow field core logic:
+const angle = noise(x * scale, y * scale) * Math.PI * 2 * curl;
+const nextX = x + Math.cos(angle) * stepLength;
+const nextY = y + Math.sin(angle) * stepLength;`,
+    parameters: [
+      { id: "streamCount", label: "Number of Streams", type: "range", min: 80, max: 350, step: 10, default: 200, unit: "lines", desc: "Total count of stream traces drawn across the page." },
+      { id: "stepCount", label: "Stream Length (Steps)", type: "range", min: 20, max: 90, step: 5, default: 55, unit: "steps", desc: "How far each particle travels before lifting the pen." },
+      { id: "stepLength", label: "Step Resolution", type: "range", min: 0.8, max: 2.2, step: 0.1, default: 1.4, unit: "mm", desc: "Distance between consecutive points in a line." },
+      { id: "noiseScale", label: "Noise Field Zoom", type: "range", min: 0.001, max: 0.025, step: 0.001, default: 0.005, unit: "", desc: "Scale of the noise grid. Smaller values create large calm waves; larger values create turbulent swirls." },
+      { id: "curlMultiplier", label: "Swirl / Curl Intensity", type: "range", min: 0.5, max: 5.0, step: 0.1, default: 2.0, unit: "x", desc: "How sharply angles rotate across the field." },
+      { id: "spawnMode", label: "Starting Placement", type: "select", options: [
+        { value: "random", label: "Random Scatter (Uniform)" },
+        { value: "circle", label: "Concentric Ring Burst" },
+        { value: "grid", label: "Structured Grid Lattice" },
+        { value: "center", label: "Central Core Outward" },
+        { value: "edges", label: "Inward from Margins" }
+      ], default: "random", desc: "Where particles are initially dropped." },
+      { id: "streamAvoidance", label: "Spacing Collision Avoidance", type: "range", min: 0, max: 4.0, step: 0.2, default: 1.8, unit: "mm", desc: "Stops streams if they get too close to existing lines (prevents ink puddles on thin paper). 0 disables." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Accent)", type: "checkbox", default: false, desc: "Splits streams into two layers for 2-color plotting (e.g. Black + Gold)." }
+    ],
+    presets: {
+      "Ocean Currents": { streamCount: 200, stepCount: 55, stepLength: 1.4, noiseScale: 0.004, curlMultiplier: 1.8, spawnMode: "random", streamAvoidance: 1.8, dualColorAccent: false },
+      "Turbulent Vortex": { streamCount: 240, stepCount: 50, stepLength: 1.2, noiseScale: 0.012, curlMultiplier: 3.5, spawnMode: "random", streamAvoidance: 1.5, dualColorAccent: true },
+      "Cosmic Ripple": { streamCount: 170, stepCount: 60, stepLength: 1.3, noiseScale: 0.006, curlMultiplier: 2.2, spawnMode: "circle", streamAvoidance: 1.6, dualColorAccent: true },
+      "Wood Grain Flow": { streamCount: 260, stepCount: 50, stepLength: 1.4, noiseScale: 0.003, curlMultiplier: 1.2, spawnMode: "edges", streamAvoidance: 2.0, dualColorAccent: false },
+      "Lattice Drift": { streamCount: 160, stepCount: 45, stepLength: 1.5, noiseScale: 0.008, curlMultiplier: 1.8, spawnMode: "grid", streamAvoidance: 1.6, dualColorAccent: false }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, maxX, maxY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      // Spatial grid for fast proximity / line avoidance check
+      const cellSize = Math.max(2, params.streamAvoidance || 1.5);
+      const gridCols = Math.ceil(width / cellSize);
+      const gridRows = Math.ceil(height / cellSize);
+      const grid = new Uint8Array(gridCols * gridRows);
+
+      function markOccupied(x, y) {
+        if (params.streamAvoidance <= 0) return;
+        const col = Math.floor((x - minX) / cellSize);
+        const row = Math.floor((y - minY) / cellSize);
+        if (col >= 0 && col < gridCols && row >= 0 && row < gridRows) {
+          grid[row * gridCols + col] = 1;
+        }
+      }
+
+      function isOccupied(x, y) {
+        if (params.streamAvoidance <= 0) return false;
+        const col = Math.floor((x - minX) / cellSize);
+        const row = Math.floor((y - minY) / cellSize);
+        if (col >= 0 && col < gridCols && row >= 0 && row < gridRows) {
+          return grid[row * gridCols + col] === 1;
+        }
+        return false;
+      }
+
+      const totalStreams = params.streamCount;
+      const stepLength = params.stepLength;
+      const maxSteps = params.stepCount;
+      const scale = params.noiseScale;
+      const curl = params.curlMultiplier;
+
+      // Seed points based on spawn mode
+      const spawnPoints = [];
+      for (let i = 0; i < totalStreams; i++) {
+        let sx, sy;
+        if (params.spawnMode === "random") {
+          sx = rng.range(minX, maxX);
+          sy = rng.range(minY, maxY);
+        } else if (params.spawnMode === "circle") {
+          const r = rng.range(width * 0.1, width * 0.45);
+          const theta = rng.range(0, Math.PI * 2);
+          sx = minX + width * 0.5 + Math.cos(theta) * r;
+          sy = minY + height * 0.5 + Math.sin(theta) * r;
+        } else if (params.spawnMode === "grid") {
+          const side = Math.ceil(Math.sqrt(totalStreams));
+          const col = i % side;
+          const row = Math.floor(i / side);
+          sx = minX + (col / side) * width + rng.range(-2, 2);
+          sy = minY + (row / side) * height + rng.range(-2, 2);
+        } else if (params.spawnMode === "center") {
+          const r = rng.range(0, width * 0.18);
+          const theta = rng.range(0, Math.PI * 2);
+          sx = minX + width * 0.5 + Math.cos(theta) * r;
+          sy = minY + height * 0.5 + Math.sin(theta) * r;
+        } else if (params.spawnMode === "edges") {
+          if (rng.chance(0.5)) {
+            sx = rng.chance(0.5) ? minX + 2 : maxX - 2;
+            sy = rng.range(minY, maxY);
+          } else {
+            sx = rng.range(minX, maxX);
+            sy = rng.chance(0.5) ? minY + 2 : maxY - 2;
+          }
+        }
+        spawnPoints.push({ x: sx, y: sy, id: i });
+      }
+
+      // Generate streams
+      spawnPoints.forEach((pt, idx) => {
+        let cx = pt.x;
+        let cy = pt.y;
+
+        // Skip if starting point is already crowded
+        if (isOccupied(cx, cy)) return;
+
+        const path = [{ x: cx, y: cy }];
+        markOccupied(cx, cy);
+
+        for (let s = 0; s < maxSteps; s++) {
+          // Calculate noise angle
+          const n = noise.noise2D(cx * scale, cy * scale);
+          const angle = n * Math.PI * curl;
+
+          const nx = cx + Math.cos(angle) * stepLength;
+          const ny = cy + Math.sin(angle) * stepLength;
+
+          // Boundary check
+          if (nx < minX || nx > maxX || ny < minY || ny > maxY) break;
+
+          // Proximity avoidance check
+          if (s > 2 && isOccupied(nx, ny)) break;
+
+          path.push({ x: nx, y: ny });
+          markOccupied(nx, ny);
+          cx = nx;
+          cy = ny;
+        }
+
+        if (path.length >= 3) {
+          if (params.dualColorAccent && idx % 3 === 0) {
+            pathsLayer2.push(path);
+          } else {
+            pathsLayer1.push(path);
+          }
+        }
+      });
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 2. TOPOGRAPHIC RIDGE WAVES (JOY DIVISION / UNKNOWN PLEASURES)
+  // =========================================================================
+  waveRidges: {
+    id: "waveRidges",
+    name: "Mountain Ridge Waves",
+    category: "Topographic / 3D Landscape",
+    badge: "Iconic Classic",
+    icon: "🏔️",
+    shortDesc: "Stacked horizontal scanlines with 3D peaks and authentic hidden-line occlusion.",
+    explanation: "Inspired by the famous 1979 radio pulsar plot from Joy Division's album 'Unknown Pleasures'. Horizontal lines sweep down the page. As they approach the center, a Gaussian bell curve combined with Perlin noise pulls the line upwards into mountain peaks. Crucially, a 'horizon mask' prevents lower lines from drawing over peaks above them, creating a solid 3D landscape effect!",
+    beginnerTip: "Keep 'Occlusion' turned ON! Without occlusion, the lines will criss-cross. With occlusion on, mountains appear completely solid without any solid fills.",
+    codeSnippet: `// 3D elevation & occlusion mask:
+const elevation = Math.exp(-Math.pow((x - centerX) / width, 2)) * noise(x, y) * peakHeight;
+const finalY = baseY - elevation;
+// If finalY is lower than previous horizon, occlude it!`,
+    parameters: [
+      { id: "lineCount", label: "Number of Ridges", type: "range", min: 15, max: 55, step: 1, default: 35, unit: "lines", desc: "Total count of stacked horizontal wave lines." },
+      { id: "peakHeight", label: "Peak Elevation Height", type: "range", min: 4, max: 40, step: 1, default: 22, unit: "mm", desc: "Maximum height of the mountain peaks." },
+      { id: "samplesPerLine", label: "Curve Smoothness", type: "range", min: 80, max: 240, step: 10, default: 180, unit: "pts", desc: "Number of evaluated sample points per ridge line." },
+      { id: "noiseScale", label: "Mountain Ruggedness", type: "range", min: 0.005, max: 0.05, step: 0.002, default: 0.016, unit: "", desc: "Frequency of jagged bumps. Low is smooth hills; high is rugged peaks." },
+      { id: "gaussianWidth", label: "Mountain Peak Width", type: "range", min: 0.15, max: 0.85, step: 0.05, default: 0.38, unit: "", desc: "Width of the central peak concentration area." },
+      { id: "occlusion", label: "3D Hidden-Line Occlusion", type: "checkbox", default: true, desc: "Hides lines behind foreground peaks so the landscape looks 3D and solid." },
+      { id: "ridgeNoiseOctaves", label: "Multi-Octave Detail", type: "range", min: 1, max: 3, step: 1, default: 2, unit: "octaves", desc: "Adds fine secondary ridges on top of the main peaks." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Peaks)", type: "checkbox", default: false, desc: "Draws peaks in Pen 2 and flat valley baselines in Pen 1." }
+    ],
+    presets: {
+      "Joy Division Classic": { lineCount: 38, peakHeight: 22, samplesPerLine: 180, noiseScale: 0.018, gaussianWidth: 0.35, occlusion: true, ridgeNoiseOctaves: 2, dualColorAccent: false },
+      "Alpine Horizon": { lineCount: 30, peakHeight: 28, samplesPerLine: 200, noiseScale: 0.025, gaussianWidth: 0.55, occlusion: true, ridgeNoiseOctaves: 3, dualColorAccent: true },
+      "Desert Sand Dunes": { lineCount: 42, peakHeight: 14, samplesPerLine: 160, noiseScale: 0.008, gaussianWidth: 0.70, occlusion: true, ridgeNoiseOctaves: 1, dualColorAccent: false },
+      "Audio Frequency Spectrogram": { lineCount: 45, peakHeight: 24, samplesPerLine: 200, noiseScale: 0.035, gaussianWidth: 0.45, occlusion: true, ridgeNoiseOctaves: 2, dualColorAccent: false },
+      "Transparent Wireframe (No Occlude)": { lineCount: 25, peakHeight: 18, samplesPerLine: 150, noiseScale: 0.015, gaussianWidth: 0.40, occlusion: false, ridgeNoiseOctaves: 2, dualColorAccent: false }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, maxX, maxY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const lineCount = params.lineCount;
+      const samples = params.samplesPerLine;
+      const peakHeight = params.peakHeight;
+      const noiseScale = params.noiseScale;
+      const gWidth = params.gaussianWidth * width * 0.5;
+      const centerX = minX + width * 0.5;
+
+      const yStep = (maxY - minY - peakHeight) / (lineCount + 1);
+      const startY = minY + peakHeight + yStep;
+
+      // Horizon buffer for hidden-line removal: stores the minimum (highest on page) Y seen so far at each X column
+      const horizonResolution = Math.max(samples * 2, 600);
+      const horizon = new Float32Array(horizonResolution).fill(Infinity);
+
+      // Iterate front-to-back (bottom ridge to top ridge) for accurate hidden-line removal
+      let continuousNoOccludePath = [];
+
+      for (let l = lineCount - 1; l >= 0; l--) {
+        const baseY = startY + l * yStep;
+        const isReverse = ((lineCount - 1 - l) % 2 === 1); // alternate left-to-right, right-to-left
+        let currentPath = [];
+
+        for (let s = 0; s <= samples; s++) {
+          const stepIdx = isReverse ? (samples - s) : s;
+          const t = stepIdx / samples;
+          const x = minX + t * width;
+
+          // Gaussian bell envelope centered in middle of page
+          const distFromCenter = x - centerX;
+          const envelope = Math.exp(-0.5 * Math.pow(distFromCenter / gWidth, 2));
+
+          // Multi-octave Perlin elevation
+          let n = noise.fBm(x * noiseScale, l * 0.15, params.ridgeNoiseOctaves, 0.5, 2.0);
+          n = Math.abs(n); // make ridges project upwards
+
+          const elevation = envelope * n * peakHeight;
+          const y = baseY - elevation;
+
+          const hIdx = Math.min(horizonResolution - 1, Math.floor(t * (horizonResolution - 1)));
+
+          if (!params.occlusion) {
+            // No occlusion: add to continuous serpentine stroke
+            if (!params.dualColorAccent) {
+              continuousNoOccludePath.push({ x, y });
+            } else {
+              currentPath.push({ x, y });
+            }
+          } else {
+            // Point is visible if it rises higher (lower Y) than foreground horizon
+            const isVisible = y <= horizon[hIdx];
+
+            if (isVisible) {
+              currentPath.push({ x, y });
+              horizon[hIdx] = y;
+            } else {
+              // Line dipped behind a foreground ridge: break path!
+              if (currentPath.length >= 2) {
+                if (params.dualColorAccent && l % 2 === 1) {
+                  pathsLayer2.push(currentPath);
+                } else {
+                  pathsLayer1.push(currentPath);
+                }
+              }
+              currentPath = [];
+            }
+          }
+        }
+
+        if (params.occlusion || params.dualColorAccent) {
+          if (currentPath.length >= 2) {
+            if (params.dualColorAccent && l % 2 === 1) {
+              pathsLayer2.push(currentPath);
+            } else {
+              pathsLayer1.push(currentPath);
+            }
+          }
+        }
+      }
+
+      if (!params.occlusion && !params.dualColorAccent && continuousNoOccludePath.length >= 2) {
+        pathsLayer1.push(continuousNoOccludePath);
+      }
+
+      // Reverse order so top-to-bottom draw order is preserved if desired
+      pathsLayer1.reverse();
+      pathsLayer2.reverse();
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 3. HARMONOGRAPH & SPIROGRAPH / GUILLOCHÉ
+  // =========================================================================
+  harmonograph: {
+    id: "harmonograph",
+    name: "Harmonograph & Spirograph",
+    category: "Geometric & Mathematical",
+    badge: "Hypnotic Math",
+    icon: "♾️",
+    shortDesc: "Simulate swinging physical pendulums, gear spirographs, and currency guilloché rosettes.",
+    explanation: "A Harmonograph simulates the motion of several swinging pendulums coupled together. As gravity and friction gently dampen the swings over time, the pen traces intricate, hypnotic loops of pure harmonic geometry that can never be drawn cleanly by human hand.",
+    beginnerTip: "Change 'Frequency Ratio' to integer fractions like 3:2, 5:4, or 4:3 to see recognizable musical harmonics in visual form!",
+    codeSnippet: `// Pendulum harmonic resonance:
+x = A1 * sin(f1 * t + p1) * exp(-d1 * t) + A2 * sin(f2 * t + p2) * exp(-d2 * t);
+y = A3 * sin(f3 * t + p3) * exp(-d3 * t) + A4 * sin(f4 * t + p4) * exp(-d4 * t);`,
+    parameters: [
+      { id: "geometryMode", label: "Model Type", type: "select", options: [
+        { value: "harmonograph", label: "Harmonograph (Damped Pendulums)" },
+        { value: "spirograph", label: "Spirograph (Hypotrochoid Gears)" },
+        { value: "guilloche", label: "Guilloché (Banknote Rosettes)" }
+      ], default: "harmonograph", desc: "Select the underlying mathematical generator." },
+      { id: "freqX", label: "X-Axis Frequency", type: "range", min: 1.0, max: 8.0, step: 0.01, default: 2.01, unit: "Hz", desc: "Primary oscillation frequency for horizontal motion." },
+      { id: "freqY", label: "Y-Axis Frequency", type: "range", min: 1.0, max: 8.0, step: 0.01, default: 3.00, unit: "Hz", desc: "Primary oscillation frequency for vertical motion." },
+      { id: "phaseShift", label: "Phase Shift", type: "range", min: 0, max: 360, step: 5, default: 45, unit: "°", desc: "Angular offset between pendulum swings." },
+      { id: "damping", label: "Pendulum Friction (Decay)", type: "range", min: 0.0004, max: 0.006, step: 0.0002, default: 0.0022, unit: "", desc: "How quickly the pendulum loses energy as it spirals inward." },
+      { id: "loopCount", label: "Drawing Duration / Detail", type: "range", min: 1200, max: 4000, step: 200, default: 2000, unit: "steps", desc: "Total number of steps evaluated along the curve." },
+      { id: "secondaryFreq", label: "Secondary Oscillation", type: "range", min: 0, max: 6.0, step: 0.1, default: 1.0, unit: "x", desc: "Adds a second coupled pendulum arm for richer geometric folds." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Mirror)", type: "checkbox", default: false, desc: "Adds a second phase-inverted curve on Layer 2 for stunning 2-pen interference." }
+    ],
+    presets: {
+      "Pendulum Waltz": { geometryMode: "harmonograph", freqX: 2.01, freqY: 3.00, phaseShift: 45, damping: 0.0022, loopCount: 2000, secondaryFreq: 1.0, dualColorAccent: false },
+      "Hypnotic Spirograph": { geometryMode: "spirograph", freqX: 3.0, freqY: 7.0, phaseShift: 90, damping: 0.0008, loopCount: 3200, secondaryFreq: 2.5, dualColorAccent: true },
+      "Banknote Rosette": { geometryMode: "guilloche", freqX: 4.0, freqY: 4.0, phaseShift: 0, damping: 0.0010, loopCount: 3400, secondaryFreq: 8.0, dualColorAccent: true },
+      "Infinity Resonance": { geometryMode: "harmonograph", freqX: 2.00, freqY: 1.002, phaseShift: 90, damping: 0.0016, loopCount: 2600, secondaryFreq: 0.5, dualColorAccent: false },
+      "Sacred Geometry": { geometryMode: "guilloche", freqX: 6.0, freqY: 6.0, phaseShift: 30, damping: 0.0012, loopCount: 3600, secondaryFreq: 12.0, dualColorAccent: false }
+    },
+    generate(bounds, params, rng) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+      const radiusX = width * 0.44;
+      const radiusY = height * 0.44;
+
+      const f1 = params.freqX;
+      const f2 = params.freqY;
+      const p1 = MathUtils.radians(params.phaseShift);
+      const d = params.damping;
+      const steps = params.loopCount;
+      const secF = params.secondaryFreq;
+
+      if (params.geometryMode === "harmonograph") {
+        const path1 = [];
+        const path2 = [];
+        const dt = 0.03;
+
+        for (let i = 0; i < steps; i++) {
+          const t = i * dt;
+          const decay = Math.exp(-d * t);
+
+          const x = cx + radiusX * decay * (Math.sin(f1 * t + p1) + 0.3 * Math.sin(f1 * secF * t));
+          const y = cy + radiusY * decay * (Math.sin(f2 * t) + 0.3 * Math.sin(f2 * secF * t + p1));
+
+          path1.push({ x, y });
+
+          if (params.dualColorAccent) {
+            const x2 = cx + radiusX * decay * (Math.sin(f1 * t + p1 + Math.PI * 0.5) + 0.3 * Math.sin(f1 * secF * t));
+            const y2 = cy + radiusY * decay * (Math.sin(f2 * t + Math.PI * 0.5) + 0.3 * Math.sin(f2 * secF * t));
+            path2.push({ x: x2, y: y2 });
+          }
+        }
+
+        if (path1.length >= 2) pathsLayer1.push(path1);
+        if (params.dualColorAccent && path2.length >= 2) pathsLayer2.push(path2);
+
+      } else if (params.geometryMode === "spirograph") {
+        // Hypotrochoid spirograph
+        const R = Math.min(radiusX, radiusY);
+        const r = R * (params.freqX / (params.freqX + params.freqY));
+        const dOffset = r * (params.secondaryFreq || 1.2);
+        const path1 = [];
+        const maxTheta = Math.PI * 2 * (params.freqY || 7);
+        const dt = maxTheta / steps;
+
+        for (let theta = 0; theta <= maxTheta; theta += dt) {
+          const x = cx + (R - r) * Math.cos(theta) + dOffset * Math.cos(((R - r) / r) * theta);
+          const y = cy + (R - r) * Math.sin(theta) - dOffset * Math.sin(((R - r) / r) * theta);
+          path1.push({ x, y });
+        }
+
+        if (path1.length >= 2) pathsLayer1.push(path1);
+
+      } else if (params.geometryMode === "guilloche") {
+        // Guilloché concentric rosettes
+        const rings = 12;
+        const ptsPerRing = Math.floor(steps / rings);
+
+        for (let r = 0; r < rings; r++) {
+          const ringPath = [];
+          const baseR = MathUtils.map(r, 0, rings - 1, radiusX * 0.2, radiusX);
+          const waveAmp = (radiusX / rings) * 0.8;
+          const petalCount = Math.floor(params.freqX * 4 + r * 2);
+
+          for (let p = 0; p <= ptsPerRing; p++) {
+            const theta = (p / ptsPerRing) * Math.PI * 2;
+            const modulation = Math.sin(theta * petalCount + r * params.phaseShift * 0.1) * waveAmp;
+            const currR = baseR + modulation;
+            const x = cx + Math.cos(theta) * currR;
+            const y = cy + Math.sin(theta) * currR * (height / width);
+            ringPath.push({ x, y });
+          }
+
+          if (r % 2 === 1 && params.dualColorAccent) {
+            pathsLayer2.push(ringPath);
+          } else {
+            pathsLayer1.push(ringPath);
+          }
+        }
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 4. TRUCHET & MODULAR GRID TILES
+  // =========================================================================
+  truchetTiles: {
+    id: "truchetTiles",
+    name: "Truchet Modular Tiles",
+    category: "Geometric & Pattern",
+    badge: "Endless Mazes",
+    icon: "🧩",
+    shortDesc: "Grid-based tiles with rotating quarter-circles that snap together into winding labyrinths.",
+    explanation: "Invented by Sébastien Truchet in 1704 and popularized by Cyril Stanley Smith. Each square tile contains simple arcs connecting the centers of its edges. By randomly rotating tiles by 0° or 90°, the arcs automatically join to form continuous, mesmerizing, flowing labyrinths with zero dead ends.",
+    beginnerTip: "Increase 'Arcs per Tile' to turn single lines into thick decorative multi-track highway ribbons!",
+    codeSnippet: `// Truchet tile connection rule:
+if (rotation === 0) {
+  drawArc(topLeft, radius);
+  drawArc(bottomRight, radius);
+} else {
+  drawArc(topRight, radius);
+  drawArc(bottomLeft, radius);
+}`,
+    parameters: [
+      { id: "gridCols", label: "Grid Columns", type: "range", min: 4, max: 16, step: 1, default: 10, unit: "cols", desc: "Number of horizontal tile cells." },
+      { id: "tileStyle", label: "Tile Motif", type: "select", options: [
+        { value: "arcs", label: "Smith Curved Arcs (Flowing Maze)" },
+        { value: "diagonal", label: "Diagonal Slash (Straight Maze)" },
+        { value: "triangles", label: "Chevron & Diamond Triangles" },
+        { value: "meander", label: "Orthogonal Meanders (Circuit Board)" }
+      ], default: "arcs", desc: "Geometric pattern placed inside each tile." },
+      { id: "arcsPerTile", label: "Concentric Arcs per Tile", type: "range", min: 1, max: 3, step: 1, default: 2, unit: "tracks", desc: "Draws parallel concentric ribbons for dense line quality." },
+      { id: "rotationRule", label: "Rotation Rule", type: "select", options: [
+        { value: "random", label: "Random 50/50 Coin Flip" },
+        { value: "noise", label: "Perlin Noise Directional Flow" },
+        { value: "checkerboard", label: "Alternating Checkerboard" },
+        { value: "concentric", label: "Concentric Rings Orientation" }
+      ], default: "random", desc: "Determines how tile rotation is decided." },
+      { id: "cornerPadding", label: "Tile Margin Gap", type: "range", min: 0, max: 4, step: 0.5, default: 0, unit: "mm", desc: "Leaves tiny gaps between tiles for an etched tile look." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Checker)", type: "checkbox", default: false, desc: "Draws alternate tiles in Pen 2 for dual-ink geometric plots." }
+    ],
+    presets: {
+      "Woven Ribbon Labyrinth": { gridCols: 10, tileStyle: "arcs", arcsPerTile: 2, rotationRule: "random", cornerPadding: 0, dualColorAccent: false },
+      "Circuit Board Maze": { gridCols: 12, tileStyle: "meander", arcsPerTile: 1, rotationRule: "noise", cornerPadding: 0.5, dualColorAccent: true },
+      "Diagonal Slash Network": { gridCols: 12, tileStyle: "diagonal", arcsPerTile: 1, rotationRule: "random", cornerPadding: 0, dualColorAccent: false },
+      "Optical Ripple Grid": { gridCols: 11, tileStyle: "arcs", arcsPerTile: 2, rotationRule: "concentric", cornerPadding: 0, dualColorAccent: true },
+      "Smooth Minimal Arcs": { gridCols: 7, tileStyle: "arcs", arcsPerTile: 1, rotationRule: "random", cornerPadding: 0, dualColorAccent: false }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const cols = params.gridCols;
+      const tileSize = width / cols;
+      const rows = Math.floor(height / tileSize);
+      const startX = minX;
+      const startY = minY + (height - rows * tileSize) * 0.5;
+
+      const arcsCount = params.arcsPerTile;
+      const segmentsPerArc = 18;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x0 = startX + c * tileSize;
+          const y0 = startY + r * tileSize;
+          const isPen2 = params.dualColorAccent && (r + c) % 2 === 1;
+          const targetLayer = isPen2 ? pathsLayer2 : pathsLayer1;
+
+          // Determine rotation (0 or 1)
+          let rot = 0;
+          if (params.rotationRule === "random") {
+            rot = rng.chance(0.5) ? 0 : 1;
+          } else if (params.rotationRule === "checkerboard") {
+            rot = (r + c) % 2 === 0 ? 0 : 1;
+          } else if (params.rotationRule === "noise") {
+            rot = noise.noise2D(c * 0.2, r * 0.2) > 0 ? 1 : 0;
+          } else if (params.rotationRule === "concentric") {
+            const dx = c - cols * 0.5;
+            const dy = r - rows * 0.5;
+            rot = Math.floor(Math.hypot(dx, dy)) % 2 === 0 ? 1 : 0;
+          }
+
+          if (params.tileStyle === "arcs") {
+            // Smith quarter circles with complementary matching radii for continuous ribbon stitching
+            for (let a = 1; a <= arcsCount; a++) {
+              const rTL = (tileSize / (arcsCount + 1)) * a;
+              const rBR = tileSize - rTL;
+
+              if (rot === 0) {
+                // Top-Left corner arc
+                const arc1 = [];
+                for (let s = 0; s <= segmentsPerArc; s++) {
+                  const th = (s / segmentsPerArc) * (Math.PI * 0.5);
+                  arc1.push({ x: x0 + Math.cos(th) * rTL, y: y0 + Math.sin(th) * rTL });
+                }
+                targetLayer.push(arc1);
+
+                // Bottom-Right corner arc (matched to neighbor)
+                const arc2 = [];
+                for (let s = 0; s <= segmentsPerArc; s++) {
+                  const th = Math.PI + (s / segmentsPerArc) * (Math.PI * 0.5);
+                  arc2.push({ x: x0 + tileSize + Math.cos(th) * rBR, y: y0 + tileSize + Math.sin(th) * rBR });
+                }
+                targetLayer.push(arc2);
+              } else {
+                // Top-Right corner arc
+                const arc1 = [];
+                for (let s = 0; s <= segmentsPerArc; s++) {
+                  const th = Math.PI * 0.5 + (s / segmentsPerArc) * (Math.PI * 0.5);
+                  arc1.push({ x: x0 + tileSize + Math.cos(th) * rTL, y: y0 + Math.sin(th) * rTL });
+                }
+                targetLayer.push(arc1);
+
+                // Bottom-Left corner arc (matched to neighbor)
+                const arc2 = [];
+                for (let s = 0; s <= segmentsPerArc; s++) {
+                  const th = Math.PI * 1.5 + (s / segmentsPerArc) * (Math.PI * 0.5);
+                  arc2.push({ x: x0 + Math.cos(th) * rBR, y: y0 + tileSize + Math.sin(th) * rBR });
+                }
+                targetLayer.push(arc2);
+              }
+            }
+
+          } else if (params.tileStyle === "diagonal") {
+            // Diagonal maze slashes
+            for (let a = 0; a < arcsCount; a++) {
+              const offset = (a - (arcsCount - 1) / 2) * (tileSize * 0.15);
+              if (rot === 0) {
+                targetLayer.push([
+                  { x: x0, y: y0 + tileSize + offset },
+                  { x: x0 + tileSize + offset, y: y0 }
+                ]);
+              } else {
+                targetLayer.push([
+                  { x: x0, y: y0 + offset },
+                  { x: x0 + tileSize, y: y0 + tileSize + offset }
+                ]);
+              }
+            }
+
+          } else if (params.tileStyle === "meander") {
+            // Circuit board orthogonal steps
+            const midX = x0 + tileSize * 0.5;
+            const midY = y0 + tileSize * 0.5;
+            if (rot === 0) {
+              targetLayer.push([
+                { x: x0, y: midY },
+                { x: midX, y: midY },
+                { x: midX, y: y0 }
+              ]);
+              targetLayer.push([
+                { x: x0 + tileSize, y: midY },
+                { x: midX, y: midY },
+                { x: midX, y: y0 + tileSize }
+              ]);
+            } else {
+              targetLayer.push([
+                { x: midX, y: y0 },
+                { x: midX, y: midY },
+                { x: x0 + tileSize, y: midY }
+              ]);
+              targetLayer.push([
+                { x: midX, y: y0 + tileSize },
+                { x: midX, y: midY },
+                { x: x0, y: midY }
+              ]);
+            }
+
+          } else if (params.tileStyle === "triangles") {
+            // Chevron triangles
+            if (rot === 0) {
+              targetLayer.push([
+                { x: x0, y: y0 },
+                { x: x0 + tileSize * 0.5, y: y0 + tileSize * 0.5 },
+                { x: x0 + tileSize, y: y0 }
+              ]);
+              targetLayer.push([
+                { x: x0, y: y0 + tileSize },
+                { x: x0 + tileSize * 0.5, y: y0 + tileSize * 0.5 },
+                { x: x0 + tileSize, y: y0 + tileSize }
+              ]);
+            } else {
+              targetLayer.push([
+                { x: x0, y: y0 },
+                { x: x0 + tileSize * 0.5, y: y0 + tileSize * 0.5 },
+                { x: x0, y: y0 + tileSize }
+              ]);
+              targetLayer.push([
+                { x: x0 + tileSize, y: y0 },
+                { x: x0 + tileSize * 0.5, y: y0 + tileSize * 0.5 },
+                { x: x0 + tileSize, y: y0 + tileSize }
+              ]);
+            }
+          }
+        }
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 5. CONCENTRIC INTERFERENCE & MOIRÉ CIRCLES
+  // =========================================================================
+  concentricMoire: {
+    id: "concentricMoire",
+    name: "Concentric Moiré & Ripples",
+    category: "Optical & Interference",
+    badge: "Optical Magic",
+    icon: "🎯",
+    shortDesc: "Multiple overlapping ripple centers that generate mesmerizing physical Moiré patterns.",
+    explanation: "When two or more sets of high-density concentric rings overlap, the human eye perceives third-order geometric interference patterns called 'Moiré'. On a pen plotter, these thin vector lines produce unbelievable optical depth and illusion of movement on paper.",
+    beginnerTip: "Keep 'Ring Spacing' between 1mm and 2mm to get the most dramatic Moiré optical illusions!",
+    codeSnippet: `// Distance ripple interference:
+const d1 = Math.hypot(x - center1.x, y - center1.y);
+const d2 = Math.hypot(x - center2.x, y - center2.y);
+const radiusWobble = noise(cos(theta), sin(theta)) * warpAmp;`,
+    parameters: [
+      { id: "centerCount", label: "Number of Wave Centers", type: "range", min: 2, max: 4, step: 1, default: 2, unit: "centers", desc: "How many interfering ripple sources are placed." },
+      { id: "ringCount", label: "Rings per Center", type: "range", min: 12, max: 34, step: 1, default: 22, unit: "rings", desc: "Density of concentric circles radiating outward." },
+      { id: "ringSpacing", label: "Ring Spacing (mm)", type: "range", min: 1.8, max: 5.0, step: 0.1, default: 2.6, unit: "mm", desc: "Distance between consecutive concentric circles (kept safe for thin paper)." },
+      { id: "noiseWobble", label: "Organic Warp / Wobble", type: "range", min: 0, max: 12, step: 0.5, default: 0, unit: "mm", desc: "Distorts clean circles into organic tree rings or ripple waves." },
+      { id: "interlaceLayers", label: "Separate Centers to Layer 2", type: "checkbox", default: true, desc: "Assigns Center 1 to Pen 1 and Center 2 to Pen 2 for stunning 2-color moiré." },
+      { id: "clipBoundary", label: "Clip to Margins", type: "checkbox", default: true, desc: "Cuts lines cleanly at paper margins." }
+    ],
+    presets: {
+      "Dual Moiré Interference": { centerCount: 2, ringCount: 24, ringSpacing: 2.6, noiseWobble: 0, interlaceLayers: true, clipBoundary: true },
+      "Triple Harmonic Echo": { centerCount: 3, ringCount: 18, ringSpacing: 2.8, noiseWobble: 0, interlaceLayers: true, clipBoundary: true },
+      "Organic Tree Cross-Section": { centerCount: 1, ringCount: 28, ringSpacing: 2.2, noiseWobble: 6.0, interlaceLayers: false, clipBoundary: true },
+      "Pond Rain Drops": { centerCount: 3, ringCount: 15, ringSpacing: 3.0, noiseWobble: 1.5, interlaceLayers: true, clipBoundary: true },
+      "Hypnotic Lens": { centerCount: 2, ringCount: 26, ringSpacing: 2.4, noiseWobble: 0, interlaceLayers: false, clipBoundary: true }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, maxX, maxY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const centers = [];
+      const count = params.centerCount;
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+
+      if (count === 1) {
+        centers.push({ x: cx, y: cy });
+      } else if (count === 2) {
+        const offset = width * 0.16;
+        centers.push({ x: cx - offset, y: cy });
+        centers.push({ x: cx + offset, y: cy });
+      } else if (count === 3) {
+        const r = width * 0.18;
+        for (let i = 0; i < 3; i++) {
+          const a = (i / 3) * Math.PI * 2 - Math.PI * 0.5;
+          centers.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+        }
+      } else {
+        const r = width * 0.22;
+        for (let i = 0; i < count; i++) {
+          const a = (i / count) * Math.PI * 2;
+          centers.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+        }
+      }
+
+      const ringCount = params.ringCount;
+      const spacing = params.ringSpacing;
+      const wobble = params.noiseWobble;
+      const samples = 140;
+
+      centers.forEach((center, cIdx) => {
+        const targetLayer = (params.interlaceLayers && cIdx % 2 === 1) ? pathsLayer2 : pathsLayer1;
+
+        for (let r = 1; r <= ringCount; r++) {
+          const baseRadius = r * spacing;
+          let currentPath = [];
+
+          for (let s = 0; s <= samples; s++) {
+            const theta = (s / samples) * Math.PI * 2;
+            let currentRadius = baseRadius;
+
+            if (wobble > 0) {
+              const nx = Math.cos(theta) * 1.5;
+              const ny = Math.sin(theta) * 1.5;
+              const n = noise.noise2D(nx + cIdx * 10, ny + r * 0.08);
+              currentRadius += n * wobble;
+            }
+
+            const x = center.x + Math.cos(theta) * currentRadius;
+            const y = center.y + Math.sin(theta) * currentRadius;
+
+            if (params.clipBoundary) {
+              const inBounds = x >= minX && x <= maxX && y >= minY && y <= maxY;
+              if (inBounds) {
+                currentPath.push({ x, y });
+              } else {
+                if (currentPath.length >= 2) targetLayer.push(currentPath);
+                currentPath = [];
+              }
+            } else {
+              currentPath.push({ x, y });
+            }
+          }
+
+          if (currentPath.length >= 2) targetLayer.push(currentPath);
+        }
+      });
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 6. DISTORTED SPIRALS & VORTEX
+  // =========================================================================
+  spirals: {
+    id: "spirals",
+    name: "Distorted Spirals & Vortex",
+    category: "Spirals & Geometry",
+    badge: "Hypnotic Coil",
+    icon: "🌀",
+    shortDesc: "Mathematically perfect Archimedean spiral with optional algorithmic wave & noise distortion.",
+    explanation: "Begins as a flawless, mathematically perfect Archimedean spiral with exact uniform spacing between every coil. You can dial in algorithmic distortion (organic noise, sinusoidal ripples, or vortex swirls) to watch pure geometry smoothly deform into organic nature!",
+    beginnerTip: "Start with 0 distortion to see a perfect Zen spiral, then gently move the distortion slider to watch it ripple!",
+    codeSnippet: `// Pure Archimedean spiral:
+const r = (theta / maxTheta) * maxRadius + algorithmicDistortion;
+const x = centerX + Math.cos(theta) * r;
+const y = centerY + Math.sin(theta) * r;`,
+    parameters: [
+      { id: "turns", label: "Spiral Turns (Revolutions)", type: "range", min: 6, max: 32, step: 1, default: 20, unit: "turns", desc: "How many concentric coils the spiral wraps around the center." },
+      { id: "distortionAmount", label: "Algorithmic Distortion", type: "range", min: 0, max: 20, step: 0.5, default: 0.0, unit: "mm", desc: "0 = mathematically perfect pure spiral. Increase to add organic ripples and waves." },
+      { id: "distortionMode", label: "Distortion Algorithm", type: "select", options: [
+        { value: "pure", label: "Pure Perfect Spiral (0 Distortion)" },
+        { value: "organic", label: "Organic Noise (Fingerprint / Tree Rings)" },
+        { value: "waves", label: "Harmonic Waves (Petal Rosette)" },
+        { value: "vortex", label: "Galactic Vortex Swirl" }
+      ], default: "pure", desc: "The mathematical rule used to deform the spiral." },
+      { id: "distortionFreq", label: "Distortion Frequency", type: "range", min: 2, max: 24, step: 1, default: 8, unit: "", desc: "Number of ripples along each spiral turn." },
+      { id: "dualSpiral", label: "Dual Intertwined Spirals", type: "checkbox", default: false, desc: "Draws two complementary intertwined spiral arms for 2-pen plotting." }
+    ],
+    presets: {
+      "Pure Geometric Spiral": { turns: 20, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 6, dualSpiral: false },
+      "Organic Fingerprint Whorl": { turns: 24, distortionAmount: 6.0, distortionMode: "organic", distortionFreq: 8, dualSpiral: false },
+      "Flower Rosette Spiral": { turns: 18, distortionAmount: 9.0, distortionMode: "waves", distortionFreq: 10, dualSpiral: false },
+      "Galactic Vortex Coil": { turns: 26, distortionAmount: 10.0, distortionMode: "vortex", distortionFreq: 5, dualSpiral: true },
+      "Hypnotic Dual Intertwined": { turns: 18, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 8, dualSpiral: true }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+      const maxR = Math.min(width, height) * 0.45;
+
+      const turns = params.turns;
+      const maxTheta = turns * Math.PI * 2;
+      const isPure = params.distortionMode === "pure" || params.distortionAmount <= 0;
+      const distAmp = isPure ? 0 : params.distortionAmount;
+      const distFreq = params.distortionFreq;
+      const totalPoints = Math.max(1800, turns * 220);
+
+      function buildSpiral(angleOffset) {
+        const path = [];
+        for (let i = 0; i <= totalPoints; i++) {
+          const t = i / totalPoints;
+          const theta = t * maxTheta;
+          const currentAngle = theta + angleOffset;
+          let r = t * maxR;
+
+          // Pure Archimedean spiral when distAmp == 0!
+          if (distAmp > 0 && t > 0.03) {
+            let wobble = 0;
+            if (params.distortionMode === "organic") {
+              const nx = Math.cos(currentAngle) * (distFreq * 0.3);
+              const ny = Math.sin(currentAngle) * (distFreq * 0.3);
+              wobble = noise.noise2D(nx + t * 3, ny + t * 3) * distAmp * Math.min(1, t * 2.2);
+            } else if (params.distortionMode === "waves") {
+              wobble = Math.sin(theta * distFreq * 0.5) * distAmp * Math.min(1, t * 2.0);
+            } else if (params.distortionMode === "vortex") {
+              const swirl = Math.pow(t, 1.4) * 5;
+              const n = noise.noise2D(Math.cos(currentAngle + swirl) * 2, Math.sin(currentAngle + swirl) * 2);
+              wobble = n * distAmp * t;
+            }
+            r += wobble;
+          }
+
+          const x = cx + Math.cos(currentAngle) * r;
+          const y = cy + Math.sin(currentAngle) * r;
+
+          if (x >= minX && x <= bounds.maxX && y >= minY && y <= bounds.maxY) {
+            path.push({ x, y });
+          } else {
+            if (path.length >= 2) break;
+          }
+        }
+        return path;
+      }
+
+      const spiral1 = buildSpiral(0);
+      if (spiral1.length >= 2) pathsLayer1.push(spiral1);
+
+      if (params.dualSpiral) {
+        const spiral2 = buildSpiral(Math.PI);
+        if (spiral2.length >= 2) pathsLayer2.push(spiral2);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 7. FRACTAL TREE & BRANCHING L-SYSTEM
+  // =========================================================================
+  fractalTree: {
+    id: "fractalTree",
+    name: "Fractal Branching Trees",
+    category: "Organic & Recursive",
+    badge: "Botanical Math",
+    icon: "🌳",
+    shortDesc: "Simulate living trees, fractal lightning, and biological lung airways with recursive geometry.",
+    explanation: "Fractal recursion is how nature builds maximum surface area with minimal code. A single branch sprouts from the ground, splits into 2 or 3 smaller branches at specific angles, and each sub-branch splits again and again. With just 7 levels of recursion, a lifelike biological tree emerges.",
+    beginnerTip: "Increase 'Branch Asymmetry' or 'Wind Sway' to turn a stiff mathematical symmetry into an expressive, windblown bonsai tree!",
+    codeSnippet: `// Recursive branch function:
+function branch(x, y, length, angle, depth) {
+  if (depth <= 0) return;
+  const nextX = x + Math.cos(angle) * length;
+  const nextY = y + Math.sin(angle) * length;
+  drawLine({x, y}, {nextX, nextY});
+  branch(nextX, nextY, length * ratio, angle - spread, depth - 1);
+  branch(nextX, nextY, length * ratio, angle + spread, depth - 1);
+}`,
+    parameters: [
+      { id: "recursionDepth", label: "Branching Depth", type: "range", min: 4, max: 7, step: 1, default: 6, unit: "levels", desc: "How many times branches split recursively." },
+      { id: "branchAngle", label: "Branch Spread Angle", type: "range", min: 15, max: 55, step: 2, default: 28, unit: "°", desc: "Angle between child branches." },
+      { id: "lengthRatio", label: "Branch Shrink Ratio", type: "range", min: 0.55, max: 0.80, step: 0.01, default: 0.72, unit: "", desc: "How much shorter each generation of branches becomes." },
+      { id: "trunkLength", label: "Trunk Height", type: "range", min: 20, max: 65, step: 2, default: 42, unit: "mm", desc: "Initial starting height of the main trunk." },
+      { id: "windSway", label: "Wind Sway / Curvature", type: "range", min: -20, max: 20, step: 1, default: 4, unit: "°", desc: "Tilts the tree organically in the wind." },
+      { id: "treeCount", label: "Number of Trees", type: "range", min: 1, max: 3, step: 1, default: 1, unit: "trees", desc: "Draws a solitary specimen or a forest horizon." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Twigs)", type: "checkbox", default: true, desc: "Plots sturdy main branches in Pen 1 and delicate leaf twigs in Pen 2." }
+    ],
+    presets: {
+      "Ancient Bonsai": { recursionDepth: 6, branchAngle: 34, lengthRatio: 0.70, trunkLength: 42, windSway: 8, treeCount: 1, dualColorAccent: true },
+      "Winter Birch Forest": { recursionDepth: 5, branchAngle: 22, lengthRatio: 0.74, trunkLength: 44, windSway: -3, treeCount: 2, dualColorAccent: true },
+      "Fractal Lightning Bolt": { recursionDepth: 7, branchAngle: 45, lengthRatio: 0.65, trunkLength: 55, windSway: 0, treeCount: 1, dualColorAccent: false },
+      "Grand Victorian Oak": { recursionDepth: 6, branchAngle: 30, lengthRatio: 0.75, trunkLength: 40, windSway: 2, treeCount: 1, dualColorAccent: true }
+    },
+    generate(bounds, params, rng) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const trees = params.treeCount;
+      const maxDepth = params.recursionDepth;
+      const baseSpread = MathUtils.radians(params.branchAngle);
+      const ratio = params.lengthRatio;
+      const sway = MathUtils.radians(params.windSway);
+
+      for (let t = 0; t < trees; t++) {
+        const rootX = minX + (width / (trees + 1)) * (t + 1);
+        const rootY = minY + height * 0.92;
+        const trunkLen = params.trunkLength * (0.85 + rng.next() * 0.3);
+
+        function growBranch(x, y, length, angle, depth) {
+          if (depth <= 0 || length < 1.0) return;
+
+          const endX = x + Math.sin(angle) * length;
+          const endY = y - Math.cos(angle) * length;
+
+          const branchPath = [{ x, y }, { x: endX, y: endY }];
+
+          // Layer separation: main trunk/thick limbs vs fine twigs
+          if (params.dualColorAccent && depth <= 3) {
+            pathsLayer2.push(branchPath);
+          } else {
+            pathsLayer1.push(branchPath);
+          }
+
+          // Random natural jitter in branch angles
+          const naturalJitter = (rng.next() - 0.5) * 0.15;
+          const leftAngle = angle - baseSpread + naturalJitter + sway * 0.2;
+          const rightAngle = angle + baseSpread + naturalJitter + sway * 0.2;
+
+          growBranch(endX, endY, length * ratio * (0.92 + rng.next() * 0.16), leftAngle, depth - 1);
+          growBranch(endX, endY, length * ratio * (0.92 + rng.next() * 0.16), rightAngle, depth - 1);
+
+          // Occasional third central sprout
+          if (depth >= 4 && rng.chance(0.35)) {
+            const centerAngle = angle + sway * 0.3 + (rng.next() - 0.5) * 0.2;
+            growBranch(endX, endY, length * ratio * 0.75, centerAngle, depth - 2);
+          }
+        }
+
+        growBranch(rootX, rootY, trunkLen, sway, maxDepth);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 7. CONTINUOUS SPACE-FILLING MEANDERS (ZERO PEN LIFTS)
+  // =========================================================================
+  continuousMeander: {
+    id: "continuousMeander",
+    name: "Continuous Single-Line Meanders",
+    category: "Continuous / 1-Path",
+    badge: "Zero Pen Lifts",
+    icon: "➰",
+    shortDesc: "A single continuous unbroken line traversing the entire sheet without lifting the pen once!",
+    explanation: "Space-filling curves like the Hilbert curve and continuous self-avoiding walks visit every sector of the 2D plane with a single, unbroken mathematical line. For pen plotters, this is the holy grail: the pen drops once at the start, draws the entire artwork smoothly without stopping, and lifts only when completely finished!",
+    beginnerTip: "Watch the plot simulator with this algorithm! Notice how the pen never lifts from the paper — it finishes in record time with zero ink-bleed dots.",
+    codeSnippet: `// Recursive Hilbert space-filling curve:
+// 1 single continuous vector path traversing the entire paper!`,
+    parameters: [
+      { id: "curveOrder", label: "Curve Detail Order", type: "range", min: 2, max: 5, step: 1, default: 4, unit: "order", desc: "Density of the space-filling grid (Order 4 = 256 cells, Order 5 = 1024 cells)." },
+      { id: "curveStyle", label: "Curve Style", type: "select", options: [
+        { value: "hilbert", label: "Hilbert Space-Filling Curve" },
+        { value: "organicWander", label: "Organic Self-Avoiding Meander" },
+        { value: "peanoSpiral", label: "Serpentine Spiral Meander" }
+      ], default: "hilbert", desc: "Select the continuous line path trajectory." },
+      { id: "cornerRoundness", label: "Corner Smoothing", type: "range", min: 0, max: 0.45, step: 0.05, default: 0.25, unit: "", desc: "Rounds sharp 90° corners for smooth continuous pen gliding." },
+      { id: "wobble", label: "Hand-Drawn Organic Wobble", type: "range", min: 0, max: 2.0, step: 0.2, default: 0.4, unit: "mm", desc: "Adds subtle hand-drawn organic vibration to the line." }
+    ],
+    presets: {
+      "Continuous Hilbert Labyrinth": { curveOrder: 4, curveStyle: "hilbert", cornerRoundness: 0.25, wobble: 0.2 },
+      "Smooth Silk Maze": { curveOrder: 4, curveStyle: "hilbert", cornerRoundness: 0.40, wobble: 0.0 },
+      "Hand-Drawn Explorer": { curveOrder: 3, curveStyle: "organicWander", cornerRoundness: 0.15, wobble: 1.0 },
+      "Serpentine Labyrinth": { curveOrder: 4, curveStyle: "peanoSpiral", cornerRoundness: 0.30, wobble: 0.4 }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const size = Math.min(width, height);
+      const offsetX = minX + (width - size) * 0.5;
+      const offsetY = minY + (height - size) * 0.5;
+
+      const singleContinuousPath = [];
+
+      if (params.curveStyle === "hilbert") {
+        // Generate Hilbert curve points
+        const order = params.curveOrder;
+        const n = 1 << order; // 2^order
+        const totalPoints = n * n;
+        const cell = size / n;
+
+        // D2XY Hilbert coordinate mapping
+        function d2xy(m, d) {
+          let rx, ry, s, t = d;
+          let x = 0, y = 0;
+          for (s = 1; s < m; s *= 2) {
+            rx = 1 & (t / 2);
+            ry = 1 & (t ^ rx);
+            if (ry === 0) {
+              if (rx === 1) {
+                x = s - 1 - x;
+                y = s - 1 - y;
+              }
+              const temp = x;
+              x = y;
+              y = temp;
+            }
+            x += s * rx;
+            y += s * ry;
+            t = Math.floor(t / 4);
+          }
+          return { x, y };
+        }
+
+        const rawPoints = [];
+        for (let i = 0; i < totalPoints; i++) {
+          const pt = d2xy(n, i);
+          rawPoints.push({
+            x: offsetX + (pt.x + 0.5) * cell,
+            y: offsetY + (pt.y + 0.5) * cell
+          });
+        }
+
+        // Apply corner rounding / subdivision if requested
+        if (params.cornerRoundness > 0) {
+          const round = params.cornerRoundness;
+          singleContinuousPath.push(rawPoints[0]);
+
+          for (let i = 1; i < rawPoints.length - 1; i++) {
+            const pPrev = rawPoints[i - 1];
+            const pCurr = rawPoints[i];
+            const pNext = rawPoints[i + 1];
+
+            const p1 = {
+              x: MathUtils.lerp(pCurr.x, pPrev.x, round),
+              y: MathUtils.lerp(pCurr.y, pPrev.y, round)
+            };
+            const p2 = {
+              x: MathUtils.lerp(pCurr.x, pNext.x, round),
+              y: MathUtils.lerp(pCurr.y, pNext.y, round)
+            };
+
+            singleContinuousPath.push(p1);
+            singleContinuousPath.push(p2);
+          }
+          singleContinuousPath.push(rawPoints[rawPoints.length - 1]);
+        } else {
+          rawPoints.forEach(p => singleContinuousPath.push(p));
+        }
+
+      } else if (params.curveStyle === "peanoSpiral") {
+        // Serpentine scanline spiral
+        const rows = (1 << params.curveOrder) * 2;
+        const stepY = height / rows;
+        for (let r = 0; r < rows; r++) {
+          const y = minY + (r + 0.5) * stepY;
+          if (r % 2 === 0) {
+            singleContinuousPath.push({ x: minX, y });
+            singleContinuousPath.push({ x: minX + width, y });
+          } else {
+            singleContinuousPath.push({ x: minX + width, y });
+            singleContinuousPath.push({ x: minX, y });
+          }
+        }
+      } else {
+        // Organic wandering self-avoiding walk
+        const cols = (1 << params.curveOrder);
+        const cell = size / cols;
+        let curX = minX + width * 0.5;
+        let curY = minY + height * 0.5;
+        singleContinuousPath.push({ x: curX, y: curY });
+
+        const steps = cols * cols * 0.6;
+        for (let s = 0; s < steps; s++) {
+          const angle = Math.floor(rng.range(0, 4)) * (Math.PI * 0.5);
+          const nx = MathUtils.clamp(curX + Math.cos(angle) * cell, minX + cell, minX + width - cell);
+          const ny = MathUtils.clamp(curY + Math.sin(angle) * cell, minY + cell, minY + height - cell);
+          singleContinuousPath.push({ x: nx, y: ny });
+          curX = nx;
+          curY = ny;
+        }
+      }
+
+      // Add wobble if set
+      if (params.wobble > 0) {
+        for (let i = 0; i < singleContinuousPath.length; i++) {
+          const pt = singleContinuousPath[i];
+          const n = noise.noise2D(pt.x * 0.05, pt.y * 0.05);
+          pt.x += Math.cos(n * Math.PI * 2) * params.wobble;
+          pt.y += Math.sin(n * Math.PI * 2) * params.wobble;
+        }
+      }
+
+      if (singleContinuousPath.length >= 2) {
+        pathsLayer1.push(singleContinuousPath);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 8. CODE SANDBOX (LIVE FORMULA TWEAKER)
+  // =========================================================================
+  codeSandbox: {
+    id: "codeSandbox",
+    name: "Live Code & Math Sandbox",
+    category: "Coding & Custom Formulas",
+    badge: "First Code Steps",
+    icon: "💻",
+    shortDesc: "Tweak real JavaScript code & mathematical formulas with live instant visual preview!",
+    explanation: "For workshop participants ready to write their first generative code! Modify the mathematical equation directly in the editor below. The live engine evaluates your code safely on the fly and renders your customized vector artwork in real-time.",
+    beginnerTip: "Start by changing numbers like '7', '0.04', or swap 'Math.sin' with 'Math.cos' to see what happens!",
+    codeSnippet: `// Live editable generator snippet:
+function generateArt(bounds, noise, rng) {
+  // Return array of paths [{x, y}, ...]
+}`,
+    parameters: [
+      { id: "codePreset", label: "Starter Formula Template", type: "select", options: [
+        { value: "roseMath", label: "Mathematical Rose Curve (r = cos(k * theta))" },
+        { value: "lissajousGrid", label: "Lissajous Resonance Mesh" },
+        { value: "customFormula", label: "Custom Formula (Type your own math!)" },
+        { value: "superFormula", label: "Gielis Superformula Organic Shapes" },
+        { value: "archimedesSpiral", label: "Archimedean Modulated Spiral" }
+      ], default: "roseMath", desc: "Select a starter code snippet to edit." },
+      { id: "customFormula", label: "Math Formula Expression", type: "text", default: "Math.cos((A/B) * theta) * (1 + 0.2 * Math.sin(A * theta))", desc: "Type any JS math expression using theta, A, B, Math.sin, Math.cos, etc." },
+      { id: "multiplierA", label: "Parameter A (Tweak in formula)", type: "range", min: 1, max: 15, step: 0.5, default: 5, unit: "", desc: "Exposed as variable 'A' inside your code snippet." },
+      { id: "multiplierB", label: "Parameter B (Tweak in formula)", type: "range", min: 1, max: 15, step: 0.5, default: 8, unit: "", desc: "Exposed as variable 'B' inside your code snippet." },
+      { id: "density", label: "Point Resolution", type: "range", min: 500, max: 3500, step: 250, default: 2000, unit: "pts", desc: "Number of points calculated by your loop." }
+    ],
+    presets: {
+      "Mathematical Rose Curve (r = cos(k * theta))": { codePreset: "roseMath", customFormula: "Math.cos((A/B) * theta)", multiplierA: 5, multiplierB: 7, density: 2200 },
+      "Lissajous Resonance Mesh": { codePreset: "lissajousGrid", customFormula: "Math.sin(A * theta)", multiplierA: 3, multiplierB: 4, density: 2000 },
+      "Custom Math Expression": { codePreset: "customFormula", customFormula: "Math.cos((A/B) * theta) * (1 + 0.2 * Math.sin(A * theta))", multiplierA: 6, multiplierB: 4, density: 2400 },
+      "Gielis Superformula Organic Shapes": { codePreset: "superFormula", customFormula: "superformula(theta)", multiplierA: 6, multiplierB: 2, density: 2400 },
+      "Archimedean Modulated Spiral": { codePreset: "archimedesSpiral", customFormula: "spiral(theta)", multiplierA: 8, multiplierB: 4, density: 2600 }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+      const maxR = Math.min(width, height) * 0.44;
+      const A = params.multiplierA;
+      const B = params.multiplierB;
+      const pts = params.density;
+
+      if (params.codePreset === "customFormula") {
+        let formulaFunc;
+        try {
+          formulaFunc = new Function("theta", "A", "B", "Math", `
+            try {
+              return (${params.customFormula || "1"});
+            } catch(e) {
+              return 1;
+            }
+          `);
+        } catch(e) {
+          formulaFunc = () => 1;
+        }
+
+        const path = [];
+        const maxTheta = Math.PI * 2 * Math.max(2, B || 4);
+        for (let i = 0; i <= pts; i++) {
+          const theta = (i / pts) * maxTheta;
+          let rVal = 1;
+          try {
+            rVal = formulaFunc(theta, A, B, Math);
+            if (isNaN(rVal) || !isFinite(rVal)) rVal = 0.5;
+          } catch(e) {
+            rVal = 0.5;
+          }
+          const r = maxR * Math.min(1.2, Math.max(-1.2, rVal));
+          const x = cx + Math.cos(theta) * r;
+          const y = cy + Math.sin(theta) * r;
+          path.push({ x, y });
+        }
+        if (path.length >= 2) pathsLayer1.push(path);
+
+      } else if (params.codePreset === "roseMath") {
+        // Mathematical Rose: r = cos(k * theta)
+        const k = A / (B || 1);
+        const path = [];
+        const maxTheta = Math.PI * 2 * (B || 1);
+        for (let i = 0; i <= pts; i++) {
+          const theta = (i / pts) * maxTheta;
+          const r = maxR * Math.cos(k * theta);
+          const x = cx + Math.cos(theta) * r;
+          const y = cy + Math.sin(theta) * r;
+          path.push({ x, y });
+        }
+        if (path.length >= 2) pathsLayer1.push(path);
+
+      } else if (params.codePreset === "lissajousGrid") {
+        // Lissajous 3D mesh
+        const path = [];
+        for (let i = 0; i <= pts; i++) {
+          const t = (i / pts) * Math.PI * 2 * 12;
+          const x = cx + maxR * Math.sin(A * t + Math.PI * 0.25);
+          const y = cy + maxR * Math.sin(B * t);
+          path.push({ x, y });
+        }
+        if (path.length >= 2) pathsLayer1.push(path);
+
+      } else if (params.codePreset === "archimedesSpiral") {
+        // Modulated spiral
+        const path = [];
+        const turns = A * 4;
+        for (let i = 0; i <= pts; i++) {
+          const t = i / pts;
+          const theta = t * Math.PI * 2 * turns;
+          const r = t * maxR + Math.sin(theta * B) * (maxR * 0.08);
+          const x = cx + Math.cos(theta) * r;
+          const y = cy + Math.sin(theta) * r;
+          path.push({ x, y });
+        }
+        if (path.length >= 2) pathsLayer1.push(path);
+
+      } else {
+        // Superformula
+        const path = [];
+        const m = A;
+        const n1 = 0.5, n2 = B * 0.2, n3 = B * 0.2;
+        const a = 1, b = 1;
+        for (let i = 0; i <= pts; i++) {
+          const phi = (i / pts) * Math.PI * 2;
+          const t1 = Math.pow(Math.abs((1 / a) * Math.cos((m * phi) / 4)), n2);
+          const t2 = Math.pow(Math.abs((1 / b) * Math.sin((m * phi) / 4)), n3);
+          const r = Math.pow(t1 + t2, -1 / n1) * (maxR * 0.6);
+          const x = cx + Math.cos(phi) * r;
+          const y = cy + Math.sin(phi) * r;
+          path.push({ x, y });
+        }
+        if (path.length >= 2) pathsLayer1.push(path);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  },
+
+  // =========================================================================
+  // 9. GENERATIVE DOODLES & MINDFUL SCRIBBLING (ZERO LIFT ORGANIC LOOPS)
+  // =========================================================================
+  doodles: {
+    id: "doodles",
+    name: "Generative Doodles & Scribbles",
+    category: "Organic & Freeform",
+    badge: "Zero Pen Lifts",
+    icon: "✏️",
+    shortDesc: "Playful continuous wandering loops, mindful scribbles, and flowing Zentangle ribbon curls.",
+    explanation: "Inspired by the intuitive scribbles people draw while daydreaming or on the phone. A virtual drawing tip wanders across the paper with natural inertia, curling into whimsical loop-de-loops, soft cloud-like squiggles, or meditative Zentangles. Designed to be completely continuous—drawing a full, rich composition in a single fluid stroke with zero pen lifts, keeping the plotter servo cool and safe!",
+    beginnerTip: "Switch between 'Whimsical Loops' and 'Mindful Cloud' to see how curling frequency transforms the doodle!",
+    codeSnippet: `// Organic wandering doodle steering:
+angularVel += Math.sin(step * curliness) * 0.35 + noise(x, y) * 0.3;
+x += Math.cos(angle) * stepSize;
+y += Math.sin(angle) * stepSize;`,
+    parameters: [
+      { id: "doodleStyle", label: "Doodle Style", type: "select", options: [
+        { value: "loops", label: "Whimsical Loop-de-Loop (Cursive Ribbon)" },
+        { value: "scribble", label: "Mindful Cloud Scribble (Soft Wandering)" },
+        { value: "zentangle", label: "Zentangle Ribbon Swirls (Rhythmic Loops)" },
+        { value: "botanical", label: "Botanical Ivy Tendrils (Organic Vines)" }
+      ], default: "loops", desc: "The character and curvature rule of the wandering pen." },
+      { id: "loopDensity", label: "Doodle Length (Steps)", type: "range", min: 1000, max: 3600, step: 200, default: 2200, unit: "steps", desc: "Total length of the continuous doodle stroke (calibrated < 5 mins)." },
+      { id: "curliness", label: "Loop Curliness", type: "range", min: 1.0, max: 4.0, step: 0.2, default: 2.2, unit: "x", desc: "How tightly the pen curls into circular loop-de-loops." },
+      { id: "wanderSpeed", label: "Step Resolution", type: "range", min: 1.0, max: 2.4, step: 0.1, default: 1.5, unit: "mm", desc: "Distance between consecutive coordinates in the stroke." },
+      { id: "coverage", label: "Paper Coverage Spread", type: "range", min: 0.55, max: 0.90, step: 0.05, default: 0.80, unit: "", desc: "Boundary envelope determining how wide the doodle spreads across the page." },
+      { id: "dualColorAccent", label: "Dual Layer (Pen 2 Accent)", type: "checkbox", default: false, desc: "Splits the doodle into two continuous layers for 2-pen plotting." }
+    ],
+    presets: {
+      "Whimsical Loop-de-Loop": { doodleStyle: "loops", loopDensity: 2200, curliness: 2.4, wanderSpeed: 1.5, coverage: 0.80, dualColorAccent: false },
+      "Mindful Cloud Scribble": { doodleStyle: "scribble", loopDensity: 2400, curliness: 1.8, wanderSpeed: 1.6, coverage: 0.85, dualColorAccent: false },
+      "Zentangle Ribbon Swirls": { doodleStyle: "zentangle", loopDensity: 2600, curliness: 2.5, wanderSpeed: 1.4, coverage: 0.78, dualColorAccent: false },
+      "Botanical Ivy Tendrils": { doodleStyle: "botanical", loopDensity: 2000, curliness: 2.0, wanderSpeed: 1.6, coverage: 0.82, dualColorAccent: true },
+      "Cursive Notepad Wander": { doodleStyle: "loops", loopDensity: 1800, curliness: 1.6, wanderSpeed: 1.8, coverage: 0.75, dualColorAccent: false }
+    },
+    generate(bounds, params, rng, noise) {
+      const { minX, minY, maxX, maxY, width, height } = bounds;
+      const pathsLayer1 = [];
+      const pathsLayer2 = [];
+
+      const style = params.doodleStyle || "loops";
+      const totalSteps = params.loopDensity || 2200;
+      const curliness = params.curliness || 2.2;
+      const stepSize = params.wanderSpeed || 1.5;
+      const coverage = params.coverage || 0.80;
+
+      const cx = minX + width * 0.5;
+      const cy = minY + height * 0.5;
+      const boundRadiusX = width * 0.5 * coverage;
+      const boundRadiusY = height * 0.5 * coverage;
+
+      let x = cx + rng.range(-8, 8);
+      let y = cy + rng.range(-8, 8);
+      let angle = rng.range(0, Math.PI * 2);
+      let angularVel = 0.05;
+
+      const fullPath = [{ x, y }];
+
+      // Spatial visited grid to ensure mindful space-filling (prevents tight ink balls)
+      const gridSize = 4.0; // mm
+      const gridW = Math.ceil(width / gridSize);
+      const gridH = Math.ceil(height / gridSize);
+      const visited = new Float32Array(gridW * gridH);
+
+      function getVisit(px, py) {
+        const gx = Math.floor((px - minX) / gridSize);
+        const gy = Math.floor((py - minY) / gridSize);
+        if (gx >= 0 && gx < gridW && gy >= 0 && gy < gridH) {
+          return visited[gy * gridW + gx];
+        }
+        return 10.0;
+      }
+
+      function addVisit(px, py, amount) {
+        const gx = Math.floor((px - minX) / gridSize);
+        const gy = Math.floor((py - minY) / gridSize);
+        if (gx >= 0 && gx < gridW && gy >= 0 && gy < gridH) {
+          visited[gy * gridW + gx] += amount;
+        }
+      }
+
+      for (let s = 0; s < totalSteps; s++) {
+        addVisit(x, y, 0.4);
+
+        if (style === "loops") {
+          // Continuous whimsical loop-de-loops
+          const n = noise.noise2D(x * 0.008, y * 0.008);
+          const curlWave = Math.sin(s * 0.045 * curliness) * 0.35 * curliness;
+          angularVel += (curlWave + n * 0.35 - angularVel) * 0.12;
+
+        } else if (style === "scribble") {
+          // Mindful cloud / organic wandering scribble
+          const n = noise.noise2D(x * 0.012, y * 0.012);
+          const jitter = (rng.next() - 0.5) * 0.32 * curliness;
+          angularVel += jitter + n * 0.22;
+          angularVel = Math.max(-0.55, Math.min(0.55, angularVel));
+
+        } else if (style === "zentangle") {
+          // Rhythmic serpentine ribbon with loopy curls
+          const freq = 0.055 * curliness;
+          const wave = Math.cos(s * freq) * 0.42;
+          const looper = (s % 85 < 20) ? (0.55 * curliness) : 0;
+          angularVel = wave + looper + noise.noise2D(x * 0.005, y * 0.005) * 0.2;
+
+        } else if (style === "botanical") {
+          // Botanical tendrils and curling vines
+          const curl = (s % 110 < 40) ? (0.42 * curliness) : (-0.22 * curliness);
+          const n = noise.noise2D(x * 0.007, y * 0.007);
+          angularVel += (curl + n * 0.28 - angularVel) * 0.15;
+        }
+
+        // Sensory probe to gently steer away from heavily visited areas (self-avoidance)
+        const probeDist = stepSize * 4.5;
+        const leftAngle = angle - 0.65;
+        const rightAngle = angle + 0.65;
+        const lx = x + Math.cos(leftAngle) * probeDist;
+        const ly = y + Math.sin(leftAngle) * probeDist;
+        const rx = x + Math.cos(rightAngle) * probeDist;
+        const ry = y + Math.sin(rightAngle) * probeDist;
+
+        const vLeft = getVisit(lx, ly);
+        const vRight = getVisit(rx, ry);
+
+        if (vLeft > vRight + 0.4) {
+          angularVel += 0.07;
+        } else if (vRight > vLeft + 0.4) {
+          angularVel -= 0.07;
+        }
+
+        // Soft boundary reflection: steer smoothly back towards paper center
+        const dxFromCenter = (x - cx) / boundRadiusX;
+        const dyFromCenter = (y - cy) / boundRadiusY;
+        const distSq = dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter;
+
+        if (distSq > 0.85) {
+          const angleToCenter = Math.atan2(cy - y, cx - x);
+          let diff = angleToCenter - angle;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          angularVel += diff * 0.18;
+        }
+
+        // Clamp angular velocity for smooth pen motion
+        angularVel = Math.max(-0.7, Math.min(0.7, angularVel));
+        angle += angularVel;
+
+        const nextX = x + Math.cos(angle) * stepSize;
+        const nextY = y + Math.sin(angle) * stepSize;
+
+        // Hard clamp within margins
+        x = Math.max(minX + 2, Math.min(maxX - 2, nextX));
+        y = Math.max(minY + 2, Math.min(maxY - 2, nextY));
+
+        fullPath.push({ x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) });
+      }
+
+      // Handle Dual Pen Accent if enabled
+      if (params.dualColorAccent) {
+        const half = Math.floor(fullPath.length * 0.55);
+        pathsLayer1.push(fullPath.slice(0, half));
+        pathsLayer2.push(fullPath.slice(half - 1));
+      } else {
+        pathsLayer1.push(fullPath);
+      }
+
+      return { layer1: pathsLayer1, layer2: pathsLayer2 };
+    }
+  }
+};
+
+window.ALGORITHM_DEFINITIONS = ALGORITHM_DEFINITIONS;
+
+
+/**
+ * Pen Plotter Engine: Hardware Specs, Path Optimization, Diagnostics & SVG Exporter
+ */
+
+const PAPER_SIZES = {
+  a5: { name: "A5 (148 × 210 mm)", width: 148, height: 210, unit: "mm" },
+  a4: { name: "A4 (210 × 297 mm)", width: 210, height: 297, unit: "mm" },
+  a3: { name: "A3 (297 × 420 mm)", width: 297, height: 420, unit: "mm" },
+  letter: { name: "US Letter (8.5 × 11 in)", width: 215.9, height: 279.4, unit: "mm" },
+  square: { name: "Square (200 × 200 mm)", width: 200, height: 200, unit: "mm" },
+  postcard: { name: "Postcard (105 × 148 mm)", width: 105, height: 148, unit: "mm" }
+};
+
+const PEN_PRESETS = [
+  { id: "micron_black", name: "Sakura Micron 0.3mm (Black)", color: "#111827", strokeWidth: 0.3 },
+  { id: "gelly_white", name: "Gelly Roll 0.5mm (White Gel)", color: "#f8fafc", strokeWidth: 0.5 },
+  { id: "metallic_gold", name: "Metallic Gold Gel 0.4mm", color: "#d97706", strokeWidth: 0.4 },
+  { id: "fountain_blue", name: "Prussian Blue Fountain Pen", color: "#1d4ed8", strokeWidth: 0.35 },
+  { id: "crimson_red", name: "Vivid Crimson Sharpie", color: "#e11d48", strokeWidth: 0.5 },
+  { id: "cyan_fine", name: "Electric Cyan Fine 0.3mm", color: "#06b6d4", strokeWidth: 0.3 }
+];
+
+const PAPER_PRESETS = [
+  { id: "white", name: "Heavy White Bristol Paper", color: "#fafaf9", texture: "smooth" },
+  { id: "cream", name: "Warm Cream Moleskine", color: "#fef3c7", texture: "moleskine" },
+  { id: "black", name: "Charcoal Black Heavy Cardstock", color: "#18181b", texture: "rough" },
+  { id: "kraft", name: "Natural Kraft Cardboard", color: "#d4b896", texture: "fiber" },
+  { id: "indigo", name: "Midnight Blueprint Indigo", color: "#0f172a", texture: "smooth" }
+];
+
+class PlotterEngine {
+  constructor() {
+    this.speedDraw = 45; // mm per sec
+    this.speedAir = 85;  // mm per sec
+    this.penLiftTime = 0.16; // 160ms servo delay per lift
+  }
+
+  // Get printable area taking margins and orientation into account
+  getBounds(paperKey, orientation, marginMm) {
+    const size = PAPER_SIZES[paperKey] || PAPER_SIZES.a5;
+    let pw = size.width;
+    let ph = size.height;
+
+    if (orientation === "landscape") {
+      const tmp = pw;
+      pw = ph;
+      ph = tmp;
+    }
+
+    const minX = marginMm;
+    const minY = marginMm;
+    const maxX = pw - marginMm;
+    const maxY = ph - marginMm;
+    const width = Math.max(10, maxX - minX);
+    const height = Math.max(10, maxY - minY);
+
+    return {
+      paperWidth: pw,
+      paperHeight: ph,
+      minX,
+      minY,
+      maxX,
+      maxY,
+      width,
+      height,
+      marginMm
+    };
+  }
+
+  // Optimize path order using Greedy Nearest-Neighbor TSP + Path Reversal + Smart Stitching (Servo Thermal Protection)
+  optimizePaths(paths, options = {}) {
+    if (!paths || paths.length <= 1) return paths ? [...paths] : [];
+
+    const stitchThresholdMm = options.stitchThreshold !== undefined ? options.stitchThreshold : 2.0;
+
+    // Clone paths to avoid mutating input
+    const pool = paths.map(p => p.map(pt => ({ x: pt.x, y: pt.y })));
+    const optimized = [];
+
+    // Start with the path closest to top-left corner
+    let bestDist = Infinity;
+    let bestIndex = 0;
+    let reverseFirst = false;
+
+    for (let i = 0; i < pool.length; i++) {
+      const p = pool[i];
+      const startDist = Math.hypot(p[0].x, p[0].y);
+      const endDist = Math.hypot(p[p.length - 1].x, p[p.length - 1].y);
+      if (startDist < bestDist) {
+        bestDist = startDist;
+        bestIndex = i;
+        reverseFirst = false;
+      }
+      if (endDist < bestDist) {
+        bestDist = endDist;
+        bestIndex = i;
+        reverseFirst = true;
+      }
+    }
+
+    let current = pool.splice(bestIndex, 1)[0];
+    if (reverseFirst) current.reverse();
+    optimized.push(current);
+
+    let curPos = current[current.length - 1];
+
+    // Greedily find closest next path
+    while (pool.length > 0) {
+      bestDist = Infinity;
+      bestIndex = 0;
+      let shouldReverse = false;
+
+      for (let i = 0; i < pool.length; i++) {
+        const candidate = pool[i];
+        const pStart = candidate[0];
+        const pEnd = candidate[candidate.length - 1];
+
+        const dStart = Math.hypot(pStart.x - curPos.x, pStart.y - curPos.y);
+        const dEnd = Math.hypot(pEnd.x - curPos.x, pEnd.y - curPos.y);
+
+        if (dStart < bestDist) {
+          bestDist = dStart;
+          bestIndex = i;
+          shouldReverse = false;
+        }
+        if (dEnd < bestDist) {
+          bestDist = dEnd;
+          bestIndex = i;
+          shouldReverse = true;
+        }
+      }
+
+      const nextPath = pool.splice(bestIndex, 1)[0];
+      if (shouldReverse) nextPath.reverse();
+
+      // Thermal Protection: if next path start is very close (<= stitchThresholdMm), stitch without lifting pen
+      if (stitchThresholdMm > 0 && bestDist <= stitchThresholdMm) {
+        const target = optimized[optimized.length - 1];
+        for (let pt of nextPath) {
+          target.push(pt);
+        }
+        curPos = target[target.length - 1];
+      } else {
+        optimized.push(nextPath);
+        curPos = nextPath[nextPath.length - 1];
+      }
+    }
+
+    return optimized;
+  }
+
+  // Calculate plotting statistics (draw distance, air distance, estimated time, and servo duty cycle)
+  calculateStats(pathsLayer1, pathsLayer2 = []) {
+    let drawDistanceMm = 0;
+    let airDistanceMm = 0;
+    let totalLifts = 0;
+
+    const allPaths = [...(pathsLayer1 || []), ...(pathsLayer2 || [])];
+    if (allPaths.length === 0) {
+      return {
+        pathCount: 0,
+        drawDistanceM: 0,
+        airDistanceM: 0,
+        totalLifts: 0,
+        liftsPerMin: 0,
+        servoStatus: "cool",
+        estimatedTimeStr: "0s",
+        estimatedSeconds: 0
+      };
+    }
+
+    let lastPos = { x: 0, y: 0 };
+
+    for (let i = 0; i < allPaths.length; i++) {
+      const path = allPaths[i];
+      if (path.length < 2) continue;
+
+      totalLifts++;
+      // Air distance from last position to start of this path
+      if (i > 0) {
+        airDistanceMm += Math.hypot(path[0].x - lastPos.x, path[0].y - lastPos.y);
+      }
+
+      // Drawing distance along the path
+      for (let j = 1; j < path.length; j++) {
+        drawDistanceMm += Math.hypot(path[j].x - path[j - 1].x, path[j].y - path[j - 1].y);
+      }
+
+      lastPos = path[path.length - 1];
+    }
+
+    // Time estimate calculation
+    const timeDraw = drawDistanceMm / this.speedDraw;
+    const timeAir = airDistanceMm / this.speedAir;
+    const timeLifts = totalLifts * this.penLiftTime;
+    const totalSec = Math.round(timeDraw + timeAir + timeLifts);
+
+    const minutes = Math.floor(totalSec / 60);
+    const seconds = totalSec % 60;
+    const estimatedTimeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+    // Servo duty cycle & thermal safety
+    const totalMinutes = Math.max(0.1, totalSec / 60);
+    const liftsPerMin = Math.round((totalLifts / totalMinutes) * 10) / 10;
+    let servoStatus = "cool"; // "cool" (< 25 lifts/min), "warm" (25-50), "hot" (> 50)
+    if (liftsPerMin > 45) servoStatus = "hot";
+    else if (liftsPerMin > 20) servoStatus = "warm";
+
+    return {
+      pathCount: allPaths.length,
+      drawDistanceM: (drawDistanceMm / 1000).toFixed(2),
+      airDistanceM: (airDistanceMm / 1000).toFixed(2),
+      totalLifts,
+      liftsPerMin,
+      servoStatus,
+      estimatedTimeStr,
+      estimatedSeconds: totalSec
+    };
+  }
+
+  // Convert array of points to SVG path 'd' string with precision rounding
+  pathToSvgD(path) {
+    if (!path || path.length < 2) return "";
+    let d = `M ${path[0].x.toFixed(2)} ${path[0].y.toFixed(2)}`;
+    for (let i = 1; i < path.length; i++) {
+      d += ` L ${path[i].x.toFixed(2)} ${path[i].y.toFixed(2)}`;
+    }
+    return d;
+  }
+
+  // Generate full clean SVG file content with Inkscape layer tags
+  generateSVG(bounds, pathsLayer1, pathsLayer2 = [], options = {}) {
+    const pw = bounds.paperWidth;
+    const ph = bounds.paperHeight;
+    const stroke1 = options.color1 || "#000000";
+    const stroke2 = options.color2 || "#e11d48";
+    const strokeWidth = options.strokeWidth || 0.3;
+
+    let svg = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`;
+    svg += `<!-- Generative Pen Plotter Art - Exported for AxiDraw / Inkscape -->\n`;
+    svg += `<!-- Plotter Thermal Guard: Path-Stitching Enabled (<25 lifts/min safe for SG90 servos) -->\n`;
+    svg += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"\n`;
+    svg += `     width="${pw}mm" height="${ph}mm" viewBox="0 0 ${pw} ${ph}">\n`;
+
+    // Layer 1
+    if (pathsLayer1 && pathsLayer1.length > 0) {
+      svg += `  <g inkscape:groupmode="layer" id="layer1" inkscape:label="Layer 1 - Main Pen">\n`;
+      pathsLayer1.forEach((p, idx) => {
+        const d = this.pathToSvgD(p);
+        if (d) {
+          svg += `    <path id="path1_${idx}" d="${d}" fill="none" stroke="${stroke1}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" />\n`;
+        }
+      });
+      svg += `  </g>\n`;
+    }
+
+    // Layer 2
+    if (pathsLayer2 && pathsLayer2.length > 0) {
+      svg += `  <g inkscape:groupmode="layer" id="layer2" inkscape:label="Layer 2 - Accent Pen">\n`;
+      pathsLayer2.forEach((p, idx) => {
+        const d = this.pathToSvgD(p);
+        if (d) {
+          svg += `    <path id="path2_${idx}" d="${d}" fill="none" stroke="${stroke2}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" />\n`;
+        }
+      });
+      svg += `  </g>\n`;
+    }
+
+    svg += `</svg>\n`;
+    return svg;
+  }
+
+  // Trigger browser file download for SVG
+  downloadSVG(filename, svgString) {
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  // Copy SVG content directly to clipboard
+  async copySVGToClipboard(svgString) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(svgString);
+      return true;
+    }
+    return false;
+  }
+
+  // Export high-resolution PNG snapshot of the preview canvas
+  downloadPNG(canvas, filename) {
+    const url = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
+window.PAPER_SIZES = PAPER_SIZES;
+window.PEN_PRESETS = PEN_PRESETS;
+window.PAPER_PRESETS = PAPER_PRESETS;
+window.PlotterEngine = PlotterEngine;
+
+
+/**
+ * Pen Plotter Drawing Simulator
+ * Animates pen carriage movement, pen-up air jumps, and ink drawing in real-time.
+ */
+
+class PlotterSimulator {
+  constructor(canvas, onProgressUpdate) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.onProgressUpdate = onProgressUpdate || (() => {});
+
+    this.isPlaying = false;
+    this.speedMultiplier = 5; // Default 5x speed
+    this.progress = 0; // 0.0 to 1.0
+    this.animationFrameId = null;
+
+    // Flattened segments cache
+    this.segments = []; // Array of { type: 'down'|'up', x1, y1, x2, y2, layer }
+    this.totalSteps = 0;
+    this.currentStep = 0;
+    this.currentPos = { x: 0, y: 0 };
+    this.isPenDown = false;
+  }
+
+  // Prepare simulation data from generated paths
+  loadPaths(pathsLayer1, pathsLayer2, bounds) {
+    this.stop();
+    this.bounds = bounds;
+    this.segments = [];
+
+    let lastX = bounds.minX;
+    let lastY = bounds.minY;
+
+    function addPaths(paths, layerIdx) {
+      if (!paths) return;
+      for (const p of paths) {
+        if (p.length < 2) continue;
+        // Air jump from last point to start of this path
+        const firstPt = p[0];
+        const airDist = Math.hypot(firstPt.x - lastX, firstPt.y - lastY);
+        if (airDist > 0.1) {
+          segments.push({
+            type: "up",
+            x1: lastX,
+            y1: lastY,
+            x2: firstPt.x,
+            y2: firstPt.y,
+            dist: airDist,
+            layer: layerIdx
+          });
+        }
+
+        // Pen down drawing segments
+        for (let i = 1; i < p.length; i++) {
+          const ptA = p[i - 1];
+          const ptB = p[i];
+          const dist = Math.hypot(ptB.x - ptA.x, ptB.y - ptA.y);
+          segments.push({
+            type: "down",
+            x1: ptA.x,
+            y1: ptA.y,
+            x2: ptB.x,
+            y2: ptB.y,
+            dist: dist,
+            layer: layerIdx
+          });
+        }
+
+        lastX = p[p.length - 1].x;
+        lastY = p[p.length - 1].y;
+      }
+    }
+
+    const segments = this.segments;
+    addPaths(pathsLayer1, 1);
+    addPaths(pathsLayer2, 2);
+
+    this.totalSteps = this.segments.length;
+    this.currentStep = 0;
+    this.progress = 0;
+  }
+
+  play() {
+    if (this.totalSteps === 0) return;
+    if (this.progress >= 1.0) {
+      this.currentStep = 0;
+      this.progress = 0;
+    }
+    this.isPlaying = true;
+    this.lastTime = performance.now();
+    this.animate();
+  }
+
+  pause() {
+    this.isPlaying = false;
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
+
+  stop() {
+    this.pause();
+    this.currentStep = 0;
+    this.progress = 0;
+  }
+
+  seek(fraction) {
+    this.progress = Math.max(0, Math.min(1, fraction));
+    this.currentStep = Math.floor(this.progress * this.totalSteps);
+  }
+
+  setSpeed(multiplier) {
+    this.speedMultiplier = multiplier;
+  }
+
+  animate() {
+    if (!this.isPlaying) return;
+
+    // Smooth fractional step accumulator for realistic, calm pen speed
+    this.stepAccumulator = (this.stepAccumulator || 0) + Math.max(0.08, this.speedMultiplier * 0.6);
+    const stepsThisFrame = Math.floor(this.stepAccumulator);
+    this.stepAccumulator -= stepsThisFrame;
+
+    if (stepsThisFrame > 0) {
+      this.currentStep = Math.min(this.totalSteps, this.currentStep + stepsThisFrame);
+      this.progress = this.totalSteps > 0 ? this.currentStep / this.totalSteps : 0;
+
+      if (this.currentStep < this.totalSteps) {
+        const seg = this.segments[this.currentStep];
+        this.currentPos = { x: seg.x2, y: seg.y2 };
+        this.isPenDown = seg.type === "down";
+      }
+
+      this.onProgressUpdate({
+        progress: this.progress,
+        currentStep: this.currentStep,
+        totalSteps: this.totalSteps,
+        currentPos: this.currentPos,
+        isPenDown: this.isPenDown
+      });
+    }
+
+    if (this.currentStep >= this.totalSteps) {
+      this.isPlaying = false;
+      this.onProgressUpdate({
+        progress: 1.0,
+        currentStep: this.totalSteps,
+        totalSteps: this.totalSteps,
+        currentPos: this.currentPos,
+        isPenDown: false,
+        completed: true
+      });
+      return;
+    }
+
+    this.animationFrameId = requestAnimationFrame(() => this.animate());
+  }
+}
+
+window.PlotterSimulator = PlotterSimulator;
+
+
+/**
+ * Workshop Pen Plotter Studio - Main Application Controller
+ * Bilingual (Arabic RTL & English LTR) with customizable parameters & simulation.
+ */
+
+const APP_TRANSLATIONS = {
+  ar: {
+    langLabel: "English",
+    logoTitle: "استوديو الراسم الآلي",
+    logoSub: "ورشة الفن الخوارزمي بالقلم",
+    linkSimple: "✨ الوضع المبسط",
+    linkPhoto: "📷 صورة إلى مسار",
+    btnGuide: "🎓 دليل الورشة",
+    
+    // Tabs
+    tabAlgo: "🎨 الخوارزميات",
+    tabSetup: "📐 الورق والقلم",
+    tabCode: "💻 الرياضيات والكود",
+    
+    // Tab 1: Algorithms
+    secAlgoTitle: "١. اختر الخوارزمية",
+    badgeAlgo: "٩ نماذج أساسية",
+    secPresetTitle: "٢. وصفات ونماذج جاهزة",
+    badgePreset: "أنماط بنقرة واحدة",
+    proBanner: '✨ جديد في الورشة؟ جرّب <a href="simple.html" id="linkToSimple">الاستوديو المبسط</a> بـ ٣ خطوات سهلة!',
+    secSeedTitle: "٣. الرقم العشوائي (Seed)",
+    badgeSeed: "قابل للتكرار",
+    btnRollSeed: "🎲 رقم جديد",
+    txtUndoSeed: "↩",
+    toastUndoSeed: "تم استرجاع الرقم السابق ↩",
+    toastNoUndoSeed: "لا توجد بذور سابقة",
+    secParamTitle: "٤. تخصيص المعايير",
+    badgeParam: "تعديل فوري",
+    
+    // Tab 2: Setup
+    secPaperTitle: "أبعاد الورقة الفعلية",
+    badgeHardware: "مواصفات الآلة",
+    lblPaperSize: "حجم الورقة",
+    lblOrientation: "اتجاه الورقة",
+    optPortrait: "عمودي (رأسي)",
+    optLandscape: "أفقي (عرضي)",
+    lblMargin: "هامش الأمان (تجنب مشابك الورق)",
+    lblPaperColor: "معاينة لون الورق والخامة",
+    paperColors: {
+      white: "ورق بريستول أبيض ناصع",
+      cream: "ورق مولسكين كريمي دافئ",
+      black: "ورق مقوى أسود فاحم",
+      kraft: "كرتون طبيعي (كرافت)",
+      indigo: "ورق نيلي مخطط ليلي"
+    },
+    secPenTitle: "اختيار الأقلام وتأثير الحبر",
+    badgePen: "حبر الرسم",
+    lblPen1: "القلم ١ (القلم الأساسي)",
+    lblPen2: "القلم ٢ (قلم الزخرفة الإضافي)",
+    pens: {
+      micron_black: "ساكورا ميكرون ٠.٣ مم (أسود)",
+      gelly_white: "جيلي رول ٠.٥ مم (جل أبيض)",
+      metallic_gold: "جل ذهبي معدني ٠.٤ مم",
+      fountain_blue: "قلم حبر سائل أزرق بروسي",
+      crimson_red: "شاربي أحمر قرمزي زاهي",
+      cyan_fine: "قلم سماوي دقيق ٠.٣ مم"
+    },
+    secOptTitle: "تحسين مسار القلم وحماية المحرك",
+    badgeOpt: "تسريع وحماية",
+    lblOpt: "⚡ خوارزمية TSP (ترتيب المسارات الأقرب)",
+    lblServoProtection: "🛡️ حماية محرك القلم (دمج المسارات المتقاربة)",
+    descOpt: "عند التفعيل، يعاد ترتيب الخطوط المنفصلة وتُدمج النقاط المتلاصقة (أقل من ٢ مم) بدون رفع القلم، مما يحمي محرك القلم (سيرفو) من السخونة ويقلل زمن الرسم بنسبة تصل إلى ٥٠٪.",
+    secImageTitle: "التبديل إلى استوديو الصور",
+    descImage: "هل ترغب في تحويل صورة شخصية أو فوتوغرافية إلى خطوط حلزونية متصلة بدلاً من الرياضيات التوليدية؟",
+    btnImageStudio: "📷 فتح استوديو تحويل الصور إلى مسار",
+    
+    // Tab 3: Code & Math
+    secCodeTitle: "منطق الخوارزمية والمعادلة",
+    badgeCode: "جافاسكريبت",
+    descCode: "كل عمل فني توليدي ينتج عن قواعد رياضية تنفذ بالتكرار داخل حلقات برمجية. هذا هو المنطق الأساسي للخوارزمية المحددة:",
+    secRecipeTitle: "الوصفة الفنية الخوارزمية",
+    recipePoint1: "<b>١. الأرقام العشوائية المحددة (Seeds):</b> يعتمد الفن الخوارزمي على أرقام شبه عشوائية تبدأ برقم محدد (مثل <code>4242</code>). في كل مرة تستخدم فيها نفس الرقم، تعيد الرياضيات رسم نفس الخطوط تماماً.",
+    recipePoint2: "<b>٢. الخطوط المتجهة (Vectors):</b> بدلاً من بكسلات الشاشة، لا تفهم الراسمات الآلية إلا نقاط إحداثيات متصلة: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.",
+    recipePoint3: "<b>٣. القيود الميكانيكية للآلة:</b> بخلاف الشاشات، تمتلك الأقلام الحقيقية احتكاكاً، ويمتص الورق الحبر، وتستغرق رفعة القلم وقتاً ميكانيكياً. الخوارزميات ذات الرفعات الأقل ترسم أسرع وبنقاء أكبر!",
+    
+    // Top Toolbar
+    btnFitView: "⛶ ملء الشاشة / توسيط",
+    btnSimStart: "▶️ محاكاة الرسم",
+    btnSimStop: "⏹ إيقاف المحاكاة",
+    
+    // Simulator panel
+    simTitle: "🤖 محاكي الراسمة الآلية",
+    simReady: "القلم جاهز",
+    simDrawing: "جاري الرسم...",
+    simSpeeds: {
+      "0.25": "🐢 ٠.٢٥× (بطيء جداً)",
+      "0.5": "🐢 ٠.٥× (بطيء وهادئ)",
+      "1": "🚶 ١× (وقت حقيقي)",
+      "2": "🐇 ٢× (سريع)",
+      "5": "⚡ ٥× (فائق السرعة)"
+    },
+    
+    // Bottom Dock Stats & Actions
+    statDist: "مسافة الرسم",
+    statLifts: "رفعات القلم",
+    statTime: "الوقت المقدر",
+    statPaths: "عدد المسارات",
+    btnDownloadSVG: "📥 تحميل SVG",
+    btnCopySVG: "📋 نسخ SVG",
+    btnDownloadPNG: "📸 صورة PNG",
+    
+    // Toast messages
+    toastSeed: "تم تحديث الرقم العشوائي إلى: ",
+    toastPreset: 'تم تطبيق النمط: "',
+    toastCopySuccess: "تم نسخ كود SVG إلى الحافظة! 📋",
+    toastCopyFail: "فشل نسخ الكود، يرجى التنزيل كملف.",
+    toastDownload: "تم بدء تنزيل ملف SVG! 🖋️",
+    toastFitView: "تم توسيط الورقة وضبط العرض ⛶",
+    
+    // Modal Guide
+    guideTitle: "🎓 دليل الورشة وورقة تعليمات الراسمة الآلية",
+    guideH3_1: "🌟 ما هو الفن التوليدي الخوارزمي؟",
+    guideP_1: "الفن التوليدي هو عمل فني ينشأ من تعاون وثيق بين الفنان البشري ونظام مستقل (الخوارزمية). بدلاً من رسم كل خط بيدك مباشرة، تقوم بتصميم القواعد والمعادلات الرياضية والتغيرات العشوائية. يحسب الحاسوب آلاف نقاط الإحداثيات، وتتولى الراسمة الآلية تحويلها إلى ضربات قلم ملموسة بالحبر على الورق الحقيقي!",
+    guideH3_2: "🖋️ الخطوات الأربع: من الشاشة إلى الورق الملموس",
+    guideStep1Title: "اختر خوارزميتك وخصصها:",
+    guideStep1Desc: "اختر خوارزمية من القائمة الجانبية (حقول التدفق، السلاسل الجبلية، البندول، الحلزونات، إلخ). حرّك المنزلقات، وجرّب الوصفات الجاهزة، واضغط 🎲 رقم جديد حتى تصل إلى تكوين فني يعجبك.",
+    guideStep2Title: "تأكد من هوامش الأمان للراسمة:",
+    guideStep2Desc: "احرص على إبقاء هامش الأمان عند ١٢ مم أو أكثر لتجنب اصطدام رأس القلم بالمشابك المعدنية التي تثبت الورقة على سطح الآلة!",
+    guideStep3Title: "شاهد محاكاة الرسم:",
+    guideStep3Desc: "انقر على ▶️ محاكاة الرسم لمشاهدة حركة القلم الافتراضية فوق صفحتك، وانتبه لمسافة الرسم وعدد مرات رفع القلم.",
+    guideStep4Title: "حمّل ملف SVG وابدأ الرسم الآلي:",
+    guideStep4Desc: "انقر 📥 تحميل SVG، ثم افتح الملف في برنامج Inkscape المجاني، وصل الراسمة (مثل AxiDraw) عبر USB، واختر Extensions > AxiDraw > Plot، وشاهد أسطر الكود تتحول إلى لوحة فنية بالحبر الحقيقي!",
+    guideH3_3: "💡 ٣ قواعد ذهبية للمبتدئين في الرسم بالآلة",
+    guideRule1: "<b>لا توجد تعبئة، فقط خطوط:</b> الراسمة بالقلم لا تستطيع تلوين مساحات مصمتة مثل الطابعة المكتبية. التظليل يتم بالخطوط المتوازية الكثيفة، أو التهشير المتقاطع، أو التموجات المتشابكة.",
+    guideRule2: "<b>انتبه لتشرب الحبر:</b> إذا توقف القلم في نقطة واحدة طويلاً أو كرر المرور، قد يتسرب الحبر في الورق. يقوم مصلح المسارات (TSP Optimizer) بإلغاء التكرارات لتفادي ذلك!",
+    guideRule3: "<b>اضبط ارتفاع القلم أولاً:</b> عند تثبيت قلمك (ساكورا ميكرون، جل، أو حبر سائل)، تأكد أن سن القلم يرتفع نحو ٣ مم عن الورقة في وضع الرفع، ويلامس الورقة برفق وانسيابية في وضع الرسم.",
+    guideH3_4: "🚀 ترشيحات الأقلام والأوراق المثالية",
+    guidePensRec: "<b>أفضل الأقلام:</b> Sakura Pigma Micron (0.3mm / 0.5mm), Uni-ball Signo Broad (أبيض أو ذهبي ميتاليك), Pilot G2 Gel.",
+    guidePapersRec: "<b>أفضل الورق:</b> ورق بريستول الناعم، ورق مقوى ثقيل (250+ جرام)، أو ورق Clairefontaine المخصص للأرشفة."
+  },
+  en: {
+    langLabel: "العربية",
+    logoTitle: "Plotter Studio",
+    logoSub: "Algorithmic Art Workshop",
+    linkSimple: "✨ Simple Mode",
+    linkPhoto: "📷 Photo to Path",
+    btnGuide: "🎓 Guide",
+    
+    // Tabs
+    tabAlgo: "🎨 Algorithms",
+    tabSetup: "📐 Paper & Pen",
+    tabCode: "💻 Math & Code",
+    
+    // Tab 1: Algorithms
+    secAlgoTitle: "1. Choose an Algorithm",
+    badgeAlgo: "9 Core Models",
+    secPresetTitle: "2. Starter Recipes",
+    badgePreset: "1-Click Looks",
+    proBanner: '✨ New to the workshop? Try the <a href="simple.html" id="linkToSimple">Simplified Studio</a> for a 3-step start!',
+    secSeedTitle: "3. Seed & Variations",
+    badgeSeed: "Reproducible",
+    btnRollSeed: "🎲 Roll Seed",
+    txtUndoSeed: "↩",
+    toastUndoSeed: "Restored previous seed ↩",
+    toastNoUndoSeed: "No previous seeds",
+    secParamTitle: "4. Customize Parameters",
+    badgeParam: "Live Tweak",
+    
+    // Tab 2: Setup
+    secPaperTitle: "Physical Paper Dimensions",
+    badgeHardware: "Hardware Specs",
+    lblPaperSize: "Paper Size Format",
+    lblOrientation: "Paper Orientation",
+    optPortrait: "Portrait (Vertical)",
+    optLandscape: "Landscape (Horizontal)",
+    lblMargin: "Safe Margin (Clips Clearance)",
+    lblPaperColor: "Paper Color / Stock Preview",
+    paperColors: {
+      white: "Heavy White Bristol Paper",
+      cream: "Warm Cream Moleskine",
+      black: "Charcoal Black Heavy Cardstock",
+      kraft: "Natural Kraft Cardboard",
+      indigo: "Midnight Blueprint Indigo"
+    },
+    secPenTitle: "Pen Selection & Stroke Preview",
+    badgePen: "Drawing Ink",
+    lblPen1: "Pen 1 (Primary Pen)",
+    lblPen2: "Pen 2 (Accent Pen / Dual-Layer)",
+    pens: {
+      micron_black: "Sakura Micron 0.3mm (Black)",
+      gelly_white: "Gelly Roll 0.5mm (White Gel)",
+      metallic_gold: "Metallic Gold Gel 0.4mm",
+      fountain_blue: "Prussian Blue Fountain Pen",
+      crimson_red: "Vivid Crimson Sharpie",
+      cyan_fine: "Electric Cyan Fine 0.3mm"
+    },
+    secOptTitle: "Plotter Path Optimization & Servo Protection",
+    badgeOpt: "Speed & Thermal Safety",
+    lblOpt: "⚡ TSP Path Optimization (Sort Nearest)",
+    lblServoProtection: "🛡️ Servo Thermal Protection (Path Stitching)",
+    descOpt: "When enabled, disconnected lines are reordered and close endpoints (<= 2mm) are seamlessly stitched without lifting the pen, preventing micro-servos from overheating and cutting plot time by up to 50%.",
+    secImageTitle: "Switch to Image Studio",
+    descImage: "Want to vectorize a portrait or photo into continuous squiggles instead of purely generative math?",
+    btnImageStudio: "📷 Open Image-to-Path Studio",
+    
+    // Tab 3: Code & Math
+    secCodeTitle: "Algorithm Logic & Formula",
+    badgeCode: "JavaScript",
+    descCode: "Every generative artwork is produced by mathematical rules executed repeatedly in loops. Here is the core logic running your selected algorithm:",
+    secRecipeTitle: "The Generative Recipe",
+    recipePoint1: "<b>1. Deterministic Seeds:</b> Generative art uses pseudo-random numbers seeded by a specific number (like <code>4242</code>). Every time you use that seed, the math reproduces the exact same strokes.",
+    recipePoint2: "<b>2. Vector Polylines:</b> Instead of raster pixels, pen plotters only understand continuous coordinate points: <code>[{x: 10, y: 15}, {x: 12, y: 18}, ...]</code>.",
+    recipePoint3: "<b>3. Physical Constraints:</b> Unlike screens, physical pens have friction, paper absorbs ink, and pen lifts take mechanical time. Algorithms with fewer lifts plot faster and cleaner!",
+    
+    // Top Toolbar
+    btnFitView: "⛶ Fit View",
+    btnSimStart: "▶️ Simulate Draw",
+    btnSimStop: "⏹ Stop Simulation",
+    
+    // Simulator panel
+    simTitle: "🤖 Pen Plotter Simulator",
+    simReady: "PEN READY",
+    simDrawing: "DRAWING...",
+    simSpeeds: {
+      "0.25": "🐢 0.25x (Super Slow)",
+      "0.5": "🐢 0.5x (Slow & Relaxed)",
+      "1": "🚶 1x (Real Time)",
+      "2": "🐇 2x Speed",
+      "5": "⚡ 5x Speed"
+    },
+    
+    // Bottom Dock Stats & Actions
+    statDist: "Draw Distance",
+    statLifts: "Pen Lifts",
+    statTime: "Est. Plot Time",
+    statPaths: "Paths Count",
+    btnDownloadSVG: "📥 Download SVG",
+    btnCopySVG: "📋 Copy SVG",
+    btnDownloadPNG: "📸 PNG",
+    
+    // Toast messages
+    toastSeed: "Seed updated to: ",
+    toastPreset: 'Applied preset: "',
+    toastCopySuccess: "Copied SVG markup to clipboard! 📋",
+    toastCopyFail: "Failed to copy SVG. Please download instead.",
+    toastDownload: "Downloaded SVG! Ready to plot 🖋️",
+    toastFitView: "View fitted to screen ⛶",
+    
+    // Modal Guide
+    guideTitle: "🎓 Workshop Guide & Pen Plotter Cheatsheet",
+    guideH3_1: "🌟 What is Algorithmic Generative Art?",
+    guideP_1: "Generative art is art made by a collaboration between a human artist and an autonomous system (an algorithm). Instead of manually drawing individual lines, you design the <b>rules</b>, <b>mathematical formulas</b>, and <b>random variations</b>. The computer computes thousands of coordinate points, and a mechanical pen plotter physically draws the artwork with real ink on paper!",
+    guideH3_2: "🖋️ The 4 Steps: From Screen to Physical Paper",
+    guideStep1Title: "Choose & Tweak Your Algorithm:",
+    guideStep1Desc: "Pick an algorithm on the left sidebar (Flow Fields, Mountain Ridges, Harmonographs, etc.). Tweak the sliders, test starter recipes, and hit <b>🎲 Roll Seed</b> until you love the composition.",
+    guideStep2Title: "Check Plotter Safety Margins:",
+    guideStep2Desc: "Keep the <i>Safe Margin</i> at 12mm or higher. This ensures the pen head never bumps into the metal binder clips holding your paper to the board!",
+    guideStep3Title: "Simulate the Draw:",
+    guideStep3Desc: "Click <b>▶️ Simulate Draw</b> to watch the virtual pen move across your page. Look out for pen lifts and total distance.",
+    guideStep4Title: "Download SVG & Plot:",
+    guideStep4Desc: "Click <b>📥 Download SVG</b>. Open the SVG in <b>Inkscape</b>, connect your AxiDraw or plotter via USB, select <i>Extensions > AxiDraw > Plot</i>, and watch your code come to life in physical ink!",
+    guideH3_3: "💡 3 Golden Rules for Pen Plotting Beginners",
+    guideRule1: "<b>No Fills, Only Strokes:</b> A pen plotter cannot paint solid fills like a desktop printer. Shading is achieved by dense parallel lines, cross-hatching, or tight squiggles.",
+    guideRule2: "<b>Mind the Pen Bleed:</b> If a line stops for too long or overlaps repeatedly, wet ink can bleed through paper. Our TSP Path Optimizer eliminates duplicate visits!",
+    guideRule3: "<b>Test Your Pen Height First:</b> When clamping your pen (Sakura Micron, gel pen, or fountain pen), ensure the pen tip sits ~3mm above the paper when raised, and rests gently on paper when lowered.",
+    guideH3_4: "🚀 Recommended Pens & Papers",
+    guidePensRec: "<b>Best Pens:</b> Sakura Pigma Micron (0.3mm or 0.5mm), Uni-ball Signo Broad (White or Metallic Gold), Pilot G2 Gel.",
+    guidePapersRec: "<b>Best Paper:</b> Bristol Board (Smooth), Heavy Cardstock (250+ gsm), or Clairefontaine archival sketch paper."
+  }
+};
+
+const ALGO_TRANSLATIONS = {
+  ar: {
+    flowField: {
+      name: "حقل تدفق بيرلن",
+      category: "ضجيج عضوي",
+      explanation: "تتبع مسار مئات الجزيئات العائمة في نهر سائل خفي أو تيار رياح انسيابي.",
+      beginnerTip: "جرّب زيادة 'تكبير الضجيج' للحصول على منحنيات ناعمة وواسعة!"
+    },
+    waveRidges: {
+      name: "تضاريس السلاسل الجبلية",
+      category: "تضاريس ثلاثية الأبعاد",
+      explanation: "قمم تضاريس متدرجة مستوحاة من مخطط بلوزار جوي ديفيجن الكلاسيكي مع حجب الخطوط الخلفية.",
+      beginnerTip: "فعّل 'حجب الخطوط الخلفية' للحصول على تأثير عمق ثلاثي الأبعاد واقعي!"
+    },
+    harmonograph: {
+      name: "هارمونوغراف وبندول ليساجو",
+      category: "فيزياء ميكانيكية",
+      explanation: "محاكاة حركة نواسير متأرجحة متناغمة تضمحل تدريجياً لترسم منحنيات بصرية ساحرة.",
+      beginnerTip: "فوارق التردد البسيطة (مثل 2.01 مقابل 3.0) تصنع مدارات هندسية آسرة!"
+    },
+    truchetTiles: {
+      name: "بلاطات تروشيه الهندسية",
+      category: "هندسة معمارية إسلامية",
+      explanation: "بلاطات شبكية تدور عشوائياً لتشكل متاهات وأشرطة متداخلة لا نهائية.",
+      beginnerTip: "اختر 'أشرطة ثلاثية' مع ٣ أقواس لمظهر مستوحى من الزخارف الهندسية الإسلامية."
+    },
+    concentricMoire: {
+      name: "تموجات مواريه المتداخلة",
+      category: "فن الخداع البصري",
+      explanation: "دوائر متحدة وحلقات متداخلة تنتج أنماط تداخل وتموجات بصرية مذهلة.",
+      beginnerTip: "إزاحة المركزين قليلاً يولد خطوط خداع بصري نابضة بالحياة عند رسمها بالقلم."
+    },
+    spirals: {
+      name: "حلزونات هندسية ومشوهة",
+      category: "منحنيات قطبية متصلة",
+      explanation: "حلزون أرخميدس نقي يبدأ بدقة هندسية مطلقة، مع إمكانية إضافة تشويه بالضجيج أو الموجات.",
+      beginnerTip: "ابدأ بتشويه صفر لرؤية حلزون هندسي نقي متزن، ثم حرّك منزلق التشويه لترى التموجات الرائعة!"
+    },
+    fractalTree: {
+      name: "شجرة التفرع الكسوري",
+      category: "نمو كسوري متفرع",
+      explanation: "خوارزمية تفرع نباتي ذاتي التشابه تحاكي نمو الأشجار وشبكات الجذور والشعب المرجانية.",
+      beginnerTip: "ارفع تمايل الرياح قليلاً للحصول على شكل شجرة طبيعية عضوية متوازنة."
+    },
+    continuousMeander: {
+      name: "خط متصل واحد مستمر",
+      category: "رسمة بخط واحد (بدون رفع قلم)",
+      explanation: "منحنى هيلبرت يملأ مساحة الورقة بالكامل في ضربة قلم واحدة متصلة بدون أي رفع للقلم.",
+      beginnerTip: "انعدام رفعات القلم يعني أن الراسمة الآلية ستعمل بأعلى كفاءة وسرعة ممكنة!"
+    },
+    codeSandbox: {
+      name: "مختبر الكود والرياضيات المباشر",
+      category: "رياضيات برمجية حرة",
+      explanation: "اكتب معادلتك البارامترية f(t) -> {x, y} لتجربة أفكارك الرياضية الخاصة في الورشة.",
+      beginnerTip: "جرّب الجمع بين Math.sin() و Math.cos() بترددات مختلفة لابتكار أشكال جديدة!"
+    },
+    doodles: {
+      name: "خربشات حرة وتأملية",
+      category: "خطوط عضوية حرة",
+      explanation: "شخبطة حرة انسيابية تلتف بحلقات مرحة وزخارف زين تانغل بدون أي رفع للقلم.",
+      beginnerTip: "جرّب التبديل بين 'حلقات مرحة' و'شخبطة سحابية' لمشاهدة الحركة الانسيابية الناعمة!"
+    }
+  }
+};
+
+const PARAM_LABELS_AR = {
+  streamCount: "عدد مسارات التدفق",
+  stepCount: "طول الخط (عدد الخطوات)",
+  stepLength: "دقة الخطوة (مسافة النقطة)",
+  noiseScale: "حجم تفاصيل الضجيج",
+  curlMultiplier: "شدة الدوران والانحناء",
+  spawnMode: "موضع البداية",
+  streamAvoidance: "تجنب تصادم الخطوط",
+  dualColorAccent: "طبقة ثانية (قلم إضافي)",
+  lineCount: "عدد خطوط التضاريس",
+  resolution: "دقة التضاريس",
+  peakHeight: "ارتفاع القمم",
+  noiseFreq: "تردد التموجات",
+  noiseOctaves: "طبقات التفاصيل",
+  occlusion: "حجب الخطوط الخلفية (عمق 3D)",
+  twoColorLayer: "طبقتان لونيتان",
+  loopCount: "عدد الدورات",
+  damping: "معدل خمود النواسير",
+  freqX: "تردد المحور الأفقي X",
+  freqY: "تردد المحور الرأسي Y",
+  freqZ: "تردد دوران الطاولة Z",
+  phaseDiff: "فرق الطور",
+  geometryMode: "نوع المنحنى الهيكلي",
+  gridCols: "أعمدة الشبكة",
+  tileStyle: "نمط البلاطة",
+  arcsPerTile: "عدد الأقواس في كل بلاطة",
+  alternatingColor: "تبديل لون الأقواس",
+  ringCount: "عدد الحلقات",
+  centerCount: "عدد المراكز",
+  centerSpacing: "المسافة بين المراكز",
+  noiseWobble: "تموجات الضجيج",
+  spiralMode: "التحويل إلى نمط حلزوني",
+  turns: "عدد اللفات (الدورات)",
+  distortionAmount: "التشويه الخوارزمي",
+  distortionMode: "نوع التشويه الخوارزمي",
+  distortionFreq: "تردد التشويه",
+  dualSpiral: "حلزون مزدوج متشابك (لقلمين)",
+  recursionDepth: "عمق التفرع الشجري",
+  branchAngle: "زاوية انحناء الأغصان",
+  lengthDecay: "نسبة تناقص طول الغصن",
+  windSway: "تمايل تأثير الرياح",
+  randomness: "تنوع عشوائي طبيعي",
+  foliageStyle: "نمط تفرع الأوراق",
+  curveOrder: "درجة المنحنى (الكثافة)",
+  cornerRoundness: "استدارة الزوايا",
+  wobble: "تموج يدوي طبيعي",
+  pointCount: "عدد النقاط المحسوبة",
+  scale: "مقياس الرسم",
+  freqA: "التردد A",
+  freqB: "التردد B",
+  doodleStyle: "نمط الخربشة والشخبطة",
+  loopDensity: "طول الخط (عدد الخطوات)",
+  curliness: "درجة التفاف الحلقات",
+  wanderSpeed: "دقة الخطوة (مسافة النقطة)",
+  coverage: "مدى انتشار الرسمة على الورقة"
+};
+
+const SELECT_OPTIONS_AR = {
+  "Random Scatter (Uniform)": "تناثر عشوائي (منتظم)",
+  "Concentric Ring Burst": "انفجار حلقي متمركز",
+  "Structured Grid Lattice": "شبكة منتظمة مرتبة",
+  "Central Core Outward": "من المركز إلى الخارج",
+  "Inward from Margins": "من الأطراف إلى الداخل",
+  "Curved Arcs (Woven Ribbons)": "أقواس منحنية (أشرطة منسوجة)",
+  "Straight Diagonals (Maze)": "خطوط مائلة (متاهة مستقيمة)",
+  "Quarter Circles": "أرباع دوائر كلاسيكية",
+  "Pure Perfect Spiral (0 Distortion)": "حلزون نقي ومثالي (بدون تشويه)",
+  "Organic Noise (Fingerprint / Tree Rings)": "ضجيج عضوي (بصمة إصبع / حلقات شجر)",
+  "Harmonic Waves (Petal Rosette)": "موجات توافقية (بتلات زهور)",
+  "Galactic Vortex Swirl": "دوامة مجرية ملتفة",
+  "Dual Lateral Pendulums (2-Axis)": "بندولان جانبيان (محوران)",
+  "Rotary Harmonograph (3-Axis)": "هارمونوغراف دوراني (٣ محاور)",
+  "Lissajous Orbit": "مدار ليساجو المغلق",
+  "Hypotrochoid Spirograph": "سبايروغراف تروس دائرية",
+  "Classic Clean Branches": "أغصان كلاسيكية نظيفة",
+  "Dense Leaf Clusters": "كتل أوراق كثيفة",
+  "Bud / Blossom Crosses": "براعم أزهار متقاطعة",
+  "Whimsical Loop-de-Loop (Cursive Ribbon)": "حلقات مرحة متصلة (شريط خطي)",
+  "Mindful Cloud Scribble (Soft Wandering)": "شخبطة سحابية تأملية (حركة هادئة)",
+  "Zentangle Ribbon Swirls (Rhythmic Loops)": "زخارف زين تانغل (حلقات إيقاعية)",
+  "Botanical Ivy Tendrils (Organic Vines)": "خربشة الكرمة والبراعم (أغصان ملتفة)"
+};
+
+const PRESET_NAMES_AR = {
+  "Pure Geometric Spiral": "حلزون هندسي نقي",
+  "Organic Fingerprint Whorl": "دوامة بصمة إصبع",
+  "Flower Rosette Spiral": "حلزون بتلات الزهور",
+  "Galactic Vortex Coil": "لولب الدوامة المجرية",
+  "Hypnotic Dual Intertwined": "حلزون مزدوج متشابك",
+  "Ocean Currents": "تيارات المحيط",
+  "Turbulent Vortex": "دوامة عاصفة",
+  "Cosmic Ripple": "تموج كوني",
+  "Wood Grain Flow": "تدفق عروق الخشب",
+  "Lattice Drift": "انجراف شبكي",
+  "Joy Division Classic": "تضاريس جوي ديفيجن",
+  "Serene Mountain Valley": "وادي جبلي هادئ",
+  "Alien Crag Peaks": "قمم صخرية شاهقة",
+  "Low Frequency Waves": "موجات منخفضة التردد",
+  "Subtle Sand Dunes": "كثبان رملية ناعمة",
+  "Pendulum Waltz": "فالس البندول",
+  "Elliptical Rose": "وردة بيضاوية",
+  "Complex Harmonograph": "هارمونوغراف مركب",
+  "Triple Harmonic Orbit": "مدار توافقي ثلاثي",
+  "Woven Ribbon Labyrinth": "متاهة أشرطة منسوجة",
+  "Islamic Archwork": "أقواس معمارية إسلامية",
+  "High-Density Maze": "متاهة عالية الكثافة",
+  "Geometric Circuit": "دارات هندسية",
+  "Dual Moiré Interference": "تداخل مواريه ثنائي",
+  "Triple Radiant Ripple": "تموج إشعاعي ثلاثي",
+  "Eccentric Vortex": "دوامة لا مركزية",
+  "Optical Pulsar Target": "هدف نبضي بصري",
+  "Ancient Bonsai": "شجرة بونساي عريقة",
+  "Dense Forest Canopy": "غابة وارفة الظلال",
+  "Wind-Swept Willow": "صفصافة في مهب الريح",
+  "Coral Network": "شبكة مرجانية",
+  "Continuous Hilbert Labyrinth": "متاهة هيلبرت المتصلة",
+  "Smooth Hilbert Flow": "تدفق هيلبرت الانسيابي",
+  "Rounded Snake Path": "مسار الثعبان المستدير",
+  "Golden Ratio Rose": "وردة النسبة الذهبية",
+  "Fermat Spiral Daisy": "زهرة حلزون فيرما",
+  "Star Polygon Knot": "عقدة نجمية متعددة الأضلاع",
+  "Lissajous Knot (3:4)": "عقدة ليساجو (٣:٤)",
+  "Whimsical Loop-de-Loop": "حلقات مرحة متصلة",
+  "Mindful Cloud Scribble": "شخبطة سحابية تأملية",
+  "Zentangle Ribbon Swirls": "زخارف زين تانغل الانسيابية",
+  "Botanical Ivy Tendrils": "خربشة الكرمة الملتفة",
+  "Cursive Notepad Wander": "شخبطة دفتر الملاحظات"
+};
+
+const UNITS_AR = {
+  "lines": "خط",
+  "steps": "خطوة",
+  "mm": "مم",
+  "x": "×",
+  "turns": "لفة",
+  "rings": "حلقة",
+  "deg": "درجة",
+  "pts": "نقطة"
+};
+
+class App {
+  constructor() {
+    this.plotter = new PlotterEngine();
+    this.rng = new RandomGenerator(42);
+    this.noise = new SimplexNoise(this.rng);
+
+    // Read initial language preference from localStorage or URL parameter
+    let initialLang = "en";
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        const savedLang = localStorage.getItem("plotter_lang");
+        if (savedLang === "ar" || savedLang === "en") {
+          initialLang = savedLang;
+        }
+      }
+    } catch (_) {}
+
+    try {
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("lang")) {
+          const l = urlParams.get("lang");
+          if (l === "en" || l === "ar") initialLang = l;
+        }
+      }
+    } catch (_) {}
+
+    // Application State
+    this.state = {
+      lang: initialLang,
+      currentAlgoId: "flowField",
+      activePresetName: "Ocean Currents",
+      seed: 4242,
+      paperKey: "a4", // Calibrated for thin A4 paper (< 10 min plots)
+      orientation: "portrait", // portrait or landscape
+      marginMm: 12, // mm
+      paperColorId: "white",
+      pen1ColorId: "micron_black",
+      pen2ColorId: "crimson_red",
+      strokeWidthMm: 0.35,
+      optimizePaths: true,
+      servoProtection: true,
+      
+      // Pan & Zoom
+      zoom: 1.0,
+      panX: 0,
+      panY: 0,
+      isPanning: false,
+      panStartX: 0,
+      panStartY: 0,
+
+      // Generated Vector Data
+      pathsLayer1: [],
+      pathsLayer2: [],
+      bounds: null,
+      stats: null,
+
+      // Parameters Map: { algoId: { paramId: value } }
+      algoParams: {}
+    };
+
+    this.seedHistory = [];
+    this._debounceRaf = null;
+
+    // Initialize default parameters for all algorithms
+    Object.keys(ALGORITHM_DEFINITIONS).forEach(id => {
+      const def = ALGORITHM_DEFINITIONS[id];
+      this.state.algoParams[id] = {};
+      def.parameters.forEach(p => {
+        this.state.algoParams[id][p.id] = p.default;
+      });
+    });
+
+    this.initDOM();
+    this.initEvents();
+    this.selectAlgorithm("flowField");
+    this.setLanguage(this.state.lang);
+  }
+
+  initDOM() {
+    this.canvas = document.getElementById("artCanvas");
+    this.ctx = this.canvas.getContext("2d");
+    this.canvasWrapper = document.getElementById("canvasWrapper");
+    this.paperSheet = document.getElementById("paperSheet");
+    this.marginOverlay = document.getElementById("marginOverlay");
+
+    // Simulator
+    this.simulator = new PlotterSimulator(this.canvas, (simState) => {
+      this.renderCanvas(simState);
+      this.updateSimulatorUI(simState);
+    });
+
+    this.renderAlgorithmCards();
+    this.updateDropdowns();
+  }
+
+  initEvents() {
+    // Language Switcher Toggle
+    document.getElementById("btnLangSwitch")?.addEventListener("click", () => {
+      const nextLang = this.state.lang === "ar" ? "en" : "ar";
+      this.setLanguage(nextLang);
+    });
+
+    // Tab switching (Algorithms vs Setup vs Code)
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        const tabPane = document.getElementById(btn.dataset.tab);
+        if (tabPane) tabPane.classList.add("active");
+      });
+    });
+
+    // Beginner Banner Close Button
+    const btnCloseBanner = document.getElementById("btnCloseBanner");
+    if (btnCloseBanner) {
+      btnCloseBanner.addEventListener("click", () => {
+        const banner = document.getElementById("proBanner");
+        if (banner) banner.style.display = "none";
+      });
+    }
+
+    // Seed Randomize Button
+    const btnRandomSeed = document.getElementById("btnRandomSeed");
+    if (btnRandomSeed) {
+      btnRandomSeed.addEventListener("click", () => {
+        this.seedHistory.push(this.state.seed);
+        if (this.seedHistory.length > 25) this.seedHistory.shift();
+        const newSeed = Math.floor(Math.random() * 900000) + 10000;
+        this.setSeed(newSeed);
+      });
+    }
+
+    // Seed Undo Button
+    const btnUndoSeed = document.getElementById("btnUndoSeed");
+    if (btnUndoSeed) {
+      btnUndoSeed.addEventListener("click", () => {
+        const t = APP_TRANSLATIONS[this.state.lang];
+        if (this.seedHistory && this.seedHistory.length > 0) {
+          const prev = this.seedHistory.pop();
+          this.setSeed(prev);
+          this.showToast(t.toastUndoSeed || "Restored previous seed ↩");
+        } else {
+          this.showToast(t.toastNoUndoSeed || "No previous seeds");
+        }
+      });
+    }
+
+    // Seed Text Input
+    const seedInput = document.getElementById("seedInput");
+    if (seedInput) {
+      seedInput.addEventListener("change", (e) => {
+        this.setSeed(e.target.value);
+      });
+    }
+
+    // Paper Size Change
+    const paperSelect = document.getElementById("paperSelect");
+    if (paperSelect) {
+      paperSelect.addEventListener("change", (e) => {
+        this.state.paperKey = e.target.value;
+        this.fitToScreen();
+        this.generate();
+      });
+    }
+
+    // Orientation toggle
+    const orientationSelect = document.getElementById("orientationSelect");
+    if (orientationSelect) {
+      orientationSelect.addEventListener("change", (e) => {
+        this.state.orientation = e.target.value;
+        this.fitToScreen();
+        this.generate();
+      });
+    }
+
+    // Margin Slider
+    const marginSlider = document.getElementById("marginSlider");
+    if (marginSlider) {
+      marginSlider.addEventListener("input", (e) => {
+        this.state.marginMm = parseFloat(e.target.value);
+        document.getElementById("marginVal").textContent = `${this.state.marginMm} mm`;
+        this.debouncedGenerate();
+      });
+    }
+
+    // Paper Color Selector
+    const paperColorSelect = document.getElementById("paperColorSelect");
+    if (paperColorSelect) {
+      paperColorSelect.addEventListener("change", (e) => {
+        this.state.paperColorId = e.target.value;
+        this.renderCanvas();
+      });
+    }
+
+    // Pen 1 Color Selector
+    const pen1Select = document.getElementById("pen1Select");
+    if (pen1Select) {
+      pen1Select.addEventListener("change", (e) => {
+        this.state.pen1ColorId = e.target.value;
+        this.renderCanvas();
+      });
+    }
+
+    // Pen 2 Color Selector
+    const pen2Select = document.getElementById("pen2Select");
+    if (pen2Select) {
+      pen2Select.addEventListener("change", (e) => {
+        this.state.pen2ColorId = e.target.value;
+        this.renderCanvas();
+      });
+    }
+
+    // Optimize Paths Toggle
+    const optToggle = document.getElementById("optimizePathsToggle");
+    if (optToggle) {
+      optToggle.addEventListener("change", (e) => {
+        this.state.optimizePaths = e.target.checked;
+        this.generate();
+      });
+    }
+
+    // Servo Thermal Protection Toggle
+    const servoToggle = document.getElementById("servoProtectionToggle");
+    if (servoToggle) {
+      servoToggle.addEventListener("change", (e) => {
+        this.state.servoProtection = e.target.checked;
+        this.generate();
+      });
+    }
+
+    // Zoom Controls
+    document.getElementById("btnZoomIn")?.addEventListener("click", () => this.zoom(1.2));
+    document.getElementById("btnZoomOut")?.addEventListener("click", () => this.zoom(0.8));
+    document.getElementById("btnZoomFit")?.addEventListener("click", () => this.fitToScreen());
+
+    // Mouse Pan & Zoom on Canvas
+    this.canvasWrapper.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      this.zoom(zoomFactor);
+    }, { passive: false });
+
+    this.canvasWrapper.addEventListener("mousedown", (e) => {
+      if (e.button === 0) { // left click
+        this.state.isPanning = true;
+        this.state.panStartX = e.clientX - this.state.panX;
+        this.state.panStartY = e.clientY - this.state.panY;
+        this.canvasWrapper.classList.add("panning");
+      }
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (this.state.isPanning) {
+        this.state.panX = e.clientX - this.state.panStartX;
+        this.state.panY = e.clientY - this.state.panStartY;
+        this.updateTransform();
+      }
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (this.state.isPanning) {
+        this.state.isPanning = false;
+        this.canvasWrapper.classList.remove("panning");
+      }
+    });
+
+    // Window Resize
+    window.addEventListener("resize", () => {
+      this.fitToScreen();
+    });
+
+    // Simulator Buttons
+    const btnSimToggle = document.getElementById("btnSimToggle");
+    const simPanel = document.getElementById("simulatorPanel");
+    if (btnSimToggle && simPanel) {
+      btnSimToggle.addEventListener("click", () => {
+        const isHidden = simPanel.style.display === "none" || !simPanel.style.display;
+        simPanel.style.display = isHidden ? "flex" : "none";
+        if (isHidden) {
+          this.simulator.loadPaths(this.state.pathsLayer1, this.state.pathsLayer2, this.state.bounds);
+        } else {
+          this.simulator.stop();
+          this.renderCanvas();
+        }
+      });
+    }
+
+    document.getElementById("simPlayBtn")?.addEventListener("click", () => {
+      if (this.simulator.isPlaying) {
+        this.simulator.pause();
+        document.getElementById("simPlayBtn").textContent = "▶";
+      } else {
+        this.simulator.play();
+        document.getElementById("simPlayBtn").textContent = "⏸";
+      }
+    });
+
+    document.getElementById("simStopBtn")?.addEventListener("click", () => {
+      this.simulator.stop();
+      document.getElementById("simPlayBtn").textContent = "▶";
+      this.renderCanvas();
+    });
+
+    document.getElementById("simScrubber")?.addEventListener("input", (e) => {
+      const frac = parseFloat(e.target.value) / 100;
+      this.simulator.seek(frac);
+      this.renderCanvas();
+    });
+
+    document.getElementById("simSpeedSelect")?.addEventListener("change", (e) => {
+      this.simulator.setSpeed(parseFloat(e.target.value));
+    });
+
+    // Download & Export Buttons
+    document.getElementById("btnDownloadSVG")?.addEventListener("click", () => this.exportSVG());
+    document.getElementById("btnCopySVG")?.addEventListener("click", () => this.copySVG());
+    document.getElementById("btnDownloadPNG")?.addEventListener("click", () => this.exportPNG());
+
+    // Guide Modal
+    document.getElementById("btnOpenGuide")?.addEventListener("click", () => {
+      document.getElementById("guideModal")?.classList.add("open");
+    });
+    document.getElementById("btnCloseGuide")?.addEventListener("click", () => {
+      document.getElementById("guideModal")?.classList.remove("open");
+    });
+    document.getElementById("guideModal")?.addEventListener("click", (e) => {
+      if (e.target.id === "guideModal") {
+        document.getElementById("guideModal")?.classList.remove("open");
+      }
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        const newSeed = Math.floor(Math.random() * 900000) + 10000;
+        this.setSeed(newSeed);
+      } else if (e.key === "f" || e.key === "F") {
+        this.fitToScreen();
+      }
+    });
+  }
+
+  setSeed(seed) {
+    this.state.seed = seed;
+    const seedInput = document.getElementById("seedInput");
+    if (seedInput) seedInput.value = seed;
+    this.rng.setSeed(seed);
+    this.noise.reseed(this.rng);
+    this.generate();
+    this.showToast(`Seed updated to: ${seed}`);
+  }
+
+  selectAlgorithm(algoId) {
+    const def = ALGORITHM_DEFINITIONS[algoId];
+    if (!def) return;
+
+    this.state.currentAlgoId = algoId;
+
+    // Update active class on cards
+    document.querySelectorAll(".algo-card").forEach(c => {
+      c.classList.toggle("active", c.dataset.algoId === algoId);
+    });
+
+    this.updateAlgorithmInfo(def);
+    this.renderPresetPills(algoId, def);
+    this.renderParameterControls(def);
+
+    // Regenerate
+    this.generate();
+  }
+
+  updateAlgorithmInfo(def) {
+    const isAr = this.state.lang === "ar";
+    const trans = (isAr && ALGO_TRANSLATIONS.ar[def.id]) || null;
+    const name = trans ? trans.name : def.name;
+    const explanation = trans ? trans.explanation : def.explanation;
+    const beginnerTip = trans ? trans.beginnerTip : def.beginnerTip;
+    const tipPrefix = isAr ? "💡 <b>نصيحة للمبتدئين:</b> " : "💡 <b>Beginner Tip:</b> ";
+
+    const infoTitle = document.getElementById("algoInfoTitle");
+    const infoDesc = document.getElementById("algoInfoDesc");
+    const infoTip = document.getElementById("algoInfoTip");
+    const codeSnippet = document.getElementById("algoCodeSnippet");
+
+    if (infoTitle) infoTitle.innerHTML = `${def.icon} ${name}`;
+    if (infoDesc) infoDesc.textContent = explanation;
+    if (infoTip) infoTip.innerHTML = `${tipPrefix}${beginnerTip}`;
+    if (codeSnippet) codeSnippet.textContent = def.codeSnippet || "// Algorithmic generative math";
+  }
+
+  renderAlgorithmCards() {
+    const algoGrid = document.getElementById("algoGrid");
+    if (!algoGrid) return;
+    algoGrid.innerHTML = "";
+
+    const isAr = this.state.lang === "ar";
+
+    Object.values(ALGORITHM_DEFINITIONS).forEach(def => {
+      const trans = (isAr && ALGO_TRANSLATIONS.ar[def.id]) || null;
+      const name = trans ? trans.name : def.name;
+      const category = trans ? trans.category : def.category;
+
+      const card = document.createElement("div");
+      card.className = `algo-card ${def.id === this.state.currentAlgoId ? "active" : ""}`;
+      card.dataset.algoId = def.id;
+      card.innerHTML = `
+        <div class="algo-card-top">
+          <span class="algo-card-icon">${def.icon}</span>
+          <div>
+            <div class="algo-card-name">${name}</div>
+            <div class="algo-card-category">${category}</div>
+          </div>
+        </div>
+      `;
+      card.addEventListener("click", () => this.selectAlgorithm(def.id));
+      algoGrid.appendChild(card);
+    });
+  }
+
+  renderPresetPills(algoId, def) {
+    const presetPills = document.getElementById("presetPills");
+    if (!presetPills) return;
+    presetPills.innerHTML = "";
+    const presets = def.presets || {};
+    const presetNames = Object.keys(presets);
+    const isAr = this.state.lang === "ar";
+
+    if (presetNames.length > 0) {
+      if (!this.state.activePresetName || !presets[this.state.activePresetName]) {
+        this.state.activePresetName = presetNames[0];
+        const presetValues = presets[presetNames[0]];
+        Object.keys(presetValues).forEach(k => {
+          this.state.algoParams[algoId][k] = presetValues[k];
+        });
+      }
+
+      presetNames.forEach(name => {
+        const pill = document.createElement("button");
+        pill.className = `preset-pill ${name === this.state.activePresetName ? "active" : ""}`;
+        const displayName = (isAr && PRESET_NAMES_AR[name]) ? PRESET_NAMES_AR[name] : name;
+        pill.textContent = displayName;
+        pill.dataset.presetName = name;
+        pill.addEventListener("click", () => {
+          this.applyPreset(algoId, name);
+        });
+        presetPills.appendChild(pill);
+      });
+    }
+  }
+
+  applyPreset(algoId, presetName) {
+    const def = ALGORITHM_DEFINITIONS[algoId];
+    if (!def || !def.presets || !def.presets[presetName]) return;
+
+    this.state.activePresetName = presetName;
+    const presetValues = def.presets[presetName];
+
+    // Update state parameters
+    Object.keys(presetValues).forEach(k => {
+      this.state.algoParams[algoId][k] = presetValues[k];
+    });
+
+    // Update active class on preset pills
+    document.querySelectorAll(".preset-pill").forEach(p => {
+      p.classList.toggle("active", p.dataset.presetName === presetName);
+    });
+
+    // Re-render sliders
+    this.renderParameterControls(def);
+
+    this.generate();
+    const isAr = this.state.lang === "ar";
+    const displayName = (isAr && PRESET_NAMES_AR[presetName]) ? PRESET_NAMES_AR[presetName] : presetName;
+    const t = APP_TRANSLATIONS[this.state.lang];
+    this.showToast(`${t.toastPreset}${displayName}"`);
+  }
+
+  renderParameterControls(def) {
+    const container = document.getElementById("paramContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const currentParams = this.state.algoParams[def.id];
+    const isAr = this.state.lang === "ar";
+
+    def.parameters.forEach(param => {
+      const val = currentParams[param.id] !== undefined ? currentParams[param.id] : param.default;
+      const paramLabel = (isAr && PARAM_LABELS_AR[param.id]) ? PARAM_LABELS_AR[param.id] : param.label;
+      const unit = (isAr && param.unit && UNITS_AR[param.unit]) ? UNITS_AR[param.unit] : (param.unit || "");
+
+      if (param.type === "range") {
+        const item = document.createElement("div");
+        item.className = "param-item";
+        item.innerHTML = `
+          <div class="param-header">
+            <label class="param-label" title="${param.desc}">${paramLabel}</label>
+            <span class="param-value" id="val_${param.id}">${val} ${unit}</span>
+          </div>
+          <input type="range" id="input_${param.id}" min="${param.min}" max="${param.max}" step="${param.step}" value="${val}">
+        `;
+        const slider = item.querySelector("input");
+        slider.addEventListener("input", (e) => {
+          const newVal = parseFloat(e.target.value);
+          currentParams[param.id] = newVal;
+          document.getElementById(`val_${param.id}`).textContent = `${newVal} ${unit}`;
+          this.debouncedGenerate();
+        });
+        container.appendChild(item);
+
+      } else if (param.type === "select") {
+        const item = document.createElement("div");
+        item.className = "param-item";
+        let optionsHtml = "";
+        param.options.forEach(opt => {
+          const optLabel = (isAr && SELECT_OPTIONS_AR[opt.label]) ? SELECT_OPTIONS_AR[opt.label] : opt.label;
+          optionsHtml += `<option value="${opt.value}" ${opt.value === val ? "selected" : ""}>${optLabel}</option>`;
+        });
+        item.innerHTML = `
+          <div class="param-header">
+            <label class="param-label" title="${param.desc}">${paramLabel}</label>
+          </div>
+          <select class="param-select" id="input_${param.id}">
+            ${optionsHtml}
+          </select>
+        `;
+        const sel = item.querySelector("select");
+        sel.addEventListener("change", (e) => {
+          currentParams[param.id] = e.target.value;
+          this.generate();
+        });
+        container.appendChild(item);
+
+      } else if (param.type === "checkbox") {
+        const item = document.createElement("div");
+        item.className = "param-checkbox-row";
+        item.innerHTML = `
+          <label class="param-label" title="${param.desc}">${paramLabel}</label>
+          <label class="switch">
+            <input type="checkbox" id="input_${param.id}" ${val ? "checked" : ""}>
+            <span class="slider-switch"></span>
+          </label>
+        `;
+        const chk = item.querySelector("input");
+        chk.addEventListener("change", (e) => {
+          currentParams[param.id] = e.target.checked;
+          this.generate();
+        });
+        container.appendChild(item);
+
+      } else if (param.type === "text") {
+        const item = document.createElement("div");
+        item.className = "param-item";
+        item.innerHTML = `
+          <div class="param-header">
+            <label class="param-label" title="${param.desc}">${paramLabel}</label>
+          </div>
+          <input type="text" class="seed-input" id="input_${param.id}" value="${val}" style="font-family: monospace; font-size: 11.5px; padding: 6px 10px;">
+        `;
+        const txt = item.querySelector("input");
+        txt.addEventListener("input", (e) => {
+          currentParams[param.id] = e.target.value;
+          this.generate();
+        });
+        container.appendChild(item);
+      }
+    });
+  }
+
+  updateDropdowns() {
+    const isAr = this.state.lang === "ar";
+    const t = APP_TRANSLATIONS[this.state.lang];
+    if (!t) return;
+
+    // Paper Select
+    const paperSelect = document.getElementById("paperSelect");
+    if (paperSelect) {
+      const currentVal = this.state.paperKey;
+      paperSelect.innerHTML = "";
+      Object.keys(PAPER_SIZES).forEach(key => {
+        const p = PAPER_SIZES[key];
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = isAr ? `${key.toUpperCase()} (${p.width} × ${p.height} مم)` : p.name;
+        if (key === currentVal) opt.selected = true;
+        paperSelect.appendChild(opt);
+      });
+    }
+
+    // Orientation Select
+    const optPort = document.getElementById("optPortrait");
+    if (optPort) optPort.textContent = t.optPortrait;
+    const optLand = document.getElementById("optLandscape");
+    if (optLand) optLand.textContent = t.optLandscape;
+
+    // Paper Color Select
+    const paperColorSelect = document.getElementById("paperColorSelect");
+    if (paperColorSelect && paperColorSelect.options) {
+      Array.from(paperColorSelect.options).forEach(opt => {
+        if (t.paperColors && t.paperColors[opt.value]) {
+          opt.textContent = t.paperColors[opt.value];
+        }
+      });
+    }
+
+    // Pen Selects
+    const pen1Select = document.getElementById("pen1Select");
+    if (pen1Select && pen1Select.options) {
+      Array.from(pen1Select.options).forEach(opt => {
+        if (t.pens && t.pens[opt.value]) {
+          opt.textContent = t.pens[opt.value];
+        }
+      });
+    }
+    const pen2Select = document.getElementById("pen2Select");
+    if (pen2Select && pen2Select.options) {
+      Array.from(pen2Select.options).forEach(opt => {
+        if (t.pens && t.pens[opt.value]) {
+          opt.textContent = t.pens[opt.value];
+        }
+      });
+    }
+
+    // Simulation Speed Select
+    const simSpeedSelect = document.getElementById("simSpeedSelect");
+    if (simSpeedSelect && simSpeedSelect.options) {
+      Array.from(simSpeedSelect.options).forEach(opt => {
+        if (t.simSpeeds && t.simSpeeds[opt.value]) {
+          opt.textContent = t.simSpeeds[opt.value];
+        }
+      });
+    }
+  }
+
+  updateModalGuide() {
+    const isAr = this.state.lang === "ar";
+    const t = APP_TRANSLATIONS[this.state.lang];
+    const titleEl = document.getElementById("modalGuideTitle");
+    const bodyEl = document.getElementById("modalGuideBody");
+    if (!titleEl || !bodyEl || !t) return;
+
+    titleEl.innerHTML = `<span>${t.guideTitle}</span>`;
+
+    if (isAr) {
+      bodyEl.innerHTML = `
+        <h3>${t.guideH3_1}</h3>
+        <p>${t.guideP_1}</p>
+
+        <h3>${t.guideH3_2}</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="guide-step-card">
+            <div class="guide-step-num">١</div>
+            <div>
+              <b>${t.guideStep1Title}</b> ${t.guideStep1Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">٢</div>
+            <div>
+              <b>${t.guideStep2Title}</b> ${t.guideStep2Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">٣</div>
+            <div>
+              <b>${t.guideStep3Title}</b> ${t.guideStep3Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">٤</div>
+            <div>
+              <b>${t.guideStep4Title}</b> ${t.guideStep4Desc}
+            </div>
+          </div>
+        </div>
+
+        <h3>${t.guideH3_3}</h3>
+        <ul>
+          <li>${t.guideRule1}</li>
+          <li>${t.guideRule2}</li>
+          <li>${t.guideRule3}</li>
+        </ul>
+
+        <h3>${t.guideH3_4}</h3>
+        <ul>
+          <li>${t.guidePensRec}</li>
+          <li>${t.guidePapersRec}</li>
+        </ul>
+      `;
+    } else {
+      bodyEl.innerHTML = `
+        <h3>${t.guideH3_1}</h3>
+        <p>${t.guideP_1}</p>
+
+        <h3>${t.guideH3_2}</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="guide-step-card">
+            <div class="guide-step-num">1</div>
+            <div>
+              <b>${t.guideStep1Title}</b> ${t.guideStep1Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">2</div>
+            <div>
+              <b>${t.guideStep2Title}</b> ${t.guideStep2Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">3</div>
+            <div>
+              <b>${t.guideStep3Title}</b> ${t.guideStep3Desc}
+            </div>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">4</div>
+            <div>
+              <b>${t.guideStep4Title}</b> ${t.guideStep4Desc}
+            </div>
+          </div>
+        </div>
+
+        <h3>${t.guideH3_3}</h3>
+        <ul>
+          <li>${t.guideRule1}</li>
+          <li>${t.guideRule2}</li>
+          <li>${t.guideRule3}</li>
+        </ul>
+
+        <h3>${t.guideH3_4}</h3>
+        <ul>
+          <li>${t.guidePensRec}</li>
+          <li>${t.guidePapersRec}</li>
+        </ul>
+      `;
+    }
+  }
+
+  setLanguage(lang) {
+    this.state.lang = lang;
+    const isAr = lang === "ar";
+    document.documentElement.setAttribute("lang", lang);
+    document.body.setAttribute("dir", isAr ? "rtl" : "ltr");
+    
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem("plotter_lang", lang);
+      }
+    } catch (_) {}
+
+    // Update simple mode link with query param
+    const linkSimple = document.getElementById("linkSimpleMode");
+    if (linkSimple) linkSimple.href = `simple.html?lang=${lang}`;
+
+    const t = APP_TRANSLATIONS[lang];
+    if (!t) return;
+
+    // Header
+    const langLabel = document.getElementById("langLabel");
+    if (langLabel) langLabel.textContent = isAr ? "English" : "العربية";
+    const logoTitle = document.getElementById("logoTitle");
+    if (logoTitle) logoTitle.textContent = t.logoTitle;
+    const logoSub = document.getElementById("logoSub");
+    if (logoSub) logoSub.textContent = t.logoSub;
+    const txtSimpleLink = document.getElementById("txtSimpleLink");
+    if (txtSimpleLink) txtSimpleLink.textContent = t.linkSimple;
+    const txtPhotoLink = document.getElementById("txtPhotoLink");
+    if (txtPhotoLink) txtPhotoLink.textContent = t.linkPhoto;
+    const txtGuideBtn = document.getElementById("txtGuideBtn");
+    if (txtGuideBtn) txtGuideBtn.textContent = t.btnGuide;
+
+    // Banner
+    const txtProBanner = document.getElementById("txtProBanner");
+    if (txtProBanner) txtProBanner.innerHTML = t.proBanner;
+
+    // Tabs
+    const txtTabAlgo = document.getElementById("txtTabAlgorithms");
+    if (txtTabAlgo) txtTabAlgo.textContent = t.tabAlgo;
+    const txtTabSetup = document.getElementById("txtTabSetup");
+    if (txtTabSetup) txtTabSetup.textContent = t.tabSetup;
+    const txtTabCode = document.getElementById("txtTabCode");
+    if (txtTabCode) txtTabCode.textContent = t.tabCode;
+
+    // Tab 1 Section Titles
+    const sec1 = document.getElementById("secAlgoTitle");
+    if (sec1) sec1.textContent = t.secAlgoTitle;
+    const badge1 = document.getElementById("badgeAlgo");
+    if (badge1) badge1.textContent = t.badgeAlgo;
+    const sec2 = document.getElementById("secPresetTitle");
+    if (sec2) sec2.textContent = t.secPresetTitle;
+    const badge2 = document.getElementById("badgePreset");
+    if (badge2) badge2.textContent = t.badgePreset;
+    const sec3 = document.getElementById("secSeedTitle");
+    if (sec3) sec3.textContent = t.secSeedTitle;
+    const badge3 = document.getElementById("badgeSeed");
+    if (badge3) badge3.textContent = t.badgeSeed;
+    const txtRollSeed = document.getElementById("txtRollSeed");
+    if (txtRollSeed) txtRollSeed.textContent = t.btnRollSeed;
+    const txtUndoSeed = document.getElementById("txtUndoSeed");
+    if (txtUndoSeed) txtUndoSeed.textContent = t.txtUndoSeed || "↩";
+    const sec4 = document.getElementById("secParamTitle");
+    if (sec4) sec4.textContent = t.secParamTitle;
+    const badge4 = document.getElementById("badgeParam");
+    if (badge4) badge4.textContent = t.badgeParam;
+
+    // Tab 2 Setup
+    const secPaper = document.getElementById("secPaperTitle");
+    if (secPaper) secPaper.textContent = t.secPaperTitle;
+    const badgeHw = document.getElementById("badgeHardware");
+    if (badgeHw) badgeHw.textContent = t.badgeHardware;
+    const lblSize = document.getElementById("lblPaperSize");
+    if (lblSize) lblSize.textContent = t.lblPaperSize;
+    const lblOrient = document.getElementById("lblOrientation");
+    if (lblOrient) lblOrient.textContent = t.lblOrientation;
+    const optPort = document.getElementById("optPortrait");
+    if (optPort) optPort.textContent = t.optPortrait;
+    const optLand = document.getElementById("optLandscape");
+    if (optLand) optLand.textContent = t.optLandscape;
+    const lblMargin = document.getElementById("lblMargin");
+    if (lblMargin) lblMargin.textContent = t.lblMargin;
+    const lblPaperColor = document.getElementById("lblPaperColor");
+    if (lblPaperColor) lblPaperColor.textContent = t.lblPaperColor;
+
+    const secPen = document.getElementById("secPenTitle");
+    if (secPen) secPen.textContent = t.secPenTitle;
+    const badgePen = document.getElementById("badgePen");
+    if (badgePen) badgePen.textContent = t.badgePen;
+    const lblPen1 = document.getElementById("lblPen1");
+    if (lblPen1) lblPen1.textContent = t.lblPen1;
+    const lblPen2 = document.getElementById("lblPen2");
+    if (lblPen2) lblPen2.textContent = t.lblPen2;
+
+    const secOpt = document.getElementById("secOptTitle");
+    if (secOpt) secOpt.textContent = t.secOptTitle;
+    const badgeOpt = document.getElementById("badgeOpt");
+    if (badgeOpt) badgeOpt.textContent = t.badgeOpt;
+    const lblOpt = document.getElementById("lblOpt");
+    if (lblOpt) lblOpt.textContent = t.lblOpt;
+    const lblServo = document.getElementById("lblServoProtection");
+    if (lblServo && t.lblServoProtection) lblServo.textContent = t.lblServoProtection;
+    const descOpt = document.getElementById("descOpt");
+    if (descOpt) descOpt.textContent = t.descOpt;
+
+    const secImg = document.getElementById("secImageTitle");
+    if (secImg) secImg.textContent = t.secImageTitle;
+    const descImg = document.getElementById("descImage");
+    if (descImg) descImg.textContent = t.descImage;
+    const btnImg = document.getElementById("btnImageStudio");
+    if (btnImg) btnImg.textContent = t.btnImageStudio;
+
+    // Tab 3 Code & Math
+    const secCode = document.getElementById("secCodeTitle");
+    if (secCode) secCode.textContent = t.secCodeTitle;
+    const badgeCode = document.getElementById("badgeCode");
+    if (badgeCode) badgeCode.textContent = t.badgeCode;
+    const descCode = document.getElementById("descCode");
+    if (descCode) descCode.textContent = t.descCode;
+    const secRecipe = document.getElementById("secRecipeTitle");
+    if (secRecipe) secRecipe.textContent = t.secRecipeTitle;
+    const r1 = document.getElementById("recipePoint1");
+    if (r1) r1.innerHTML = t.recipePoint1;
+    const r2 = document.getElementById("recipePoint2");
+    if (r2) r2.innerHTML = t.recipePoint2;
+    const r3 = document.getElementById("recipePoint3");
+    if (r3) r3.innerHTML = t.recipePoint3;
+
+    // Viewport Toolbar
+    const txtFit = document.getElementById("txtBtnZoomFit");
+    if (txtFit) txtFit.textContent = t.btnFitView;
+    const txtSimToggle = document.getElementById("txtSimToggle");
+    if (txtSimToggle) {
+      txtSimToggle.textContent = this.simulator && this.simulator.isPlaying ? t.btnSimStop : t.btnSimStart;
+    }
+
+    // Simulator
+    const simTitle = document.getElementById("txtSimTitle");
+    if (simTitle) simTitle.textContent = t.simTitle;
+
+    // Bottom Dock Stats
+    const lblDist = document.getElementById("lblStatDist");
+    if (lblDist) lblDist.textContent = t.statDist;
+    const lblLifts = document.getElementById("lblStatLifts");
+    if (lblLifts) lblLifts.textContent = t.statLifts;
+    const lblTime = document.getElementById("lblStatTime");
+    if (lblTime) lblTime.textContent = t.statTime;
+    const lblPaths = document.getElementById("lblStatPaths");
+    if (lblPaths) lblPaths.textContent = t.statPaths;
+
+    const txtDown = document.getElementById("txtBtnDownloadSVG");
+    if (txtDown) txtDown.textContent = t.btnDownloadSVG;
+    const txtCopy = document.getElementById("txtBtnCopySVG");
+    if (txtCopy) txtCopy.textContent = t.btnCopySVG;
+    const txtPng = document.getElementById("txtBtnDownloadPNG");
+    if (txtPng) txtPng.textContent = t.btnDownloadPNG;
+
+    // Re-populate and re-render dynamic sections
+    this.renderAlgorithmCards();
+    this.updateDropdowns();
+    this.updateModalGuide();
+    
+    const def = ALGORITHM_DEFINITIONS[this.state.currentAlgoId];
+    if (def) {
+      this.updateAlgorithmInfo(def);
+      this.renderPresetPills(this.state.currentAlgoId, def);
+      this.renderParameterControls(def);
+    }
+  }
+
+  debouncedGenerate() {
+    if (this._debounceRaf) {
+      cancelAnimationFrame(this._debounceRaf);
+    }
+    this._debounceRaf = requestAnimationFrame(() => {
+      this.generate();
+    });
+  }
+
+  generate() {
+    const algoDef = ALGORITHM_DEFINITIONS[this.state.currentAlgoId];
+    if (!algoDef) return;
+
+    // Reset PRNG with current seed for absolute reproducibility
+    this.rng.setSeed(this.state.seed);
+    this.noise.reseed(this.rng);
+
+    // Compute paper bounds taking margin and orientation into account
+    this.state.bounds = this.plotter.getBounds(
+      this.state.paperKey,
+      this.state.orientation,
+      this.state.marginMm
+    );
+
+    const params = this.state.algoParams[this.state.currentAlgoId];
+
+    // Generate raw paths
+    const result = algoDef.generate(this.state.bounds, params, this.rng, this.noise);
+    let layer1 = result.layer1 || [];
+    let layer2 = result.layer2 || [];
+
+    // Apply TSP Path Optimization & Servo Thermal Protection if enabled
+    if (this.state.optimizePaths) {
+      const stitchThreshold = this.state.servoProtection !== false ? 2.0 : 0;
+      layer1 = this.plotter.optimizePaths(layer1, { stitchThreshold });
+      layer2 = this.plotter.optimizePaths(layer2, { stitchThreshold });
+    }
+
+    this.state.pathsLayer1 = layer1;
+    this.state.pathsLayer2 = layer2;
+
+    // Compute statistics
+    this.state.stats = this.plotter.calculateStats(layer1, layer2);
+    this.updateStatsUI();
+
+    // Render on canvas
+    this.renderCanvas();
+
+    // Update simulation engine
+    if (this.simulator.isPlaying) {
+      this.simulator.loadPaths(layer1, layer2, this.state.bounds);
+      this.simulator.play();
+    }
+  }
+
+  updateStatsUI() {
+    const s = this.state.stats;
+    if (!s) return;
+    const isAr = this.state.lang === "ar";
+
+    document.getElementById("statDistance").textContent = `${s.drawDistanceM} m`;
+
+    const liftsEl = document.getElementById("statLifts");
+    if (liftsEl) {
+      const isCool = s.servoStatus === "cool";
+      const statusText = isCool
+        ? (isAr ? "🟢 بارد وآمن" : "🟢 Cool & Safe")
+        : (isAr ? "🟡 معتدل" : "🟡 Moderate");
+      liftsEl.innerHTML = `${s.totalLifts} <small style="font-size: 11px; font-weight: 500; color: ${isCool ? '#10b981' : '#f59e0b'};">(${statusText})</small>`;
+    }
+
+    document.getElementById("statTime").textContent = s.estimatedTimeStr;
+    document.getElementById("statPaths").textContent = s.pathCount;
+  }
+
+  updateSimulatorUI(simState) {
+    const scrubber = document.getElementById("simScrubber");
+    if (scrubber && !this.state.isScrubbing) {
+      scrubber.value = Math.round(simState.progress * 100);
+    }
+
+    const posEl = document.getElementById("simCoords");
+    if (posEl && simState.currentPos) {
+      posEl.textContent = `X: ${simState.currentPos.x.toFixed(1)}mm  Y: ${simState.currentPos.y.toFixed(1)}mm`;
+    }
+
+    const stateEl = document.getElementById("simPenState");
+    if (stateEl) {
+      stateEl.textContent = simState.isPenDown ? "PEN DOWN (INK)" : "PEN UP (RAPID)";
+      stateEl.style.color = simState.isPenDown ? "#10b981" : "#f59e0b";
+    }
+
+    if (simState.completed) {
+      document.getElementById("simPlayBtn").textContent = "▶";
+      this.showToast("Plot simulation finished!");
+    }
+  }
+
+  renderCanvas(simState = null) {
+    const bounds = this.state.bounds;
+    if (!bounds) return;
+
+    const pw = bounds.paperWidth;
+    const ph = bounds.paperHeight;
+
+    // Physical millimeter to screen pixel scale
+    // e.g., 3.8 pixels per mm for sharp display
+    const pxPerMm = 4.0;
+    const canvasW = Math.round(pw * pxPerMm);
+    const canvasH = Math.round(ph * pxPerMm);
+
+    if (this.canvas.width !== canvasW || this.canvas.height !== canvasH) {
+      this.canvas.width = canvasW;
+      this.canvas.height = canvasH;
+      this.canvas.style.width = `${pw * 2.8}px`;
+      this.canvas.style.height = `${ph * 2.8}px`;
+      this.updateMarginOverlay(pw, ph, bounds.marginMm);
+    }
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.scale(pxPerMm, pxPerMm);
+
+    // Draw Paper Background
+    const paperPreset = PAPER_PRESETS.find(p => p.id === this.state.paperColorId) || PAPER_PRESETS[0];
+    ctx.fillStyle = paperPreset.color;
+    ctx.fillRect(0, 0, pw, ph);
+
+    // Subtle paper grain effect
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.03)";
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < pw; i += 8) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, ph);
+      ctx.stroke();
+    }
+
+    // Pen colors
+    const pen1 = PEN_PRESETS.find(p => p.id === this.state.pen1ColorId) || PEN_PRESETS[0];
+    const pen2 = PEN_PRESETS.find(p => p.id === this.state.pen2ColorId) || PEN_PRESETS[4];
+    const strokeWidth = this.state.strokeWidthMm;
+
+    // Standard static render vs Simulation render
+    if (!simState || simState.progress === 0) {
+      // Layer 1
+      ctx.strokeStyle = pen1.color;
+      ctx.lineWidth = strokeWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      this.state.pathsLayer1.forEach(p => {
+        if (p.length < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(p[0].x, p[0].y);
+        for (let i = 1; i < p.length; i++) {
+          ctx.lineTo(p[i].x, p[i].y);
+        }
+        ctx.stroke();
+      });
+
+      // Layer 2
+      if (this.state.pathsLayer2.length > 0) {
+        ctx.strokeStyle = pen2.color;
+        ctx.lineWidth = strokeWidth;
+        this.state.pathsLayer2.forEach(p => {
+          if (p.length < 2) return;
+          ctx.beginPath();
+          ctx.moveTo(p[0].x, p[0].y);
+          for (let i = 1; i < p.length; i++) {
+            ctx.lineTo(p[i].x, p[i].y);
+          }
+          ctx.stroke();
+        });
+      }
+    } else {
+      // Simulation mode: render up to current step
+      const segments = this.simulator.segments;
+      const curStep = simState.currentStep;
+
+      for (let i = 0; i <= curStep && i < segments.length; i++) {
+        const seg = segments[i];
+        if (seg.type === "down") {
+          ctx.strokeStyle = seg.layer === 2 ? pen2.color : pen1.color;
+          ctx.lineWidth = strokeWidth;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(seg.x1, seg.y1);
+          ctx.lineTo(seg.x2, seg.y2);
+          ctx.stroke();
+        } else if (seg.type === "up") {
+          // Draw faint pen-up air jump travel
+          ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
+          ctx.lineWidth = 0.2;
+          ctx.setLineDash([1, 1]);
+          ctx.beginPath();
+          ctx.moveTo(seg.x1, seg.y1);
+          ctx.lineTo(seg.x2, seg.y2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // Draw Virtual Pen Head Carriage
+      const pos = simState.currentPos;
+      if (pos) {
+        ctx.save();
+        // Pen shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        ctx.beginPath();
+        ctx.arc(pos.x + 0.6, pos.y + 0.6, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pen carriage ring
+        ctx.strokeStyle = simState.isPenDown ? "#10b981" : "#f59e0b";
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 2.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Pen tip dot
+        ctx.fillStyle = simState.isPenDown ? pen1.color : "#ffffff";
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 1.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  updateMarginOverlay(pw, ph, marginMm) {
+    if (!this.marginOverlay) return;
+    const scale = 2.8; // matches canvas visual display
+    this.marginOverlay.style.left = `${marginMm * scale}px`;
+    this.marginOverlay.style.top = `${marginMm * scale}px`;
+    this.marginOverlay.style.width = `${(pw - marginMm * 2) * scale}px`;
+    this.marginOverlay.style.height = `${(ph - marginMm * 2) * scale}px`;
+  }
+
+  // Pan & Zoom
+  zoom(factor) {
+    this.state.zoom = Math.max(0.3, Math.min(4.0, this.state.zoom * factor));
+    this.updateTransform();
+  }
+
+  fitToScreen() {
+    this.state.panX = 0;
+    this.state.panY = 0;
+    if (this.canvasWrapper && this.state.bounds) {
+      const wrapperW = Math.max(200, this.canvasWrapper.clientWidth - 80);
+      const wrapperH = Math.max(200, this.canvasWrapper.clientHeight - 80);
+      const paperW = this.state.bounds.paperWidth * 2.8;
+      const paperH = this.state.bounds.paperHeight * 2.8;
+      const scaleX = wrapperW / paperW;
+      const scaleY = wrapperH / paperH;
+      this.state.zoom = Math.min(1.15, Math.max(0.4, Math.min(scaleX, scaleY)));
+    } else {
+      this.state.zoom = 1.0;
+    }
+    this.updateTransform();
+    this.showToast("Canvas Centered & Fitted ⛶");
+  }
+
+  updateTransform() {
+    if (this.paperSheet) {
+      this.paperSheet.style.transform = `translate(${this.state.panX}px, ${this.state.panY}px) scale(${this.state.zoom})`;
+    }
+  }
+
+  // Export functions
+  exportSVG() {
+    const pen1 = PEN_PRESETS.find(p => p.id === this.state.pen1ColorId) || PEN_PRESETS[0];
+    const pen2 = PEN_PRESETS.find(p => p.id === this.state.pen2ColorId) || PEN_PRESETS[4];
+
+    const svg = this.plotter.generateSVG(
+      this.state.bounds,
+      this.state.pathsLayer1,
+      this.state.pathsLayer2,
+      {
+        color1: pen1.color,
+        color2: pen2.color,
+        strokeWidth: this.state.strokeWidthMm
+      }
+    );
+
+    const filename = `plotter_${this.state.currentAlgoId}_seed${this.state.seed}.svg`;
+    this.plotter.downloadSVG(filename, svg);
+    this.showToast(`Saved ${filename} (Ready to plot!)`);
+  }
+
+  async copySVG() {
+    const pen1 = PEN_PRESETS.find(p => p.id === this.state.pen1ColorId) || PEN_PRESETS[0];
+    const pen2 = PEN_PRESETS.find(p => p.id === this.state.pen2ColorId) || PEN_PRESETS[4];
+
+    const svg = this.plotter.generateSVG(
+      this.state.bounds,
+      this.state.pathsLayer1,
+      this.state.pathsLayer2,
+      {
+        color1: pen1.color,
+        color2: pen2.color,
+        strokeWidth: this.state.strokeWidthMm
+      }
+    );
+
+    const success = await this.plotter.copySVGToClipboard(svg);
+    if (success) {
+      this.showToast("SVG copied to clipboard! (Paste directly into Inkscape)");
+    } else {
+      this.showToast("Could not access clipboard");
+    }
+  }
+
+  exportPNG() {
+    const filename = `art_${this.state.currentAlgoId}_seed${this.state.seed}.png`;
+    this.plotter.downloadPNG(this.canvas, filename);
+    this.showToast(`Saved PNG preview snapshot!`);
+  }
+
+  showToast(msg) {
+    let toast = document.getElementById("appToast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "appToast";
+      toast.className = "toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2800);
+  }
+}
+
+// Start app on DOM load
+window.addEventListener("DOMContentLoaded", () => {
+  window.app = new App();
+});
+
+</script>
 </body>
 </html>

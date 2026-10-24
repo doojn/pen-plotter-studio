@@ -51,7 +51,8 @@ const TRANSLATIONS = {
       maze: { name: "متاهة إسلامية", sub: "أقواس متصلة متشابكة" },
       ripples: { name: "تموجات الماء", sub: "دوائر متداخلة بصرية" },
       tree: { name: "أغصان الشجرة", sub: "تفرعات طبيعية ذكية" },
-      oneline: { name: "خط متصل واحد", sub: "بدون أي رفع للقلم!" }
+      oneline: { name: "خط متصل واحد", sub: "بدون أي رفع للقلم!" },
+      doodles: { name: "خربشات مرحة", sub: "خط انسيابي حر بدون رفع للقلم" }
     }
   },
   en: {
@@ -101,7 +102,8 @@ const TRANSLATIONS = {
       maze: { name: "Curved Maze", sub: "Interlocking ribbon tiles" },
       ripples: { name: "Water Ripples", sub: "Optical interference rings" },
       tree: { name: "Fractal Tree", sub: "Natural branching growth" },
-      oneline: { name: "One Continuous Line", sub: "Zero pen lifts!" }
+      oneline: { name: "One Continuous Line", sub: "Zero pen lifts!" },
+      doodles: { name: "Playful Doodles", sub: "Organic wandering loops & curls" }
     }
   }
 };
@@ -114,7 +116,8 @@ const SIMPLE_STYLES = [
   { id: "maze", algoId: "truchetTiles", icon: "🧩", defaultPreset: "Woven Ribbon Labyrinth" },
   { id: "ripples", algoId: "concentricMoire", icon: "🎯", defaultPreset: "Dual Moiré Interference" },
   { id: "tree", algoId: "fractalTree", icon: "🌳", defaultPreset: "Ancient Bonsai" },
-  { id: "oneline", algoId: "continuousMeander", icon: "➰", defaultPreset: "Continuous Hilbert Labyrinth" }
+  { id: "oneline", algoId: "continuousMeander", icon: "➰", defaultPreset: "Continuous Hilbert Labyrinth" },
+  { id: "doodles", algoId: "doodles", icon: "✏️", defaultPreset: "Whimsical Loop-de-Loop" }
 ];
 
 const COLOR_PALETTES = {
@@ -458,9 +461,11 @@ class SimpleApp {
     if (!badge) return;
     const isAr = this.state.lang === "ar";
     const timeStr = stats ? stats.estimatedTimeStr : "3m";
+    const servoSafe = !stats || stats.servoStatus === "cool";
+    const servoText = isAr ? "🟢 المحرك بارد وآمن" : "🟢 Servo Safe & Cool";
     badge.innerHTML = isAr
-      ? `<span>⏱️ وقت الرسم: <b>~${timeStr}</b> (سريع وخفيف لورق A4)</span>`
-      : `<span>⏱️ Plot Time: <b>~${timeStr}</b> (Safe & fast for A4)</span>`;
+      ? `<span>⏱️ وقت الرسم: <b>~${timeStr}</b> • <small style="color:#059669; font-weight:600;">${servoText}</small></span>`
+      : `<span>⏱️ Plot Time: <b>~${timeStr}</b> • <small style="color:#059669; font-weight:600;">${servoText}</small></span>`;
   }
 
   render() {
@@ -478,9 +483,9 @@ class SimpleApp {
     let layer1 = result.layer1 || [];
     let layer2 = result.layer2 || [];
 
-    // Always apply TSP path optimizer for beginner safety
-    layer1 = this.plotter.optimizePaths(layer1);
-    layer2 = this.plotter.optimizePaths(layer2);
+    // Always apply TSP path optimizer with Smart Stitching (Servo Thermal Protection)
+    layer1 = this.plotter.optimizePaths(layer1, { stitchThreshold: 2.0 });
+    layer2 = this.plotter.optimizePaths(layer2, { stitchThreshold: 2.0 });
 
     this.state.pathsLayer1 = layer1;
     this.state.pathsLayer2 = layer2;
@@ -538,6 +543,12 @@ class SimpleApp {
       params.curveOrder = Math.round(MathUtils.map(d, 1, 5, 2, 4));
       params.wobble = MathUtils.map(w, 1, 5, 0, 1.4);
       params.cornerRoundness = 0.25;
+    } else if (algoId === "doodles") {
+      params.loopDensity = Math.round(MathUtils.map(d, 1, 5, 1200, 2800));
+      params.curliness = MathUtils.map(w, 1, 5, 1.2, 3.4);
+      params.wanderSpeed = 1.5;
+      params.coverage = 0.82;
+      params.dualColorAccent = false;
     }
 
     return params;

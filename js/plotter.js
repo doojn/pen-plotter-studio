@@ -67,9 +67,11 @@ class PlotterEngine {
     };
   }
 
-  // Optimize path order using Greedy Nearest-Neighbor TSP + Path Reversal
-  optimizePaths(paths) {
+  // Optimize path order using Greedy Nearest-Neighbor TSP + Path Reversal + Smart Stitching (Servo Thermal Protection)
+  optimizePaths(paths, options = {}) {
     if (!paths || paths.length <= 1) return paths ? [...paths] : [];
+
+    const stitchThresholdMm = options.stitchThreshold !== undefined ? options.stitchThreshold : 2.0;
 
     // Clone paths to avoid mutating input
     const pool = paths.map(p => p.map(pt => ({ x: pt.x, y: pt.y })));
@@ -130,14 +132,24 @@ class PlotterEngine {
 
       const nextPath = pool.splice(bestIndex, 1)[0];
       if (shouldReverse) nextPath.reverse();
-      optimized.push(nextPath);
-      curPos = nextPath[nextPath.length - 1];
+
+      // Thermal Protection: if next path start is very close (<= stitchThresholdMm), stitch without lifting pen
+      if (stitchThresholdMm > 0 && bestDist <= stitchThresholdMm) {
+        const target = optimized[optimized.length - 1];
+        for (let pt of nextPath) {
+          target.push(pt);
+        }
+        curPos = target[target.length - 1];
+      } else {
+        optimized.push(nextPath);
+        curPos = nextPath[nextPath.length - 1];
+      }
     }
 
     return optimized;
   }
 
-  // Calculate plotting statistics (draw distance, air distance, estimated time)
+  // Calculate plotting statistics (draw distance, air distance, estimated time, and servo duty cycle)
   calculateStats(pathsLayer1, pathsLayer2 = []) {
     let drawDistanceMm = 0;
     let airDistanceMm = 0;
@@ -150,6 +162,8 @@ class PlotterEngine {
         drawDistanceM: 0,
         airDistanceM: 0,
         totalLifts: 0,
+        liftsPerMin: 0,
+        servoStatus: "cool",
         estimatedTimeStr: "0s",
         estimatedSeconds: 0
       };
@@ -185,11 +199,20 @@ class PlotterEngine {
     const seconds = totalSec % 60;
     const estimatedTimeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 
+    // Servo duty cycle & thermal safety
+    const totalMinutes = Math.max(0.1, totalSec / 60);
+    const liftsPerMin = Math.round((totalLifts / totalMinutes) * 10) / 10;
+    let servoStatus = "cool"; // "cool" (< 25 lifts/min), "warm" (25-50), "hot" (> 50)
+    if (liftsPerMin > 45) servoStatus = "hot";
+    else if (liftsPerMin > 20) servoStatus = "warm";
+
     return {
       pathCount: allPaths.length,
       drawDistanceM: (drawDistanceMm / 1000).toFixed(2),
       airDistanceM: (airDistanceMm / 1000).toFixed(2),
       totalLifts,
+      liftsPerMin,
+      servoStatus,
       estimatedTimeStr,
       estimatedSeconds: totalSec
     };
@@ -215,6 +238,7 @@ class PlotterEngine {
 
     let svg = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`;
     svg += `<!-- Generative Pen Plotter Art - Exported for AxiDraw / Inkscape -->\n`;
+    svg += `<!-- Plotter Thermal Guard: Path-Stitching Enabled (<25 lifts/min safe for SG90 servos) -->\n`;
     svg += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"\n`;
     svg += `     width="${pw}mm" height="${ph}mm" viewBox="0 0 ${pw} ${ph}">\n`;
 
