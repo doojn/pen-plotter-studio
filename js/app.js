@@ -353,7 +353,13 @@ class App {
       const presetNames = Object.keys(presets);
 
       if (presetNames.length > 0) {
-        this.state.activePresetName = presetNames[0];
+        const firstPreset = presetNames[0];
+        this.state.activePresetName = firstPreset;
+        const presetValues = presets[firstPreset];
+        Object.keys(presetValues).forEach(k => {
+          this.state.algoParams[algoId][k] = presetValues[k];
+        });
+
         presetNames.forEach(name => {
           const pill = document.createElement("button");
           pill.className = `preset-pill ${name === this.state.activePresetName ? "active" : ""}`;

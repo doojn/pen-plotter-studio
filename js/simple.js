@@ -16,8 +16,11 @@ const TRANSLATIONS = {
     few: "قليل",
     many: "كثيف",
     labelWiggle: "تموج وانحناء الخطوط",
+    labelWiggleSpiral: "تشويه خوارزمي للحلزون",
     smooth: "هادئ",
     wild: "عاصف",
+    pureSpiral: "حلزون نقي ومثالي",
+    distortedSpiral: "تشويه خوارزمي",
     labelPaper: "حجم الورقة",
     labelColors: "ألوان الورق والحبر",
     colorWhiteBlack: "أبيض + أسود",
@@ -36,7 +39,7 @@ const TRANSLATIONS = {
     speedFast: "🐇 سريع",
     styles: {
       waves: { name: "أمواج رشيقة", sub: "خطوط نهرية ناعمة" },
-      spirals: { name: "حلزون متموج", sub: "دوامات قابلة للتشويه" },
+      spirals: { name: "حلزون هندسي", sub: "حلزون مثالي + تشويه خوارزمي" },
       mountains: { name: "جبال ثلاثية الأبعاد", sub: "تضاريس كلاسيكية" },
       loops: { name: "حلقات البندول", sub: "دوائر هندسية ساحرة" },
       maze: { name: "متاهة إسلامية", sub: "أقواس متصلة متشابكة" },
@@ -57,8 +60,11 @@ const TRANSLATIONS = {
     few: "Few",
     many: "Dense",
     labelWiggle: "Wave & Turbulence",
+    labelWiggleSpiral: "Algorithmic Distortion",
     smooth: "Gentle",
     wild: "Wild",
+    pureSpiral: "Pure Perfect Spiral",
+    distortedSpiral: "Distorted Spiral",
     labelPaper: "Paper Size",
     labelColors: "Paper & Ink Colors",
     colorWhiteBlack: "White + Black",
@@ -77,7 +83,7 @@ const TRANSLATIONS = {
     speedFast: "🐇 Fast",
     styles: {
       waves: { name: "Ocean Waves", sub: "Flowing organic streams" },
-      spirals: { name: "Distorted Spiral", sub: "Coils with organic distortion" },
+      spirals: { name: "Geometric Spiral", sub: "Pure spiral + distortion" },
       mountains: { name: "Mountain Ridges", sub: "3D Joy Division peaks" },
       loops: { name: "Pendulum Loops", sub: "Hypnotic geometric orbits" },
       maze: { name: "Curved Maze", sub: "Interlocking ribbon tiles" },
@@ -90,7 +96,7 @@ const TRANSLATIONS = {
 
 const SIMPLE_STYLES = [
   { id: "waves", algoId: "flowField", icon: "🌊", defaultPreset: "Ocean Currents" },
-  { id: "spirals", algoId: "spirals", icon: "🌀", defaultPreset: "Organic Fingerprint Whorl" },
+  { id: "spirals", algoId: "spirals", icon: "🌀", defaultPreset: "Pure Geometric Spiral" },
   { id: "mountains", algoId: "waveRidges", icon: "🏔️", defaultPreset: "Joy Division Classic" },
   { id: "loops", algoId: "harmonograph", icon: "♾️", defaultPreset: "Pendulum Waltz" },
   { id: "maze", algoId: "truchetTiles", icon: "🧩", defaultPreset: "Woven Ribbon Labyrinth" },
@@ -127,9 +133,31 @@ class SimpleApp {
       bounds: null
     };
 
+    // Check URL parameters for direct linking (e.g. ?style=spirals&lang=en)
+    try {
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("style")) {
+          const s = urlParams.get("style");
+          if (SIMPLE_STYLES.some(st => st.id === s)) {
+            this.state.activeStyleId = s;
+            if (s === "spirals") this.state.wiggleLevel = 1;
+          }
+        }
+        if (urlParams.has("lang")) {
+          const l = urlParams.get("lang");
+          if (l === "en" || l === "ar") this.state.lang = l;
+        }
+      }
+    } catch (_) {}
+
     this.initDOM();
     this.initEvents();
-    this.setLanguage("ar");
+    this.setLanguage(this.state.lang);
+    if (this.state.activeStyleId === "spirals") {
+      const sw = document.getElementById("sliderWiggle");
+      if (sw) sw.value = this.state.wiggleLevel;
+    }
     this.render();
   }
 
@@ -172,9 +200,18 @@ class SimpleApp {
       `;
 
       card.addEventListener("click", () => {
+        const prevStyle = this.state.activeStyleId;
         this.state.activeStyleId = style.id;
         document.querySelectorAll(".style-card").forEach(c => c.classList.remove("active"));
         card.classList.add("active");
+
+        if (style.id === "spirals" && prevStyle !== "spirals") {
+          this.state.wiggleLevel = 1;
+          const sw = document.getElementById("sliderWiggle");
+          if (sw) sw.value = 1;
+        }
+
+        this.updateSliderLabels();
         this.render();
       });
 
@@ -317,7 +354,27 @@ class SimpleApp {
     if (simBtn) simBtn.innerHTML = this.simulator.isPlaying ? t.btnStopSim : t.btnSimulate;
     document.getElementById("btnDownload").innerHTML = t.btnDownload;
 
+    this.updateSliderLabels();
     this.renderStyleCards();
+  }
+
+  updateSliderLabels() {
+    const t = TRANSLATIONS[this.state.lang];
+    const isSpiral = this.state.activeStyleId === "spirals";
+
+    const lblWiggle = document.getElementById("labelWiggle");
+    const txtSmooth = document.getElementById("txtSmooth");
+    const txtWild = document.getElementById("txtWild");
+
+    if (lblWiggle) {
+      lblWiggle.textContent = isSpiral ? t.labelWiggleSpiral : t.labelWiggle;
+    }
+    if (txtSmooth) {
+      txtSmooth.textContent = isSpiral ? t.pureSpiral : t.smooth;
+    }
+    if (txtWild) {
+      txtWild.textContent = isSpiral ? t.distortedSpiral : t.wild;
+    }
   }
 
   centerView() {
@@ -367,7 +424,7 @@ class SimpleApp {
       params.streamAvoidance = 1.0;
     } else if (algoId === "spirals") {
       params.turns = Math.round(MathUtils.map(d, 1, 5, 14, 45));
-      params.distortionAmount = MathUtils.map(w, 1, 5, 0, 18);
+      params.distortionAmount = w === 1 ? 0 : MathUtils.map(w, 2, 5, 4.0, 18.0);
       params.distortionMode = w === 1 ? "pure" : "organic";
       params.distortionFreq = 8;
       params.dualSpiral = false;

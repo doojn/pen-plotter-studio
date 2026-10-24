@@ -714,33 +714,31 @@ const radiusWobble = noise(cos(theta), sin(theta)) * warpAmp;`,
     category: "Spirals & Geometry",
     badge: "Hypnotic Coil",
     icon: "🌀",
-    shortDesc: "Archimedean spirals with customizable organic noise distortion, waves, and dual arms.",
-    explanation: "Spirals are among the most captivating forms in nature (from galaxies to nautilus shells and fingerprints). An Archimedean spiral winds outward from the center. By applying Perlin noise wobble or harmonic waves to the radius, the pure spiral bends into organic topography, optical illusions, or fingerprints!",
-    beginnerTip: "Set 'Distortion Amount' to 0 for a pure mathematical spiral, or turn it up for stunning fingerprint and galaxy ripples!",
-    codeSnippet: `// Archimedean spiral with organic distortion:
-const baseR = (theta / maxTheta) * maxRadius;
-const wobble = noise(cos(theta) * freq, sin(theta) * freq) * distortionAmount;
-const r = baseR + wobble;
+    shortDesc: "Mathematically perfect Archimedean spiral with optional algorithmic wave & noise distortion.",
+    explanation: "Begins as a flawless, mathematically perfect Archimedean spiral with exact uniform spacing between every coil. You can dial in algorithmic distortion (organic noise, sinusoidal ripples, or vortex swirls) to watch pure geometry smoothly deform into organic nature!",
+    beginnerTip: "Start with 0 distortion to see a perfect Zen spiral, then gently move the distortion slider to watch it ripple!",
+    codeSnippet: `// Pure Archimedean spiral:
+const r = (theta / maxTheta) * maxRadius + algorithmicDistortion;
 const x = centerX + Math.cos(theta) * r;
 const y = centerY + Math.sin(theta) * r;`,
     parameters: [
-      { id: "turns", label: "Spiral Turns (Revolutions)", type: "range", min: 6, max: 60, step: 1, default: 28, unit: "turns", desc: "How many concentric coils the spiral wraps around the center." },
-      { id: "distortionAmount", label: "Distortion Amount", type: "range", min: 0, max: 25, step: 0.5, default: 6.0, unit: "mm", desc: "How strongly the spiral is bent and warped (0 = clean pure spiral)." },
-      { id: "distortionMode", label: "Distortion Style", type: "select", options: [
-        { value: "organic", label: "Organic Wobble (Fingerprint / Tree Rings)" },
+      { id: "turns", label: "Spiral Turns (Revolutions)", type: "range", min: 6, max: 60, step: 1, default: 25, unit: "turns", desc: "How many concentric coils the spiral wraps around the center." },
+      { id: "distortionAmount", label: "Algorithmic Distortion", type: "range", min: 0, max: 25, step: 0.5, default: 0.0, unit: "mm", desc: "0 = mathematically perfect pure spiral. Increase to add organic ripples and waves." },
+      { id: "distortionMode", label: "Distortion Algorithm", type: "select", options: [
+        { value: "pure", label: "Pure Perfect Spiral (0 Distortion)" },
+        { value: "organic", label: "Organic Noise (Fingerprint / Tree Rings)" },
         { value: "waves", label: "Harmonic Waves (Petal Rosette)" },
-        { value: "vortex", label: "Galactic Vortex Swirl" },
-        { value: "pure", label: "Pure Clean Spiral (No Distortion)" }
-      ], default: "organic", desc: "The type of mathematical deformation applied to the spiral." },
-      { id: "distortionFreq", label: "Distortion Frequency", type: "range", min: 2, max: 32, step: 1, default: 8, unit: "", desc: "Number of ripples or noise frequency along each turn." },
+        { value: "vortex", label: "Galactic Vortex Swirl" }
+      ], default: "pure", desc: "The mathematical rule used to deform the spiral." },
+      { id: "distortionFreq", label: "Distortion Frequency", type: "range", min: 2, max: 32, step: 1, default: 8, unit: "", desc: "Number of ripples along each spiral turn." },
       { id: "dualSpiral", label: "Dual Intertwined Spirals", type: "checkbox", default: false, desc: "Draws two complementary intertwined spiral arms for 2-pen plotting." }
     ],
     presets: {
+      "Pure Geometric Spiral": { turns: 25, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 6, dualSpiral: false },
       "Organic Fingerprint Whorl": { turns: 32, distortionAmount: 7.0, distortionMode: "organic", distortionFreq: 8, dualSpiral: false },
-      "Pure Geometric Spiral": { turns: 24, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 6, dualSpiral: false },
-      "Flower Rosette Spiral": { turns: 20, distortionAmount: 12.0, distortionMode: "waves", distortionFreq: 12, dualSpiral: false },
-      "Galactic Vortex Coil": { turns: 38, distortionAmount: 14.0, distortionMode: "vortex", distortionFreq: 5, dualSpiral: true },
-      "Hypnotic Dual Intertwined": { turns: 26, distortionAmount: 4.0, distortionMode: "organic", distortionFreq: 10, dualSpiral: true }
+      "Flower Rosette Spiral": { turns: 20, distortionAmount: 11.0, distortionMode: "waves", distortionFreq: 12, dualSpiral: false },
+      "Galactic Vortex Coil": { turns: 36, distortionAmount: 12.0, distortionMode: "vortex", distortionFreq: 5, dualSpiral: true },
+      "Hypnotic Dual Intertwined": { turns: 24, distortionAmount: 0.0, distortionMode: "pure", distortionFreq: 8, dualSpiral: true }
     },
     generate(bounds, params, rng, noise) {
       const { minX, minY, width, height } = bounds;
@@ -753,9 +751,10 @@ const y = centerY + Math.sin(theta) * r;`,
 
       const turns = params.turns;
       const maxTheta = turns * Math.PI * 2;
-      const distAmp = params.distortionMode === "pure" ? 0 : params.distortionAmount;
+      const isPure = params.distortionMode === "pure" || params.distortionAmount <= 0;
+      const distAmp = isPure ? 0 : params.distortionAmount;
       const distFreq = params.distortionFreq;
-      const totalPoints = Math.max(1000, turns * 160);
+      const totalPoints = Math.max(1800, turns * 220);
 
       function buildSpiral(angleOffset) {
         const path = [];
@@ -765,16 +764,17 @@ const y = centerY + Math.sin(theta) * r;`,
           const currentAngle = theta + angleOffset;
           let r = t * maxR;
 
-          if (distAmp > 0 && t > 0.04) {
+          // Pure Archimedean spiral when distAmp == 0!
+          if (distAmp > 0 && t > 0.03) {
             let wobble = 0;
             if (params.distortionMode === "organic") {
-              const nx = Math.cos(currentAngle) * (distFreq * 0.25);
-              const ny = Math.sin(currentAngle) * (distFreq * 0.25);
-              wobble = noise.noise2D(nx + t * 4, ny + t * 4) * distAmp * Math.min(1, t * 2.5);
+              const nx = Math.cos(currentAngle) * (distFreq * 0.3);
+              const ny = Math.sin(currentAngle) * (distFreq * 0.3);
+              wobble = noise.noise2D(nx + t * 3, ny + t * 3) * distAmp * Math.min(1, t * 2.2);
             } else if (params.distortionMode === "waves") {
-              wobble = Math.sin(theta * distFreq * 0.5) * distAmp * t;
+              wobble = Math.sin(theta * distFreq * 0.5) * distAmp * Math.min(1, t * 2.0);
             } else if (params.distortionMode === "vortex") {
-              const swirl = Math.pow(t, 1.5) * 6;
+              const swirl = Math.pow(t, 1.4) * 5;
               const n = noise.noise2D(Math.cos(currentAngle + swirl) * 2, Math.sin(currentAngle + swirl) * 2);
               wobble = n * distAmp * t;
             }
